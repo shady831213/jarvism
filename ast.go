@@ -22,14 +22,6 @@ type astLinker interface {
 	Link() error
 }
 
-func astKeyOfStringMap(m map[string]interface{}) []string {
-	keys := make([]string, 0)
-	for k, _ := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 func astError(item string, err error) error {
 	return errors.New("Error in " + item + ": " + err.Error())
 }
@@ -43,8 +35,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 	return fmt.Sprintln(strings.Repeat(" ", space)+strings.Repeat("-", 20-space)) +
 		fmt.Sprintln(strings.Repeat(" ", space)+title) +
 		handler() +
-		"\n" +
-		fmt.Sprintln(strings.Repeat(" ", space)+strings.Repeat("-", 20-space))
+		"\n"
 }
 
 func astParse(parser astParser, cfg map[interface{}]interface{}) error {
@@ -131,7 +122,7 @@ type astSimOnlyItem struct {
 func (t *astSimOnlyItem) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"pre_sim_option": nil, "sim_option": nil, "post_sim_option": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, astKeyOfStringMap(keywords), ""
+		return false, KeyOfStringMap(keywords), ""
 	}
 	return true, nil, ""
 }
@@ -185,7 +176,7 @@ func (t *astBuildItem) KeywordsChecker(s string) (bool, []string, string) {
 	if ok, simKeywords, _ := t.astSimOnlyItem.KeywordsChecker(s); !ok {
 		compileKeywords := map[string]interface{}{"pre_compile_option": nil, "compile_option": nil, "post_compile_option": nil}
 		if !checkKeyWord(s, compileKeywords) {
-			return false, append(simKeywords, astKeyOfStringMap(compileKeywords)...), ""
+			return false, append(simKeywords, KeyOfStringMap(compileKeywords)...), ""
 		}
 	}
 
@@ -285,7 +276,7 @@ func (t *astOption) IsBoolFlag() bool {
 func (t *astOption) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"on_action": nil, "off_action": nil, "with_value_action": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, astKeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, KeyOfStringMap(keywords), "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
@@ -352,7 +343,7 @@ type astEnv struct {
 func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"simulator": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, astKeyOfStringMap(keywords), "Error in Env:"
+		return false, KeyOfStringMap(keywords), "Error in Env:"
 	}
 	return true, nil, ""
 }
@@ -459,7 +450,7 @@ func (t *astTest) GetName() string {
 func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"args": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, astKeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, KeyOfStringMap(keywords), "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
@@ -504,9 +495,14 @@ func (t *astTest) GetHierString(space int) string {
 	}) +
 		astHierFmt("OptionArgs:", nextSpace, func() string {
 			s := ""
-			for _, option := range t.GetOptionArgs() {
-				s += option.GetHierString(nextSpace)
+			keys := make([]string, 0)
+			args := t.GetOptionArgs()
+			for k := range args {
+				keys = append(keys, k)
 			}
+			ForeachStringKeysInOrder(keys, func(i string) {
+				s += args[i].GetHierString(nextSpace + 1)
+			})
 			return s
 		})
 }
@@ -563,7 +559,7 @@ func (t *astGroup) KeywordsChecker(s string) (bool, []string, string) {
 	if ok, testKeywords, _ := t.astTest.KeywordsChecker(s); !ok {
 		groupKeywords := map[string]interface{}{"build": nil, "tests": nil, "groups": nil}
 		if !checkKeyWord(s, groupKeywords) {
-			return false, append(testKeywords, astKeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
+			return false, append(testKeywords, KeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
 		}
 	}
 	return true, nil, ""
@@ -648,16 +644,24 @@ func (t *astGroup) GetHierString(space int) string {
 			}) +
 			astHierFmt("Tests:", nextSpace, func() string {
 				s := ""
-				for _, test := range t.Tests {
-					s += test.GetHierString(nextSpace + 1)
+				keys := make([]string, 0)
+				for k := range t.Tests {
+					keys = append(keys, k)
 				}
+				ForeachStringKeysInOrder(keys, func(i string) {
+					s += t.Tests[i].GetHierString(nextSpace + 1)
+				})
 				return s
 			}) +
 			astHierFmt("Groups:", nextSpace, func() string {
 				s := ""
-				for _, group := range t.Groups {
-					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + group.Name)
+				keys := make([]string, 0)
+				for k := range t.Groups {
+					keys = append(keys, k)
 				}
+				ForeachStringKeysInOrder(keys, func(i string) {
+					s += fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + t.Groups[i].Name)
+				})
 				return s
 			})
 	})
@@ -761,23 +765,35 @@ func (t *astRoot) GetHierString(space int) string {
 		}) +
 		astHierFmt("Options:", nextSpace, func() string {
 			s := ""
-			for _, option := range t.Options {
-				s += option.GetHierString(nextSpace + 1)
+			keys := make([]string, 0)
+			for k := range t.Options {
+				keys = append(keys, k)
 			}
+			ForeachStringKeysInOrder(keys, func(i string) {
+				s += t.Options[i].GetHierString(nextSpace + 1)
+			})
 			return s
 		}) +
 		astHierFmt("Builds:", nextSpace, func() string {
 			s := ""
-			for _, build := range t.Builds {
-				s += build.GetHierString(nextSpace + 1)
+			keys := make([]string, 0)
+			for k := range t.Builds {
+				keys = append(keys, k)
 			}
+			ForeachStringKeysInOrder(keys, func(i string) {
+				s += t.Builds[i].GetHierString(nextSpace + 1)
+			})
 			return s
 		}) +
 		astHierFmt("Groups:", nextSpace, func() string {
 			s := ""
-			for _, group := range t.Groups {
-				s += group.GetHierString(nextSpace + 1)
+			keys := make([]string, 0)
+			for k := range t.Groups {
+				keys = append(keys, k)
 			}
+			ForeachStringKeysInOrder(keys, func(i string) {
+				s += t.Groups[i].GetHierString(nextSpace + 1)
+			})
 			return s
 		})
 
