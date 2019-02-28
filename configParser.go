@@ -17,10 +17,10 @@ func Lex(configFile string) (map[interface{}]interface{}, error) {
 }
 
 func Parse(cfg map[interface{}]interface{}) error {
-	if err := jvsASTRoot.Parse(cfg); err != nil {
+	if err := astParse(&jvsAstRoot, cfg); err != nil {
 		return err
 	}
-	if err := jvsASTRoot.Link(); err != nil {
+	if err := jvsAstRoot.Link(); err != nil {
 		return err
 	}
 	return nil
