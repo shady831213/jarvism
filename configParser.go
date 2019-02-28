@@ -20,7 +20,7 @@ func Parse(cfg map[interface{}]interface{}) error {
 	if err := jvsASTRoot.Parse(cfg); err != nil {
 		return err
 	}
-	if err := jvsASTRoot.Link(cfg); err != nil {
+	if err := jvsASTRoot.Link(); err != nil {
 		return err
 	}
 	return nil

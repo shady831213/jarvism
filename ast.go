@@ -18,7 +18,7 @@ type ASTParser interface {
 type ASTLinker interface {
 	ASTParser
 	//pass2:top-down link
-	Link(map[interface{}]interface{}) error
+	Link() error
 }
 
 func astHierFmt(title string, space int, handler func() string) string {
@@ -361,6 +361,7 @@ type aSTTestOpts interface {
 type aSTTest struct {
 	Name       string
 	OptionArgs map[string]*ASTOption
+	args       []string
 	parent     aSTTestOpts
 }
 
@@ -392,6 +393,32 @@ func (t *aSTTest) GetName() string {
 }
 
 func (t *aSTTest) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToASTItemOptional(cfg, "args", func(item interface{}) error {
+		t.args = make([]string, 0)
+		for _, arg := range (item.([]interface{})) {
+			t.args = append(t.args, arg.(string))
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+//because Link is top-down, the last repeated args take effect
+func (t *aSTTest) Link() error {
+	for _, arg := range t.args {
+		//Options have been all parsed
+		args := strings.Split(arg, " ")
+		if err := jvsOptions.Parse(args); err != nil {
+			return errors.New("Error in args of " + t.Name + ": " + err.Error())
+		}
+		optName, err := argToOption(args[0])
+		if err != nil {
+			return errors.New("Error in args of " + t.Name + ": " + err.Error())
+		}
+		t.OptionArgs[optName] = jvsOptions.Lookup(optName).Value.(*ASTOption).Clone()
+	}
 	return nil
 }
 
@@ -410,28 +437,6 @@ func (t *aSTTest) GetHierString(space int) string {
 			}
 			return s
 		})
-}
-
-//because Link is top-down, the last repeated args take effect
-func (t *aSTTest) Link(cfg map[interface{}]interface{}) error {
-	if err := CfgToASTItemOptional(cfg, "args", func(item interface{}) error {
-		for _, arg := range (item.([]interface{})) {
-			//Options have been all parsed
-			args := strings.Split(arg.(string), " ")
-			if err := jvsOptions.Parse(args); err != nil {
-				return err
-			}
-			optName, err := argToOption(args[0])
-			if err != nil {
-				return err
-			}
-			t.OptionArgs[optName] = jvsOptions.Lookup(optName).Value.(*ASTOption).Clone()
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
 }
 
 type ASTTestCase struct {
@@ -460,9 +465,10 @@ func (t *ASTTestCase) GetHierString(space int) string {
 
 type ASTGroup struct {
 	aSTTest
-	Build  *ASTBuild
-	Tests  map[string]*ASTTestCase
-	Groups []*ASTGroup
+	buildName string
+	Build     *ASTBuild
+	Tests     map[string]*ASTTestCase
+	Groups    map[string]*ASTGroup
 }
 
 func NewASTGroup(name string) *ASTGroup {
@@ -485,6 +491,12 @@ func (t *ASTGroup) Parse(cfg map[interface{}]interface{}) error {
 	if err := t.aSTTest.Parse(cfg); err != nil {
 		return err
 	}
+	if err := CfgToASTItemOptional(cfg, "build", func(item interface{}) error {
+		t.buildName = item.(string)
+		return nil
+	}); err != nil {
+		return err
+	}
 	//parse tests
 	if err := CfgToASTItemOptional(cfg, "tests", func(item interface{}) error {
 		t.Tests = make(map[string]*ASTTestCase)
@@ -498,47 +510,49 @@ func (t *ASTGroup) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return err
 	}
-	return nil
-}
-
-func (t *ASTGroup) Link(cfg map[interface{}]interface{}) error {
-	//link build
-	//builds have been all parsed
-	if err := CfgToASTItemOptional(cfg, "build", func(item interface{}) error {
-		build := jvsASTRoot.GetBuild(item.(string))
-		if build == nil {
-			return errors.New(item.(string) + " is undef!")
+	//parse groups
+	if err := CfgToASTItemOptional(cfg, "groups", func(item interface{}) error {
+		t.Groups = make(map[string]*ASTGroup)
+		for _, name := range item.([]interface{}) {
+			if _, ok := t.Groups[name.(string)]; ok {
+				return errors.New("sub group " + name.(string) + " is redefined in group " + t.Name + "!")
+			}
+			t.Groups[name.(string)] = nil
 		}
-		t.Build = build
 		return nil
 	}); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (t *ASTGroup) Link() error {
+	//link build
+	//builds have been all parsed
+	build := jvsASTRoot.GetBuild(t.buildName)
+	if build == nil {
+		return errors.New("build " + t.buildName + "of group " + t.Name + "is undef!")
+	}
+	t.Build = build
 	//link args
-	if err := t.aSTTest.Link(cfg); err != nil {
+	if err := t.aSTTest.Link(); err != nil {
 		return err
 	}
 	//link tests
-	for name, test := range t.Tests {
-		if err := test.Link(cfg["tests"].(map[interface{}]interface{})[name].(map[interface{}]interface{})); err != nil {
+	for _, test := range t.Tests {
+		if err := test.Link(); err != nil {
 			return err
 		}
 		test.SetParent(t)
 	}
 	//link groups
-	if err := CfgToASTItemOptional(cfg, "groups", func(item interface{}) error {
-		t.Groups = make([]*ASTGroup, 0)
-		for _, name := range item.([]interface{}) {
-			group := jvsASTRoot.GetGroup(name.(string))
-			if group == nil {
-				return errors.New("group " + name.(string) + " is undef!")
-			}
-			t.Groups = append(t.Groups, group)
-			group.SetParent(t)
+	for name, _ := range t.Groups {
+		group := jvsASTRoot.GetGroup(name)
+		if group == nil {
+			return errors.New("sub group " + name + "of group " + t.Name + " is undef!")
 		}
-		return nil
-	}); err != nil {
-		return err
+		t.Groups[name] = group
+		group.SetParent(t)
 	}
 	return nil
 }
@@ -643,10 +657,10 @@ func (t *ASTRoot) Parse(cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func (t *ASTRoot) Link(cfg map[interface{}]interface{}) error {
+func (t *ASTRoot) Link() error {
 	//link groups
-	for name, group := range t.Groups {
-		if err := group.Link(cfg["groups"].(map[interface{}]interface{})[name].(map[interface{}]interface{})); err != nil {
+	for _, group := range t.Groups {
+		if err := group.Link(); err != nil {
 			return err
 		}
 	}
