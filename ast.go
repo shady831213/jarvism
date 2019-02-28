@@ -23,7 +23,7 @@ type ASTLinker interface {
 
 func astHierFmt(title string, space int, handler func() string) string {
 	return fmt.Sprintln(strings.Repeat(" ", space)+strings.Repeat("-", 20-space)) +
-		fmt.Sprintln(strings.Repeat(" ", space)+title+":") +
+		fmt.Sprintln(strings.Repeat(" ", space)+title) +
 		handler() +
 		"\n" +
 		fmt.Sprintln(strings.Repeat(" ", space)+strings.Repeat("-", 20-space))
@@ -210,6 +210,15 @@ func NewASTOption(name string) *ASTOption {
 	return inst
 }
 
+func (t *ASTOption) Clone() *ASTOption {
+	inst := NewASTOption(t.Name)
+	inst.Value = t.Value
+	inst.On = t.On
+	inst.Off = t.Off
+	inst.WithValue = t.WithValue
+	return inst
+}
+
 func (t *ASTOption) Set(s string) error {
 	if t.WithValue != nil {
 		t.Value = s
@@ -231,28 +240,25 @@ func (t *ASTOption) IsBoolFlag() bool {
 func (t *ASTOption) Parse(cfg map[interface{}]interface{}) error {
 	if err := CfgToASTItemOptional(cfg, "on_action", func(item interface{}) error {
 		t.On = new(ASTOptionAction)
-		fmt.Println("get an on action!")
 		return t.On.Parse(item.(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
 	if err := CfgToASTItemOptional(cfg, "off_action", func(item interface{}) error {
 		t.Off = new(ASTOptionAction)
-		fmt.Println("get an off action!")
 		return t.Off.Parse(item.(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
 	if err := CfgToASTItemOptional(cfg, "with_value_action", func(item interface{}) error {
 		t.WithValue = new(ASTOptionAction)
-		fmt.Println("get an with_value action!")
 		return t.WithValue.Parse(item.(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
-	for key, _ := range(cfg) {
+	for key, _ := range (cfg) {
 		if key.(string) != "on_action" && key.(string) != "off_action" && key.(string) != "with_value_action" {
-			return errors.New("action of option " + t.Name + "must be \"on_action\", \"off_action\" or \"with_value_action\" but get \"" + key.(string) + "\"!" )
+			return errors.New("action of option " + t.Name + "must be \"on_action\", \"off_action\" or \"with_value_action\" but get \"" + key.(string) + "\"!")
 		}
 	}
 	//add to flagSet
@@ -270,19 +276,19 @@ func (t *ASTOption) GetHierString(space int) string {
 				if t.On != nil {
 					return t.On.GetHierString(nextSpace + 1)
 				}
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace + 1) + "null")
+				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
 			}) +
 			astHierFmt("Off:", nextSpace, func() string {
 				if t.Off != nil {
 					return t.Off.GetHierString(nextSpace + 1)
 				}
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace + 1) + "null")
+				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
 			}) +
 			astHierFmt("WithValue:", nextSpace, func() string {
 				if t.WithValue != nil {
 					return t.WithValue.GetHierString(nextSpace + 1)
 				}
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace + 1) + "null")
+				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
 			})
 	})
 }
@@ -292,19 +298,12 @@ func (t *ASTOption) GetHierString(space int) string {
 //env
 //------------------------
 type ASTEnv struct {
-	CompileCmd *ASTOptionItem
-	SimCmd     *ASTOptionItem
+	Simulator string
 }
 
 func (t *ASTEnv) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToASTItemRequired(cfg, "compile_cmd", func(item interface{}) error {
-		t.CompileCmd = NewASTOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	if err := CfgToASTItemRequired(cfg, "sim_cmd", func(item interface{}) error {
-		t.SimCmd = NewASTOptionItem(item)
+	if err := CfgToASTItemRequired(cfg, "simulator", func(item interface{}) error {
+		t.Simulator = item.(string)
 		return nil
 	}); err != nil {
 		return err
@@ -314,14 +313,10 @@ func (t *ASTEnv) Parse(cfg map[interface{}]interface{}) error {
 
 func (t *ASTEnv) GetHierString(space int) string {
 	nextSpace := space + 1
-	return astHierFmt("CompileCmd:", nextSpace, func() string {
+	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(t.CompileCmd)
-	}) +
-		astHierFmt("SimCmd:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.SimCmd)
-		})
+			fmt.Sprintln(t.Simulator)
+	})
 }
 
 //------------------------
@@ -354,37 +349,46 @@ func (t *ASTBuild) GetHierString(space int) string {
 
 //Test and Group, linkable
 //------------------------
-//bottom-up search
 type aSTTestOpts interface {
 	SetParent(parent aSTTestOpts)
 	GetName() string
-	GetOptionArgs() []*ASTOption
+	//bottom-up search
+	GetOptionArgs() map[string]*ASTOption
+	//bottom-up search
 	GetBuild() *ASTBuild
 }
 
 type aSTTest struct {
 	Name       string
-	OptionArgs []*ASTOption
+	OptionArgs map[string]*ASTOption
 	parent     aSTTestOpts
 }
 
 func (t *aSTTest) init(name string) {
 	t.Name = name
+	t.OptionArgs = make(map[string]*ASTOption)
 }
 
 func (t *aSTTest) SetParent(parent aSTTestOpts) {
 	t.parent = parent
 }
 
-func (t *aSTTest) GetName() string {
-	return t.Name
-}
-
-func (t *aSTTest) GetOptionArgs() []*ASTOption {
+func (t *aSTTest) GetOptionArgs() map[string]*ASTOption {
 	if t.parent != nil {
-		return append(t.parent.GetOptionArgs(), t.OptionArgs...)
+		options := make(map[string]*ASTOption)
+		for k, v := range t.parent.GetOptionArgs() {
+			options[k] = v
+		}
+		for k, v := range t.OptionArgs {
+			options[k] = v
+		}
+		return options
 	}
 	return t.OptionArgs
+}
+
+func (t *aSTTest) GetName() string {
+	return t.Name
 }
 
 func (t *aSTTest) Parse(cfg map[interface{}]interface{}) error {
@@ -393,27 +397,24 @@ func (t *aSTTest) Parse(cfg map[interface{}]interface{}) error {
 
 func (t *aSTTest) GetHierString(space int) string {
 	nextSpace := space + 1
-	return astHierFmt(t.Name+":", space, func() string {
-		return astHierFmt("parent:", nextSpace, func() string {
-			if t.parent != nil {
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.parent.GetName())
+	return astHierFmt("parent:", nextSpace, func() string {
+		if t.parent != nil {
+			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.parent.GetName())
+		}
+		return fmt.Sprintln(strings.Repeat(" ", nextSpace) + "null")
+	}) +
+		astHierFmt("OptionArgs:", nextSpace, func() string {
+			s := ""
+			for _, option := range t.GetOptionArgs() {
+				s += option.GetHierString(nextSpace)
 			}
-			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + "null")
-		}) +
-			astHierFmt("OptionArgs:", nextSpace, func() string {
-				s := ""
-				for _, option := range t.GetOptionArgs() {
-					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + option.Name)
-				}
-				return s
-			})
-	})
+			return s
+		})
 }
 
 //because Link is top-down, the last repeated args take effect
 func (t *aSTTest) Link(cfg map[interface{}]interface{}) error {
 	if err := CfgToASTItemOptional(cfg, "args", func(item interface{}) error {
-		t.OptionArgs = make([]*ASTOption, 0)
 		for _, arg := range (item.([]interface{})) {
 			//Options have been all parsed
 			args := strings.Split(arg.(string), " ")
@@ -424,7 +425,7 @@ func (t *aSTTest) Link(cfg map[interface{}]interface{}) error {
 			if err != nil {
 				return err
 			}
-			t.OptionArgs = append(t.OptionArgs, jvsOptions.Lookup(optName).Value.(*ASTOption))
+			t.OptionArgs[optName] = jvsOptions.Lookup(optName).Value.(*ASTOption).Clone()
 		}
 		return nil
 	}); err != nil {

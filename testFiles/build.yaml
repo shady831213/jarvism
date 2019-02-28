@@ -1,6 +1,5 @@
 env:
-  compile_cmd: "vcs"
-  sim_cmd: "simv"
+  simulator: "vcs"
 
 common_compile_option: &common_compile >-
   -sverilog
