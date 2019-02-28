@@ -142,29 +142,8 @@ func (t *ASTBuildItem) Parse(cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-type ASTBuild struct {
-	ASTBuildItem
-	Name string
-}
-
-func NewASTBuild(name string) *ASTBuild {
-	inst := new(ASTBuild)
-	inst.Name = name
-	return inst
-}
-
-func (t *ASTBuild) Parse(cfg map[interface{}]interface{}) error {
-	return t.ASTBuildItem.Parse(cfg)
-}
-
-type ASTOptionAction struct {
-	ASTBuildItem
-}
-
-func (t *ASTOptionAction) Parse(cfg map[interface{}]interface{}) error {
-	return t.ASTBuildItem.Parse(cfg)
-}
-
+//Options
+//------------------------
 type ASTOption struct {
 	On        *ASTOptionAction
 	Off       *ASTOptionAction
@@ -221,11 +200,91 @@ func (t *ASTOption) Parse(cfg map[interface{}]interface{}) error {
 	jvsOptions.Var(t, t.Name, "user-defined flag")
 	return nil
 }
+//------------------------
+
+//env
+//------------------------
+type ASTEnv struct {
+	CompileCmd *ASTOptionItem
+	SimCmd     *ASTOptionItem
+}
+
+func (t *ASTEnv) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToASTItemRequired(cfg, "compile_cmd", func(item interface{}) error {
+		t.CompileCmd = NewASTOptionItem(item)
+		return nil
+	}); err != nil {
+		return err
+	}
+	if err := CfgToASTItemRequired(cfg, "sim_cmd", func(item interface{}) error {
+		t.SimCmd = NewASTOptionItem(item)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+//------------------------
+
+//Build
+//------------------------
+type ASTBuild struct {
+	ASTBuildItem
+	Name string
+}
+
+func NewASTBuild(name string) *ASTBuild {
+	inst := new(ASTBuild)
+	inst.Name = name
+	return inst
+}
+
+func (t *ASTBuild) Parse(cfg map[interface{}]interface{}) error {
+	return t.ASTBuildItem.Parse(cfg)
+}
+
+type ASTOptionAction struct {
+	ASTBuildItem
+}
+
+func (t *ASTOptionAction) Parse(cfg map[interface{}]interface{}) error {
+	return t.ASTBuildItem.Parse(cfg)
+}
+//------------------------
+
+//Test and Group, linkable
+//------------------------
+//bottom-up search
+type aSTTestOpts interface {
+	SetParent(parent aSTTestOpts)
+	GetParent() aSTTestOpts
+	GetOptionArgs() []*ASTOption
+	GetBuild() *ASTBuild
+}
 
 type aSTTest struct {
-	Build      *ASTBuild
 	Name       string
 	OptionArgs []*ASTOption
+	parent     aSTTestOpts
+}
+
+func (t *aSTTest) init(name string) {
+	t.Name = name
+}
+
+func (t *aSTTest) SetParent(parent aSTTestOpts) {
+	t.parent = parent
+}
+
+func (t *aSTTest) GetParent() aSTTestOpts {
+	return t.parent
+}
+
+func (t *aSTTest) GetOptionArgs() []*ASTOption {
+	if t.parent != nil {
+		return append(t.parent.GetOptionArgs(), t.OptionArgs...)
+	}
+	return t.OptionArgs
 }
 
 func (t *aSTTest) Parse(cfg map[interface{}]interface{}) error {
@@ -260,20 +319,35 @@ type ASTTestCase struct {
 
 func NewASTTestCase(name string) *ASTTestCase {
 	inst := new(ASTTestCase)
-	inst.Name = name
+	inst.init(name)
 	return inst
+}
+
+func (t *ASTTestCase) GetBuild() *ASTBuild {
+	return t.parent.GetBuild()
 }
 
 type ASTGroup struct {
 	aSTTest
+	Build  *ASTBuild
 	Tests  map[string]*ASTTestCase
 	Groups []*ASTGroup
 }
 
 func NewASTGroup(name string) *ASTGroup {
 	inst := new(ASTGroup)
-	inst.Name = name
+	inst.init(name)
 	return inst
+}
+
+func (t *ASTGroup) GetBuild() *ASTBuild {
+	if t.Build != nil {
+		return t.Build
+	}
+	if t.parent != nil {
+		return t.parent.GetBuild()
+	}
+	return nil
 }
 
 func (t *ASTGroup) Parse(cfg map[interface{}]interface{}) error {
@@ -318,6 +392,7 @@ func (t *ASTGroup) Link(cfg map[interface{}]interface{}) error {
 		if err := test.Link(cfg["tests"].(map[interface{}]interface{})[name].(map[interface{}]interface{})); err != nil {
 			return err
 		}
+		test.SetParent(t)
 	}
 	//link groups
 	if err := CfgToASTItemOptional(cfg, "groups", func(item interface{}) error {
@@ -328,6 +403,7 @@ func (t *ASTGroup) Link(cfg map[interface{}]interface{}) error {
 				return errors.New("group " + name.(string) + " is undef!")
 			}
 			t.Groups = append(t.Groups, group)
+			group.SetParent(t)
 		}
 		return nil
 	}); err != nil {
@@ -335,28 +411,10 @@ func (t *ASTGroup) Link(cfg map[interface{}]interface{}) error {
 	}
 	return nil
 }
+//------------------------
 
-type ASTEnv struct {
-	CompileCmd *ASTOptionItem
-	SimCmd     *ASTOptionItem
-}
-
-func (t *ASTEnv) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToASTItemRequired(cfg, "compile_cmd", func(item interface{}) error {
-		t.CompileCmd = NewASTOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	if err := CfgToASTItemRequired(cfg, "sim_cmd", func(item interface{}) error {
-		t.SimCmd = NewASTOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
+//Root
+//------------------------
 type ASTRoot struct {
 	Env     *ASTEnv
 	Options map[string]*ASTOption
@@ -442,3 +500,4 @@ func (t *ASTRoot) Link(cfg map[interface{}]interface{}) error {
 //global
 var jvsASTRoot = ASTRoot{}
 var jvsOptions = flag.NewFlagSet("jvsOptions", flag.ExitOnError)
+//------------------------
