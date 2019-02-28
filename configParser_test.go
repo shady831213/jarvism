@@ -21,5 +21,5 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(jvsASTRoot)
+	t.Log(jvsASTRoot.GetHierString(0))
 }

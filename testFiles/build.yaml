@@ -35,27 +35,27 @@ builds:
 
 options:
   quite_comp:
-    on:
+    on_action:
       compile_option:
         - -q
         - +lint=none
   repeat:
-    with_value:
+    with_value_action:
       compile_option:
         - -q
         - +lint=none
   seed:
-    with_value:
+    with_value_action:
       compile_option:
         - -q
         - +lint=none
   vh:
-    off:
+    off_action:
       compile_option:
         - +UVM_VERBOSITY=UVM_FULL
 
   has_pre_phase:
-    with_value:
+    with_value_action:
       pre_compile_option:
         - echo "pre_compile_option $1"
       post_compile_option:
