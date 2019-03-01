@@ -1,4 +1,4 @@
-package jarivsSim
+package utils
 
 import (
 	"io/ioutil"
@@ -29,7 +29,7 @@ func ForeachStringKeysInOrder(keys []string, handler func(string)) {
 	}
 }
 
-func readFile(path string) string {
+func ReadFile(path string) string {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err.Error())
@@ -37,7 +37,7 @@ func readFile(path string) string {
 	return string(bytes)
 }
 
-func writeNewFile(path string, content string) {
+func WriteNewFile(path string, content string) {
 	f, err := os.Create(path)
 	defer f.Close()
 	if err != nil {

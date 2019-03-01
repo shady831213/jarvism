@@ -1,4 +1,4 @@
-package jarivsSim
+package parser
 
 import (
 	"gopkg.in/yaml.v2"
@@ -17,7 +17,7 @@ func Lex(configFile string) (map[interface{}]interface{}, error) {
 }
 
 func Parse(cfg map[interface{}]interface{}) error {
-	if err := astParse(&jvsAstRoot, cfg); err != nil {
+	if err := AstParse(&jvsAstRoot, cfg); err != nil {
 		return err
 	}
 	if err := jvsAstRoot.Link(); err != nil {

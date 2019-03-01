@@ -1,19 +1,18 @@
-package jarivsSim
+package parser
 
 import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/shady831213/jarvisSim/utils"
 	"strconv"
 	"strings"
 )
 
 type astParser interface {
-	//pass1:top-down astParse
+	//pass1:top-down AstParse
 	Parse(map[interface{}]interface{}) error
 	KeywordsChecker(s string) (bool, []string, string)
-	//print:for debug
-	GetHierString(space int) string;
 }
 
 type astLinker interface {
@@ -38,7 +37,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 		"\n"
 }
 
-func astParse(parser astParser, cfg map[interface{}]interface{}) error {
+func AstParse(parser astParser, cfg map[interface{}]interface{}) error {
 	for name, _ := range cfg {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
 			return errors.New(tag + "syntax error of " + name.(string) + "! expect " + fmt.Sprint(keywords))
@@ -65,198 +64,164 @@ func cfgToastItemOptional(cfg map[interface{}]interface{}, key string, handler f
 	return nil
 }
 
-func argToOption(s string) (string, error) {
-	if len(s) < 2 || s[0] != '-' {
-		return "", errors.New(fmt.Sprintf("bad flag syntax: %s", s))
-	}
-	numMinuses := 1
-	if s[1] == '-' {
-		numMinuses++
-		if len(s) == 2 { // "--" terminates the flags
-			return "", nil
-		}
-	}
-	name := s[numMinuses:]
-	if len(name) == 0 || name[0] == '-' || name[0] == '=' {
-		return name, errors.New(fmt.Sprintf("bad flag syntax: %s", s))
-	}
-	return name, nil
-}
-
-type astOptionItem struct {
+type astItem struct {
 	content string
 }
 
-func newAstOptionItem(content interface{}) *astOptionItem {
-	inst := new(astOptionItem)
+func newAstOptionItem(content interface{}) *astItem {
+	inst := new(astItem)
 	if value, ok := content.(string); ok {
 		inst.content = value
-		return inst
-	}
-	if value, ok := content.([]string); ok {
-		inst.content = strings.Join(value, "")
 		return inst
 	}
 	if value, ok := content.([]interface{}); ok {
 		for _, i := range (value) {
 			s, ok := i.(string)
 			if !ok {
-				panic(fmt.Sprintf("content must be string or []string, but it is %T !", content))
+				panic(fmt.Sprintf("content must be string or []interface{}, but it is %T !", content))
 				return nil
 			}
-			inst.content += s
+			inst.content += " " + s
 		}
 
 		return inst
 	}
-	panic(fmt.Sprintf("content must be string or []string, but it is %T !", content))
+	panic(fmt.Sprintf("content must be string or []interface{}, but it is %T !", content))
 	return nil
 }
 
-type astSimOnlyItem struct {
-	PreSimOption  *astOptionItem
-	SimOption     *astOptionItem
-	PostSimOption *astOptionItem
-}
-
-func (t *astSimOnlyItem) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"pre_sim_option": nil, "sim_option": nil, "post_sim_option": nil}
-	if !checkKeyWord(s, keywords) {
-		return false, KeyOfStringMap(keywords), ""
+func (item *astItem) Cat(i *astItem) {
+	if i == nil {
+		return
 	}
-	return true, nil, ""
+	item.content += i.content
 }
 
-func (t *astSimOnlyItem) Parse(cfg map[interface{}]interface{}) error {
-	if err := cfgToastItemOptional(cfg, "pre_sim_option", func(item interface{}) error {
-		t.PreSimOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
+func (item *astItem) Replace(old, new string, cnt int) {
+	item.content = strings.Replace(item.content, old, new, cnt)
+}
+
+type astItems struct {
+	Items map[string]*astItem
+}
+
+func (items *astItems) init() {
+	items.Items = make(map[string]*astItem)
+	items.Items["pre_sim_option"] = nil
+	items.Items["sim_option"] = nil
+	items.Items["post_sim_option"] = nil
+	items.Items["pre_compile_option"] = nil
+	items.Items["compile_option"] = nil
+	items.Items["post_compile_option"] = nil
+}
+
+func (items *astItems) Cat(i *astItems) {
+	if i == nil {
+		return
 	}
-	if err := cfgToastItemOptional(cfg, "sim_option", func(item interface{}) error {
-		t.SimOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
+	for k, _ := range i.Items {
+		if items.Items[k] == nil && i.Items[k] != nil {
+			items.Items[k] = newAstOptionItem("")
+		}
+		items.Items[k].Cat(i.Items[k])
 	}
-	if err := cfgToastItemOptional(cfg, "post_sim_option", func(item interface{}) error {
-		t.PostSimOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
 }
 
-func (t *astSimOnlyItem) GetHierString(space int) string {
-	nextSpace := space + 1
-	return astHierFmt("PreSimOption:", nextSpace, func() string {
-		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(t.PreSimOption)
-	}) +
-		astHierFmt("SimOption:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.SimOption)
-		}) +
-		astHierFmt("PostSimOption:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.PostSimOption)
-		})
-}
-
-type astBuildItem struct {
-	astSimOnlyItem
-	PreCompileOption  *astOptionItem
-	CompileOption     *astOptionItem
-	PostCompileOption *astOptionItem
-}
-
-func (t *astBuildItem) KeywordsChecker(s string) (bool, []string, string) {
-	if ok, simKeywords, _ := t.astSimOnlyItem.KeywordsChecker(s); !ok {
-		compileKeywords := map[string]interface{}{"pre_compile_option": nil, "compile_option": nil, "post_compile_option": nil}
-		if !checkKeyWord(s, compileKeywords) {
-			return false, append(simKeywords, KeyOfStringMap(compileKeywords)...), ""
+func (items *astItems) Replace(old, new string, cnt int) {
+	for k, v := range items.Items {
+		if v != nil {
+			items.Items[k].Replace(old, new, cnt)
 		}
 	}
+}
 
+func (items *astItems) IsSimOnly() bool {
+	return items.Items["pre_compile_option"] == nil && items.Items["compile_option"] == nil && items.Items["post_compile_option"] == nil
+}
+
+func (items *astItems) GetHierString(space int) string {
+	nextSpace := space + 1
+	s := ""
+	keys := make([]string, 0)
+	for k := range items.Items {
+		keys = append(keys, k)
+	}
+	utils.ForeachStringKeysInOrder(keys, func(i string) {
+		s += astHierFmt(i+":", nextSpace, func() string {
+			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
+				fmt.Sprintln(items.Items[i])
+		})
+	})
+	return s
+}
+
+type astParseItem struct {
+	astItems
+}
+
+func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
+	keywords := make(map[string]interface{})
+	for k, _ := range items.Items {
+		keywords[k] = nil
+	}
+	if !checkKeyWord(s, keywords) {
+		return false, utils.KeyOfStringMap(keywords), ""
+	}
 	return true, nil, ""
 }
 
-func (t *astBuildItem) Parse(cfg map[interface{}]interface{}) error {
-	if err := t.astSimOnlyItem.Parse(cfg); err != nil {
-		return err
-	}
-	if err := cfgToastItemOptional(cfg, "pre_compile_option", func(item interface{}) error {
-		t.PreCompileOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	if err := cfgToastItemOptional(cfg, "compile_option", func(item interface{}) error {
-		t.CompileOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
-	}
-	if err := cfgToastItemOptional(cfg, "post_compile_option", func(item interface{}) error {
-		t.PostCompileOption = newAstOptionItem(item)
-		return nil
-	}); err != nil {
-		return err
+func (items *astParseItem) Parse(cfg map[interface{}]interface{}) error {
+	for k, _ := range items.Items {
+		if err := cfgToastItemOptional(cfg, k, func(i interface{}) error {
+			items.Items[k] = newAstOptionItem(i)
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
-}
-
-func (t *astBuildItem) GetHierString(space int) string {
-	nextSpace := space + 1
-	return t.astSimOnlyItem.GetHierString(space) +
-		astHierFmt("PreCompileOption:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.PreCompileOption)
-		}) +
-		astHierFmt("CompileOption:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.CompileOption)
-		}) +
-		astHierFmt("PostCompileOption:", nextSpace, func() string {
-			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(t.PostCompileOption)
-		})
 }
 
 //Options
 //------------------------
-type astOptionAction struct {
-	astBuildItem
+type AstOptionAction struct {
+	astParseItem
 }
 
-type astOption struct {
-	On        *astOptionAction
-	Off       *astOptionAction
-	WithValue *astOptionAction
+func NewAstOptionAction() *AstOptionAction {
+	inst := new(AstOptionAction)
+	inst.astParseItem.init()
+	return inst
+}
+
+type AstOption struct {
+	On        *AstOptionAction
+	WithValue *AstOptionAction
 	Value     string
 	Name      string
 }
 
-func newAstOption(name string) *astOption {
-	inst := new(astOption)
-	inst.Name = name
-	inst.Value = "false"
+func newAstOption(name string) *AstOption {
+	inst := new(AstOption)
+	inst.Init(name)
 	return inst
 }
 
-func (t *astOption) Clone() *astOption {
+func (t *AstOption) Init(name string) {
+	t.Name = name
+	t.Value = "false"
+}
+
+func (t *AstOption) Clone() *AstOption {
 	inst := newAstOption(t.Name)
 	inst.Value = t.Value
 	inst.On = t.On
-	inst.Off = t.Off
 	inst.WithValue = t.WithValue
 	return inst
 }
 
-func (t *astOption) Set(s string) error {
-	if t.WithValue != nil {
+func (t *AstOption) Set(s string) error {
+	if !t.IsBoolFlag() {
 		t.Value = s
 		return nil
 	}
@@ -265,47 +230,73 @@ func (t *astOption) Set(s string) error {
 	return err
 }
 
-func (t *astOption) String() string {
+func (t *AstOption) String() string {
 	return t.Value
 }
 
-func (t *astOption) IsBoolFlag() bool {
+func (t *AstOption) IsBoolFlag() bool {
 	return t.WithValue == nil
 }
 
-func (t *astOption) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"on_action": nil, "off_action": nil, "with_value_action": nil}
+func (t *AstOption) GetName() string {
+	return t.Name
+}
+
+func (t *AstOption) AfterParse() {
+	if !t.IsBoolFlag() {
+		t.WithValue.Replace("$"+t.Name, t.Value, -1)
+	}
+}
+
+func (t *AstOption) IsCompileOption() bool {
+	return t.WithValue != nil && !t.WithValue.IsSimOnly() || t.On != nil && !t.On.IsSimOnly()
+}
+
+func (t *AstOption) Usage() string {
+	return "user-defined flag"
+}
+
+func (t *AstOption) TestHandler(test *AstTestCase) {
+	if t.IsBoolFlag() {
+		test.Cat(&t.On.astItems)
+		return
+	}
+	test.Cat(&t.WithValue.astItems)
+}
+
+func (t *AstOption) KeywordsChecker(s string) (bool, []string, string) {
+	keywords := map[string]interface{}{"on_action": nil, "with_value_action": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, KeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, utils.KeyOfStringMap(keywords), "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
 
-func (t *astOption) Parse(cfg map[interface{}]interface{}) error {
+func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 	if err := cfgToastItemOptional(cfg, "on_action", func(item interface{}) error {
-		t.On = new(astOptionAction)
-		return astParse(t.On, item.(map[interface{}]interface{}))
+		if t.WithValue != nil {
+			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
+		}
+		t.On = NewAstOptionAction()
+		return AstParse(t.On, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return astError("on_action of "+t.Name, err)
 	}
-	if err := cfgToastItemOptional(cfg, "off_action", func(item interface{}) error {
-		t.Off = new(astOptionAction)
-		return astParse(t.Off, item.(map[interface{}]interface{}))
-	}); err != nil {
-		return astError("off_action of "+t.Name, err)
-	}
 	if err := cfgToastItemOptional(cfg, "with_value_action", func(item interface{}) error {
-		t.WithValue = new(astOptionAction)
-		return astParse(t.WithValue, item.(map[interface{}]interface{}))
+		if t.On != nil {
+			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
+		}
+		t.WithValue = NewAstOptionAction()
+		return AstParse(t.WithValue, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return astError("with_value_action of "+t.Name, err)
 	}
 	//add to flagSet
-	jvsOptions.Var(t, t.Name, "user-defined flag")
+	RegisterOption(t)
 	return nil
 }
 
-func (t *astOption) GetHierString(space int) string {
+func (t *AstOption) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
 		return astHierFmt("Value:", nextSpace, func() string {
@@ -314,12 +305,6 @@ func (t *astOption) GetHierString(space int) string {
 			astHierFmt("On:", nextSpace, func() string {
 				if t.On != nil {
 					return t.On.GetHierString(nextSpace + 1)
-				}
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
-			}) +
-			astHierFmt("Off:", nextSpace, func() string {
-				if t.Off != nil {
-					return t.Off.GetHierString(nextSpace + 1)
 				}
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
 			}) +
@@ -343,7 +328,7 @@ type astEnv struct {
 func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"simulator": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, KeyOfStringMap(keywords), "Error in Env:"
+		return false, utils.KeyOfStringMap(keywords), "Error in Env:"
 	}
 	return true, nil, ""
 }
@@ -371,18 +356,19 @@ func (t *astEnv) GetHierString(space int) string {
 //Build
 //------------------------
 type astBuild struct {
-	astBuildItem
+	astParseItem
 	Name string
 }
 
 func newAstBuild(name string) *astBuild {
 	inst := new(astBuild)
 	inst.Name = name
+	inst.astParseItem.init()
 	return inst
 }
 
 func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
-	if ok, buildKeywords, _ := t.astBuildItem.KeywordsChecker(s); !ok {
+	if ok, buildKeywords, _ := t.astParseItem.KeywordsChecker(s); !ok {
 		return false, buildKeywords, "Error in build " + t.Name + ":"
 	}
 
@@ -390,13 +376,13 @@ func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astBuild) Parse(cfg map[interface{}]interface{}) error {
-	return t.astBuildItem.Parse(cfg)
+	return t.astParseItem.Parse(cfg)
 }
 
 func (t *astBuild) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
-		return t.astBuildItem.GetHierString(nextSpace)
+		return t.astParseItem.GetHierString(nextSpace)
 	})
 }
 
@@ -408,30 +394,30 @@ type astTestOpts interface {
 	SetParent(parent astTestOpts)
 	GetName() string
 	//bottom-up search
-	GetOptionArgs() map[string]*astOption
+	GetOptionArgs() map[string]*AstOption
 	//bottom-up search
 	GetBuild() *astBuild
 }
 
 type astTest struct {
 	Name       string
-	OptionArgs map[string]*astOption
+	OptionArgs map[string]*AstOption
 	args       []string
 	parent     astTestOpts
 }
 
 func (t *astTest) init(name string) {
 	t.Name = name
-	t.OptionArgs = make(map[string]*astOption)
+	t.OptionArgs = make(map[string]*AstOption)
 }
 
 func (t *astTest) SetParent(parent astTestOpts) {
 	t.parent = parent
 }
 
-func (t *astTest) GetOptionArgs() map[string]*astOption {
+func (t *astTest) GetOptionArgs() map[string]*AstOption {
 	if t.parent != nil {
-		options := make(map[string]*astOption)
+		options := make(map[string]*AstOption)
 		for k, v := range t.parent.GetOptionArgs() {
 			options[k] = v
 		}
@@ -450,7 +436,7 @@ func (t *astTest) GetName() string {
 func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"args": nil}
 	if !checkKeyWord(s, keywords) {
-		return false, KeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, utils.KeyOfStringMap(keywords), "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
@@ -472,15 +458,19 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
 func (t *astTest) Link() error {
 	for _, arg := range t.args {
 		//Options have been all parsed
-		args := strings.Split(arg, " ")
-		if err := jvsOptions.Parse(args); err != nil {
-			return astError("args of "+t.Name, err)
-		}
-		optName, err := argToOption(args[0])
+		opt, err := GetOption(arg)
 		if err != nil {
 			return astError("args of "+t.Name, err)
 		}
-		t.OptionArgs[optName] = jvsOptions.Lookup(optName).Value.(*astOption).Clone()
+		v, ok := opt.(*AstOption)
+		if !ok {
+			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is not invalid option!")
+		}
+		if v.IsCompileOption() {
+			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
+		}
+		t.OptionArgs[v.GetName()] = v.Clone()
+		t.OptionArgs[v.GetName()].AfterParse()
 	}
 	return nil
 }
@@ -500,31 +490,44 @@ func (t *astTest) GetHierString(space int) string {
 			for k := range args {
 				keys = append(keys, k)
 			}
-			ForeachStringKeysInOrder(keys, func(i string) {
+			utils.ForeachStringKeysInOrder(keys, func(i string) {
 				s += args[i].GetHierString(nextSpace + 1)
 			})
 			return s
 		})
 }
 
-type astTestCase struct {
+type AstTestCase struct {
 	astTest
+	astItems
 }
 
-func newAstTestCase(name string) *astTestCase {
-	inst := new(astTestCase)
-	inst.init(name)
+func newAstTestCase(name string) *AstTestCase {
+	inst := new(AstTestCase)
+	inst.astTest.init(name)
+	inst.astItems.init()
 	return inst
 }
 
-func (t *astTestCase) GetBuild() *astBuild {
+func (t *AstTestCase) GetBuild() *astBuild {
 	return t.parent.GetBuild()
 }
 
-func (t *astTestCase) GetHierString(space int) string {
+func (t *AstTestCase) Link() error {
+	if err := t.astTest.Link(); err != nil {
+		return err
+	}
+	for _, opt := range t.GetOptionArgs() {
+		opt.TestHandler(t)
+	}
+	return nil
+}
+
+func (t *AstTestCase) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
+			t.astItems.GetHierString(nextSpace) +
 			astHierFmt("Builds:", nextSpace, func() string {
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.GetBuild().Name)
 			})
@@ -535,7 +538,7 @@ type astGroup struct {
 	astTest
 	buildName string
 	Build     *astBuild
-	Tests     map[string]*astTestCase
+	Tests     map[string]*AstTestCase
 	Groups    map[string]*astGroup
 }
 
@@ -559,7 +562,7 @@ func (t *astGroup) KeywordsChecker(s string) (bool, []string, string) {
 	if ok, testKeywords, _ := t.astTest.KeywordsChecker(s); !ok {
 		groupKeywords := map[string]interface{}{"build": nil, "tests": nil, "groups": nil}
 		if !checkKeyWord(s, groupKeywords) {
-			return false, append(testKeywords, KeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
+			return false, append(testKeywords, utils.KeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
 		}
 	}
 	return true, nil, ""
@@ -575,12 +578,12 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return astError("group "+t.Name, err)
 	}
-	//astParse tests
+	//AstParse tests
 	if err := cfgToastItemOptional(cfg, "tests", func(item interface{}) error {
-		t.Tests = make(map[string]*astTestCase)
+		t.Tests = make(map[string]*AstTestCase)
 		for name, test := range item.(map[interface{}]interface{}) {
 			t.Tests[name.(string)] = newAstTestCase(name.(string))
-			if err := astParse(t.Tests[name.(string)], test.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(t.Tests[name.(string)], test.(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
@@ -588,7 +591,7 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return astError("group "+t.Name, err)
 	}
-	//astParse groups
+	//AstParse groups
 	if err := cfgToastItemOptional(cfg, "groups", func(item interface{}) error {
 		t.Groups = make(map[string]*astGroup)
 		for _, name := range item.([]interface{}) {
@@ -616,21 +619,21 @@ func (t *astGroup) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
-	//link tests
-	for _, test := range t.Tests {
-		if err := test.Link(); err != nil {
-			return err
-		}
-		test.SetParent(t)
-	}
 	//link groups
 	for name, _ := range t.Groups {
 		group := jvsAstRoot.GetGroup(name)
+		group.SetParent(t)
 		if group == nil {
 			return errors.New("sub group " + name + "of group " + t.Name + " is undef!")
 		}
 		t.Groups[name] = group
-		group.SetParent(t)
+	}
+	//link tests
+	for _, test := range t.Tests {
+		test.SetParent(t)
+		if err := test.Link(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -648,7 +651,7 @@ func (t *astGroup) GetHierString(space int) string {
 				for k := range t.Tests {
 					keys = append(keys, k)
 				}
-				ForeachStringKeysInOrder(keys, func(i string) {
+				utils.ForeachStringKeysInOrder(keys, func(i string) {
 					s += t.Tests[i].GetHierString(nextSpace + 1)
 				})
 				return s
@@ -659,7 +662,7 @@ func (t *astGroup) GetHierString(space int) string {
 				for k := range t.Groups {
 					keys = append(keys, k)
 				}
-				ForeachStringKeysInOrder(keys, func(i string) {
+				utils.ForeachStringKeysInOrder(keys, func(i string) {
 					s += fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + t.Groups[i].Name)
 				})
 				return s
@@ -673,7 +676,7 @@ func (t *astGroup) GetHierString(space int) string {
 //------------------------
 type astRoot struct {
 	Env     *astEnv
-	Options map[string]*astOption
+	Options map[string]*AstOption
 	Builds  map[string]*astBuild
 	Groups  map[string]*astGroup
 }
@@ -700,7 +703,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	//parsing Env
 	if err := cfgToastItemRequired(cfg, "env", func(item interface{}) error {
 		t.Env = new(astEnv)
-		return astParse(t.Env, item.(map[interface{}]interface{}))
+		return AstParse(t.Env, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
@@ -709,7 +712,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 		t.Builds = make(map[string]*astBuild)
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
-			if err := astParse(t.Builds[name.(string)], (build.(map[interface{}]interface{}))); err != nil {
+			if err := AstParse(t.Builds[name.(string)], (build.(map[interface{}]interface{}))); err != nil {
 				return err
 			}
 		}
@@ -719,10 +722,10 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	}
 	//parsing options
 	if err := cfgToastItemOptional(cfg, "options", func(item interface{}) error {
-		t.Options = make(map[string]*astOption)
+		t.Options = make(map[string]*AstOption)
 		for name, option := range item.(map[interface{}]interface{}) {
 			t.Options[name.(string)] = newAstOption(name.(string))
-			if err := astParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
@@ -736,7 +739,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 		t.Groups = make(map[string]*astGroup)
 		for name, group := range item.(map[interface{}]interface{}) {
 			t.Groups[name.(string)] = newAstGroup(name.(string))
-			if err := astParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
@@ -769,7 +772,7 @@ func (t *astRoot) GetHierString(space int) string {
 			for k := range t.Options {
 				keys = append(keys, k)
 			}
-			ForeachStringKeysInOrder(keys, func(i string) {
+			utils.ForeachStringKeysInOrder(keys, func(i string) {
 				s += t.Options[i].GetHierString(nextSpace + 1)
 			})
 			return s
@@ -780,7 +783,7 @@ func (t *astRoot) GetHierString(space int) string {
 			for k := range t.Builds {
 				keys = append(keys, k)
 			}
-			ForeachStringKeysInOrder(keys, func(i string) {
+			utils.ForeachStringKeysInOrder(keys, func(i string) {
 				s += t.Builds[i].GetHierString(nextSpace + 1)
 			})
 			return s
@@ -791,7 +794,7 @@ func (t *astRoot) GetHierString(space int) string {
 			for k := range t.Groups {
 				keys = append(keys, k)
 			}
-			ForeachStringKeysInOrder(keys, func(i string) {
+			utils.ForeachStringKeysInOrder(keys, func(i string) {
 				s += t.Groups[i].GetHierString(nextSpace + 1)
 			})
 			return s
@@ -801,5 +804,9 @@ func (t *astRoot) GetHierString(space int) string {
 
 //global
 var jvsAstRoot = astRoot{}
-var jvsOptions = flag.NewFlagSet("jvsOptions", flag.ExitOnError)
+
+func GetJvsAstRoot() *astRoot {
+	return &jvsAstRoot
+}
+
 //------------------------

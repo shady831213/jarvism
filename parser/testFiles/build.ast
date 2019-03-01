@@ -19,34 +19,30 @@ On:
 null
 
 -----------------
-Off:
-null
-
------------------
 WithValue:
 ---------------
-PreSimOption:
-&{echo"pre_sim_option$1"}
-
----------------
-SimOption:
+compile_option:
 <nil>
 
 ---------------
-PostSimOption:
-&{echo"post_sim_option$1"}
+post_compile_option:
+&{echo"post_compile_option$has_pre_phase"}
 
 ---------------
-PreCompileOption:
-&{echo"pre_compile_option$1"}
+post_sim_option:
+&{echo"post_sim_option$has_pre_phase"}
 
 ---------------
-CompileOption:
+pre_compile_option:
+&{echo"pre_compile_option$has_pre_phase"}
+
+---------------
+pre_sim_option:
+&{echo"pre_sim_option$has_pre_phase"}
+
+---------------
+sim_option:
 <nil>
-
----------------
-PostCompileOption:
-&{echo"post_compile_option$1"}
 
 
 
@@ -59,33 +55,29 @@ false
 -----------------
 On:
 ---------------
-PreSimOption:
-<nil>
-
----------------
-SimOption:
-<nil>
-
----------------
-PostSimOption:
-<nil>
-
----------------
-PreCompileOption:
-<nil>
-
----------------
-CompileOption:
+compile_option:
 &{-q+lint=none}
 
 ---------------
-PostCompileOption:
+post_compile_option:
 <nil>
 
+---------------
+post_sim_option:
+<nil>
 
------------------
-Off:
-null
+---------------
+pre_compile_option:
+<nil>
+
+---------------
+pre_sim_option:
+<nil>
+
+---------------
+sim_option:
+<nil>
+
 
 -----------------
 WithValue:
@@ -103,34 +95,30 @@ On:
 null
 
 -----------------
-Off:
-null
-
------------------
 WithValue:
 ---------------
-PreSimOption:
+compile_option:
 <nil>
 
 ---------------
-SimOption:
+post_compile_option:
 <nil>
 
 ---------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ---------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ---------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+---------------
+sim_option:
 &{-q+lint=none}
-
----------------
-PostCompileOption:
-<nil>
 
 
 
@@ -145,34 +133,30 @@ On:
 null
 
 -----------------
-Off:
-null
-
------------------
 WithValue:
 ---------------
-PreSimOption:
+compile_option:
 <nil>
 
 ---------------
-SimOption:
+post_compile_option:
 <nil>
 
 ---------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ---------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ---------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+---------------
+sim_option:
 &{-q+lint=none}
-
----------------
-PostCompileOption:
-<nil>
 
 
 
@@ -184,33 +168,29 @@ true
 
 -----------------
 On:
-null
-
------------------
-Off:
 ---------------
-PreSimOption:
+compile_option:
 <nil>
 
 ---------------
-SimOption:
+post_compile_option:
 <nil>
 
 ---------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ---------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ---------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+---------------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
----------------
-PostCompileOption:
-<nil>
 
 
 -----------------
@@ -224,55 +204,55 @@ Builds:
 ------------------
 build1:
 ----------------
-PreSimOption:
-&{echo"pre_sim_build1"}
-
-----------------
-SimOption:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
-
-----------------
-PostSimOption:
-&{echo"post_sim_build1"}
-
-----------------
-PreCompileOption:
-<nil>
-
-----------------
-CompileOption:
+compile_option:
 &{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
 
 ----------------
-PostCompileOption:
+post_compile_option:
 <nil>
+
+----------------
+post_sim_option:
+&{echo"post_sim_build1"}
+
+----------------
+pre_compile_option:
+<nil>
+
+----------------
+pre_sim_option:
+&{echo"pre_sim_build1"}
+
+----------------
+sim_option:
+&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
 
 
 ------------------
 build2:
 ----------------
-PreSimOption:
-<nil>
-
-----------------
-SimOption:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
-
-----------------
-PostSimOption:
-<nil>
-
-----------------
-PreCompileOption:
-&{echo"pre_compile_build2"}
-
-----------------
-CompileOption:
+compile_option:
 &{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
 
 ----------------
-PostCompileOption:
+post_compile_option:
 &{echo"post_compile_build2"}
+
+----------------
+post_sim_option:
+<nil>
+
+----------------
+pre_compile_option:
+&{echo"pre_compile_build2"}
+
+----------------
+pre_sim_option:
+<nil>
+
+----------------
+sim_option:
+&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
 
 
 
@@ -297,34 +277,30 @@ On:
 null
 
 --------------
-Off:
-null
-
---------------
 WithValue:
 ------------
-PreSimOption:
+compile_option:
 <nil>
 
 ------------
-SimOption:
+post_compile_option:
 <nil>
 
 ------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+------------
+sim_option:
 &{-q+lint=none}
-
-------------
-PostCompileOption:
-<nil>
 
 
 
@@ -336,33 +312,29 @@ true
 
 --------------
 On:
-null
-
---------------
-Off:
 ------------
-PreSimOption:
+compile_option:
 <nil>
 
 ------------
-SimOption:
+post_compile_option:
 <nil>
 
 ------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+------------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
-------------
-PostCompileOption:
-<nil>
 
 
 --------------
@@ -396,34 +368,30 @@ On:
 null
 
 ------------
-Off:
-null
-
-------------
 WithValue:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{-q+lint=none}
-
-----------
-PostCompileOption:
-<nil>
 
 
 
@@ -435,33 +403,29 @@ true
 
 ------------
 On:
-null
-
-------------
-Off:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
-----------
-PostCompileOption:
-<nil>
 
 
 ------------
@@ -469,6 +433,30 @@ WithValue:
 null
 
 
+
+--------------
+compile_option:
+<nil>
+
+--------------
+post_compile_option:
+<nil>
+
+--------------
+post_sim_option:
+<nil>
+
+--------------
+pre_compile_option:
+<nil>
+
+--------------
+pre_sim_option:
+<nil>
+
+--------------
+sim_option:
+&{+UVM_VERBOSITY=UVM_FULL-q+lint=none}
 
 ---------------
 Builds:
@@ -494,34 +482,30 @@ On:
 null
 
 ------------
-Off:
-null
-
-------------
 WithValue:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{-q+lint=none}
-
-----------
-PostCompileOption:
-<nil>
 
 
 
@@ -536,34 +520,30 @@ On:
 null
 
 ------------
-Off:
-null
-
-------------
 WithValue:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{-q+lint=none}
-
-----------
-PostCompileOption:
-<nil>
 
 
 
@@ -575,33 +555,29 @@ true
 
 ------------
 On:
-null
-
-------------
-Off:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
-----------
-PostCompileOption:
-<nil>
 
 
 ------------
@@ -609,6 +585,30 @@ WithValue:
 null
 
 
+
+--------------
+compile_option:
+<nil>
+
+--------------
+post_compile_option:
+<nil>
+
+--------------
+post_sim_option:
+<nil>
+
+--------------
+pre_compile_option:
+<nil>
+
+--------------
+pre_sim_option:
+<nil>
+
+--------------
+sim_option:
+&{+UVM_VERBOSITY=UVM_FULL-q+lint=none-q+lint=none}
 
 ---------------
 Builds:
@@ -639,34 +639,30 @@ On:
 null
 
 --------------
-Off:
-null
-
---------------
 WithValue:
 ------------
-PreSimOption:
+compile_option:
 <nil>
 
 ------------
-SimOption:
+post_compile_option:
 <nil>
 
 ------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+------------
+sim_option:
 &{-q+lint=none}
-
-------------
-PostCompileOption:
-<nil>
 
 
 
@@ -678,33 +674,29 @@ true
 
 --------------
 On:
-null
-
---------------
-Off:
 ------------
-PreSimOption:
+compile_option:
 <nil>
 
 ------------
-SimOption:
+post_compile_option:
 <nil>
 
 ------------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ------------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ------------
-CompileOption:
+pre_sim_option:
+<nil>
+
+------------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
-------------
-PostCompileOption:
-<nil>
 
 
 --------------
@@ -738,34 +730,30 @@ On:
 null
 
 ------------
-Off:
-null
-
-------------
 WithValue:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{-q+lint=none}
-
-----------
-PostCompileOption:
-<nil>
 
 
 
@@ -777,33 +765,29 @@ true
 
 ------------
 On:
-null
-
-------------
-Off:
 ----------
-PreSimOption:
+compile_option:
 <nil>
 
 ----------
-SimOption:
+post_compile_option:
 <nil>
 
 ----------
-PostSimOption:
+post_sim_option:
 <nil>
 
 ----------
-PreCompileOption:
+pre_compile_option:
 <nil>
 
 ----------
-CompileOption:
+pre_sim_option:
+<nil>
+
+----------
+sim_option:
 &{+UVM_VERBOSITY=UVM_FULL}
-
-----------
-PostCompileOption:
-<nil>
 
 
 ------------
@@ -811,6 +795,30 @@ WithValue:
 null
 
 
+
+--------------
+compile_option:
+<nil>
+
+--------------
+post_compile_option:
+<nil>
+
+--------------
+post_sim_option:
+<nil>
+
+--------------
+pre_compile_option:
+<nil>
+
+--------------
+pre_sim_option:
+<nil>
+
+--------------
+sim_option:
+&{+UVM_VERBOSITY=UVM_FULL-q+lint=none}
 
 ---------------
 Builds:

@@ -40,29 +40,29 @@ options:
         - +lint=none
   repeat:
     with_value_action:
-      compile_option:
+      sim_option:
         - -q
         - +lint=none
   seed:
     with_value_action:
-      compile_option:
+      sim_option:
         - -q
         - +lint=none
   vh:
-    off_action:
-      compile_option:
+    on_action:
+      sim_option:
         - +UVM_VERBOSITY=UVM_FULL
 
   has_pre_phase:
     with_value_action:
       pre_compile_option:
-        - echo "pre_compile_option $1"
+        - echo "pre_compile_option $has_pre_phase"
       post_compile_option:
-        - echo "post_compile_option $1"
+        - echo "post_compile_option $has_pre_phase"
       pre_sim_option:
-        - echo "pre_sim_option $1"
+        - echo "pre_sim_option $has_pre_phase"
       post_sim_option:
-        - echo "post_sim_option $1"
+        - echo "post_sim_option $has_pre_phase"
 
 groups:
   group1:
