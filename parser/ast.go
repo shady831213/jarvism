@@ -212,7 +212,7 @@ func (t *AstOption) Init(name string) {
 	t.Value = "false"
 }
 
-func (t *AstOption) Clone() *AstOption {
+func (t *AstOption) Clone() JvsOption {
 	inst := newAstOption(t.Name)
 	inst.Value = t.Value
 	inst.On = t.On
@@ -236,10 +236,6 @@ func (t *AstOption) String() string {
 
 func (t *AstOption) IsBoolFlag() bool {
 	return t.WithValue == nil
-}
-
-func (t *AstOption) GetName() string {
-	return t.Name
 }
 
 func (t *AstOption) AfterParse() {
@@ -292,7 +288,7 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 		return astError("with_value_action of "+t.Name, err)
 	}
 	//add to flagSet
-	RegisterOption(t)
+	RegisterJvsOption(t, t.Name, t.Usage())
 	return nil
 }
 
@@ -322,7 +318,6 @@ func (t *AstOption) GetHierString(space int) string {
 //env
 //------------------------
 type astEnv struct {
-	Simulator string
 }
 
 func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
@@ -335,7 +330,19 @@ func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 	if err := cfgToastItemRequired(cfg, "simulator", func(item interface{}) error {
-		t.Simulator = item.(string)
+		simulator, ok := validSimulators[item.(string)]
+		if !ok {
+			errMsg := "Error in Env: simulator " + item.(string) + " is invalid! valid simulator are [ "
+			for k, _ := range validSimulators {
+				errMsg += k + " "
+			}
+			errMsg += "!"
+			return errors.New(errMsg)
+		}
+		if err := LoadBuildInOptions(simulator.BuildInOptionFile); err != nil {
+			panic("Error in loading " + simulator.BuildInOptionFile + ":" + err.Error())
+		}
+		setSimulator(simulator)
 		return nil
 	}); err != nil {
 		return astError("Env", err)
@@ -347,7 +354,7 @@ func (t *astEnv) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(t.Simulator)
+			fmt.Sprintln(GetSimulator().Name)
 	})
 }
 
@@ -392,7 +399,6 @@ func (t *astBuild) GetHierString(space int) string {
 //------------------------
 type astTestOpts interface {
 	SetParent(parent astTestOpts)
-	GetName() string
 	//bottom-up search
 	GetOptionArgs() map[string]*AstOption
 	//bottom-up search
@@ -429,10 +435,6 @@ func (t *astTest) GetOptionArgs() map[string]*AstOption {
 	return t.OptionArgs
 }
 
-func (t *astTest) GetName() string {
-	return t.Name
-}
-
 func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"args": nil}
 	if !checkKeyWord(s, keywords) {
@@ -462,15 +464,15 @@ func (t *astTest) Link() error {
 		if err != nil {
 			return astError("args of "+t.Name, err)
 		}
-		v, ok := opt.(*AstOption)
+		v, ok := opt.Clone().(*AstOption)
 		if !ok {
-			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is not invalid option!")
+			return nil
 		}
 		if v.IsCompileOption() {
-			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
+			return errors.New("Error in args of " + t.Name + ":" + v.Name + " is a compile option! compile option can't be in groups and tests!")
 		}
-		t.OptionArgs[v.GetName()] = v.Clone()
-		t.OptionArgs[v.GetName()].AfterParse()
+		t.OptionArgs[v.Name] = v
+		t.OptionArgs[v.Name].AfterParse()
 	}
 	return nil
 }
@@ -479,7 +481,7 @@ func (t *astTest) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt("parent:", nextSpace, func() string {
 		if t.parent != nil {
-			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.parent.GetName())
+			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.parent.(*astGroup).Name)
 		}
 		return fmt.Sprintln(strings.Repeat(" ", nextSpace) + "null")
 	}) +
@@ -517,9 +519,15 @@ func (t *AstTestCase) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
-	for _, opt := range t.GetOptionArgs() {
-		opt.TestHandler(t)
+	//in order
+	keys := make([]string, 0)
+	args := t.GetOptionArgs()
+	for k := range args {
+		keys = append(keys, k)
 	}
+	utils.ForeachStringKeysInOrder(keys, func(i string) {
+		args[i].TestHandler(t)
+	})
 	return nil
 }
 
@@ -681,6 +689,15 @@ type astRoot struct {
 	Groups  map[string]*astGroup
 }
 
+func newAstRoot() *astRoot {
+	inst := new(astRoot)
+	inst.Env = new(astEnv)
+	inst.Builds = make(map[string]*astBuild)
+	inst.Groups = make(map[string]*astGroup)
+	inst.Options = make(map[string]*AstOption)
+	return inst
+}
+
 func (t *astRoot) GetBuild(name string) *astBuild {
 	if build, ok := t.Builds[name]; ok {
 		return build
@@ -702,14 +719,12 @@ func (t *astRoot) KeywordsChecker(s string) (bool, []string, string) {
 func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	//parsing Env
 	if err := cfgToastItemRequired(cfg, "env", func(item interface{}) error {
-		t.Env = new(astEnv)
 		return AstParse(t.Env, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
 	//parsing builds
 	if err := cfgToastItemRequired(cfg, "builds", func(item interface{}) error {
-		t.Builds = make(map[string]*astBuild)
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
 			if err := AstParse(t.Builds[name.(string)], (build.(map[interface{}]interface{}))); err != nil {
@@ -722,7 +737,6 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	}
 	//parsing options
 	if err := cfgToastItemOptional(cfg, "options", func(item interface{}) error {
-		t.Options = make(map[string]*AstOption)
 		for name, option := range item.(map[interface{}]interface{}) {
 			t.Options[name.(string)] = newAstOption(name.(string))
 			if err := AstParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
@@ -736,7 +750,6 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 
 	//parsing groups
 	if err := cfgToastItemOptional(cfg, "groups", func(item interface{}) error {
-		t.Groups = make(map[string]*astGroup)
 		for name, group := range item.(map[interface{}]interface{}) {
 			t.Groups[name.(string)] = newAstGroup(name.(string))
 			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
@@ -803,10 +816,10 @@ func (t *astRoot) GetHierString(space int) string {
 }
 
 //global
-var jvsAstRoot = astRoot{}
+var jvsAstRoot = newAstRoot()
 
 func GetJvsAstRoot() *astRoot {
-	return &jvsAstRoot
+	return jvsAstRoot
 }
 
 //------------------------

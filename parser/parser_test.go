@@ -1,7 +1,6 @@
 package parser_test
 
 import (
-	_ "github.com/shady831213/jarvisSim/buildIncmd"
 	"github.com/shady831213/jarvisSim/utils"
 	"github.com/shady831213/jarvisSim/parser"
 	"strings"

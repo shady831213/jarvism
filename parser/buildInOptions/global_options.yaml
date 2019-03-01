@@ -1,0 +1,10 @@
+options:
+  sim_args:
+    with_value_action:
+      sim_option:
+        - $sim_args
+
+  complie_args:
+    with_value_action:
+      sim_option:
+        - $complie_args

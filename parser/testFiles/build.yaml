@@ -33,21 +33,6 @@ builds:
       - *common_sim
 
 options:
-  quite_comp:
-    on_action:
-      compile_option:
-        - -q
-        - +lint=none
-  repeat:
-    with_value_action:
-      sim_option:
-        - -q
-        - +lint=none
-  seed:
-    with_value_action:
-      sim_option:
-        - -q
-        - +lint=none
   vh:
     on_action:
       sim_option:

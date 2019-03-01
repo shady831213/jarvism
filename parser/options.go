@@ -4,18 +4,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type JvsOption interface {
 	flag.Value
-	GetName() string
-	Usage() string
-	AfterParse()
+	Clone() JvsOption
 }
 
-func RegisterOption(option JvsOption) {
-	jvsOptions.Var(option, option.GetName(), option.Usage())
+func RegisterJvsOption(v JvsOption, name string, usage string) {
+	jvsOptions.Var(v, name, usage)
 }
 
 func argToOption(s string) (string, error) {
@@ -50,6 +49,48 @@ func GetOption(arg string) (JvsOption, error) {
 		panic(fmt.Sprintf("expect type JvsOption but get %T", jvsOptions.Lookup(optName).Value))
 	}
 	return v, nil
+}
+
+type jvsNonBoolOption struct {
+}
+
+func (t *RepeatOption) IsBoolFlag() bool {
+	return false
+}
+
+//buildin options
+type RepeatOption struct {
+	jvsNonBoolOption
+	n int
+}
+
+func newRepeatOption() *RepeatOption {
+	inst := new(RepeatOption)
+	inst.n = 1
+	return inst
+}
+
+func (t *RepeatOption) Clone() JvsOption {
+	inst := newRepeatOption()
+	inst.n = t.n
+	return inst
+}
+
+func (t *RepeatOption) Set(s string) error {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+	t.n = n
+	return nil
+}
+
+func (t *RepeatOption) String() string {
+	return string(t.n)
+}
+
+func init() {
+	RegisterJvsOption(newRepeatOption(), "repeat", "run each testcase repeatly n times")
 }
 
 //global
