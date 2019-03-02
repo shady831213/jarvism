@@ -51,3 +51,5 @@ func WriteNewFile(path string, content string) {
 		panic("write file " + path + " uncompleted!")
 	}
 }
+
+

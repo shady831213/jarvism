@@ -4,7 +4,7 @@ options:
       sim_option:
         - $sim_args
 
-  complie_args:
+  compile_args:
     with_value_action:
       sim_option:
         - $complie_args

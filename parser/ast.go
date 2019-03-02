@@ -68,7 +68,7 @@ type astItem struct {
 	content string
 }
 
-func newAstOptionItem(content interface{}) *astItem {
+func newAstItem(content interface{}) *astItem {
 	inst := new(astItem)
 	if value, ok := content.(string); ok {
 		inst.content = value
@@ -121,7 +121,7 @@ func (items *astItems) Cat(i *astItems) {
 	}
 	for k, _ := range i.Items {
 		if items.Items[k] == nil && i.Items[k] != nil {
-			items.Items[k] = newAstOptionItem("")
+			items.Items[k] = newAstItem("")
 		}
 		items.Items[k].Cat(i.Items[k])
 	}
@@ -173,7 +173,7 @@ func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
 func (items *astParseItem) Parse(cfg map[interface{}]interface{}) error {
 	for k, _ := range items.Items {
 		if err := cfgToastItemOptional(cfg, k, func(i interface{}) error {
-			items.Items[k] = newAstOptionItem(i)
+			items.Items[k] = newAstItem(i)
 			return nil
 		}); err != nil {
 			return err
@@ -194,6 +194,12 @@ func NewAstOptionAction() *AstOptionAction {
 	return inst
 }
 
+type JvsOptionForTest interface {
+	JvsOption
+	IsCompileOption() bool
+	TestHandler(test *AstTestCase)
+}
+
 type AstOption struct {
 	On        *AstOptionAction
 	WithValue *AstOptionAction
@@ -210,6 +216,10 @@ func newAstOption(name string) *AstOption {
 func (t *AstOption) Init(name string) {
 	t.Name = name
 	t.Value = "false"
+}
+
+func (t *AstOption) GetName() string {
+	return t.Name
 }
 
 func (t *AstOption) Clone() JvsOption {
@@ -238,12 +248,6 @@ func (t *AstOption) IsBoolFlag() bool {
 	return t.WithValue == nil
 }
 
-func (t *AstOption) AfterParse() {
-	if !t.IsBoolFlag() {
-		t.WithValue.Replace("$"+t.Name, t.Value, -1)
-	}
-}
-
 func (t *AstOption) IsCompileOption() bool {
 	return t.WithValue != nil && !t.WithValue.IsSimOnly() || t.On != nil && !t.On.IsSimOnly()
 }
@@ -257,6 +261,7 @@ func (t *AstOption) TestHandler(test *AstTestCase) {
 		test.Cat(&t.On.astItems)
 		return
 	}
+	t.WithValue.Replace("$"+t.Name, t.Value, -1)
 	test.Cat(&t.WithValue.astItems)
 }
 
@@ -288,7 +293,7 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 		return astError("with_value_action of "+t.Name, err)
 	}
 	//add to flagSet
-	RegisterJvsOption(t, t.Name, t.Usage())
+	RegisterJvsOption(t, t.Usage())
 	return nil
 }
 
@@ -400,30 +405,33 @@ func (t *astBuild) GetHierString(space int) string {
 type astTestOpts interface {
 	SetParent(parent astTestOpts)
 	//bottom-up search
-	GetOptionArgs() map[string]*AstOption
+	GetOptionArgs() map[string]JvsOptionForTest
 	//bottom-up search
 	GetBuild() *astBuild
+	//top-down search
+	GetTestCases() []*AstTestCase
 }
 
 type astTest struct {
 	Name       string
-	OptionArgs map[string]*AstOption
+	Build      *astBuild
+	OptionArgs map[string]JvsOptionForTest
 	args       []string
 	parent     astTestOpts
 }
 
 func (t *astTest) init(name string) {
 	t.Name = name
-	t.OptionArgs = make(map[string]*AstOption)
+	t.OptionArgs = make(map[string]JvsOptionForTest)
 }
 
 func (t *astTest) SetParent(parent astTestOpts) {
 	t.parent = parent
 }
 
-func (t *astTest) GetOptionArgs() map[string]*AstOption {
+func (t *astTest) GetOptionArgs() map[string]JvsOptionForTest {
 	if t.parent != nil {
-		options := make(map[string]*AstOption)
+		options := make(map[string]JvsOptionForTest)
 		for k, v := range t.parent.GetOptionArgs() {
 			options[k] = v
 		}
@@ -433,6 +441,16 @@ func (t *astTest) GetOptionArgs() map[string]*AstOption {
 		return options
 	}
 	return t.OptionArgs
+}
+
+func (t *astTest) GetBuild() *astBuild {
+	if t.Build != nil {
+		return t.Build
+	}
+	if t.parent != nil {
+		return t.parent.GetBuild()
+	}
+	return nil
 }
 
 func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
@@ -464,15 +482,15 @@ func (t *astTest) Link() error {
 		if err != nil {
 			return astError("args of "+t.Name, err)
 		}
-		v, ok := opt.Clone().(*AstOption)
+		v, ok := opt.Clone().(JvsOptionForTest)
 		if !ok {
 			return nil
 		}
 		if v.IsCompileOption() {
-			return errors.New("Error in args of " + t.Name + ":" + v.Name + " is a compile option! compile option can't be in groups and tests!")
+			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
 		}
-		t.OptionArgs[v.Name] = v
-		t.OptionArgs[v.Name].AfterParse()
+		t.OptionArgs[v.GetName()] = v
+
 	}
 	return nil
 }
@@ -493,7 +511,11 @@ func (t *astTest) GetHierString(space int) string {
 				keys = append(keys, k)
 			}
 			utils.ForeachStringKeysInOrder(keys, func(i string) {
-				s += args[i].GetHierString(nextSpace + 1)
+				if v, ok := args[i].(*AstOption); ok {
+					s += v.GetHierString(nextSpace + 1)
+				} else {
+					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + args[i].GetName())
+				}
 			})
 			return s
 		})
@@ -502,6 +524,7 @@ func (t *astTest) GetHierString(space int) string {
 type AstTestCase struct {
 	astTest
 	astItems
+	seeds []int
 }
 
 func newAstTestCase(name string) *AstTestCase {
@@ -511,15 +534,28 @@ func newAstTestCase(name string) *AstTestCase {
 	return inst
 }
 
-func (t *AstTestCase) GetBuild() *astBuild {
-	return t.parent.GetBuild()
+func (t *AstTestCase) GetTestCases() []*AstTestCase {
+	testcases := make([]*AstTestCase, len(t.seeds))
+	for i := range testcases {
+		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
+		//copy sim_options and set seed
+		testcases[i].astItems.Cat(&t.astItems)
+		testcases[i].Items["sim_option"].Cat(newAstItem(GetSimulator().SeedOption + strconv.Itoa(t.seeds[i])))
+		//copy build
+		testcases[i].Build = t.Build
+	}
+	return testcases
 }
 
 func (t *AstTestCase) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
-	//in order
+	//get build sim_options
+	t.Build = t.GetBuild()
+	t.Cat(&t.Build.astItems)
+
+	//get options sim_options in order
 	keys := make([]string, 0)
 	args := t.GetOptionArgs()
 	for k := range args {
@@ -536,8 +572,18 @@ func (t *AstTestCase) GetHierString(space int) string {
 	return astHierFmt(t.Name+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
 			t.astItems.GetHierString(nextSpace) +
+			astHierFmt("seeds:", nextSpace, func() string {
+				return strings.Repeat(" ", nextSpace) + fmt.Sprintln(t.seeds)
+			}) +
 			astHierFmt("Builds:", nextSpace, func() string {
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.GetBuild().Name)
+			}) +
+			astHierFmt("Flatten Tests:", nextSpace, func() string {
+				s := ""
+				for _, test := range t.GetTestCases() {
+					s += test.GetHierString(nextSpace + 1)
+				}
+				return s
 			})
 	})
 }
@@ -545,7 +591,6 @@ func (t *AstTestCase) GetHierString(space int) string {
 type astGroup struct {
 	astTest
 	buildName string
-	Build     *astBuild
 	Tests     map[string]*AstTestCase
 	Groups    map[string]*astGroup
 }
@@ -553,17 +598,19 @@ type astGroup struct {
 func newAstGroup(name string) *astGroup {
 	inst := new(astGroup)
 	inst.init(name)
+	inst.buildName = ""
 	return inst
 }
 
-func (t *astGroup) GetBuild() *astBuild {
-	if t.Build != nil {
-		return t.Build
+func (t *astGroup) GetTestCases() []*AstTestCase {
+	testcases := make([]*AstTestCase, 0)
+	for _, test := range t.Tests {
+		testcases = append(testcases, test.GetTestCases()...)
 	}
-	if t.parent != nil {
-		return t.parent.GetBuild()
+	for _, group := range t.Groups {
+		testcases = append(testcases, group.GetTestCases()...)
 	}
-	return nil
+	return testcases
 }
 
 func (t *astGroup) KeywordsChecker(s string) (bool, []string, string) {
@@ -599,6 +646,7 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return astError("group "+t.Name, err)
 	}
+
 	//AstParse groups
 	if err := cfgToastItemOptional(cfg, "groups", func(item interface{}) error {
 		t.Groups = make(map[string]*astGroup)
@@ -618,11 +666,13 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 func (t *astGroup) Link() error {
 	//link build
 	//builds have been all parsed
-	build := jvsAstRoot.GetBuild(t.buildName)
-	if build == nil {
-		return errors.New("build " + t.buildName + "of group " + t.Name + "is undef!")
+	if t.buildName != "" {
+		build := jvsAstRoot.GetBuild(t.buildName)
+		if build == nil {
+			return errors.New("build " + t.buildName + "of group " + t.Name + "is undef!")
+		}
+		t.Build = build
 	}
-	t.Build = build
 	//link args
 	if err := t.astTest.Link(); err != nil {
 		return err
@@ -636,6 +686,15 @@ func (t *astGroup) Link() error {
 		}
 		t.Groups[name] = group
 	}
+	//check loop
+	if t.parent != nil {
+		for g := t.parent.(*astGroup); g.parent != nil; g = g.parent.(*astGroup) {
+			if g.Name == t.Name {
+				return errors.New("Loop include: group " + t.Name + " and group " + g.Name)
+			}
+		}
+	}
+
 	//link tests
 	for _, test := range t.Tests {
 		test.SetParent(t)
@@ -673,6 +732,13 @@ func (t *astGroup) GetHierString(space int) string {
 				utils.ForeachStringKeysInOrder(keys, func(i string) {
 					s += fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + t.Groups[i].Name)
 				})
+				return s
+			}) +
+			astHierFmt("Flatten Tests:", nextSpace, func() string {
+				s := ""
+				for _, test := range t.GetTestCases() {
+					s += test.GetHierString(nextSpace + 1)
+				}
 				return s
 			})
 	})

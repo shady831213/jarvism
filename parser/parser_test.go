@@ -1,8 +1,9 @@
 package parser_test
 
 import (
-	"github.com/shady831213/jarvisSim/utils"
 	"github.com/shady831213/jarvisSim/parser"
+	"github.com/shady831213/jarvisSim/utils"
+	"math/rand"
 	"strings"
 	"syscall"
 	"testing"
@@ -17,6 +18,7 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	parser.SetRand(rand.New(rand.NewSource(1)))
 	cfg, err := parser.Lex("testFiles/build.yaml")
 	if err != nil {
 		t.Error(err)

@@ -1,9 +1,4 @@
 options:
-  seed:
-    with_value_action:
-      sim_option:
-        - +ntb_random_seed=$seed
-
   quite_comp:
     on_action:
       compile_option:
