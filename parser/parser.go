@@ -1,8 +1,10 @@
 package parser
 
 import (
+	"github.com/shady831213/jarvisSim"
 	"gopkg.in/yaml.v2"
 	"os"
+	"path"
 )
 
 func Lex(configFile string) (map[interface{}]interface{}, error) {
@@ -46,7 +48,7 @@ func LoadBuildInOptions(configFile string) error {
 }
 
 func init() {
-	if err := LoadBuildInOptions("buildInOptions/global_options.yaml"); err != nil {
-		panic("Error in loading buildInOptions/global_options.yaml :" + err.Error())
+	if err := LoadBuildInOptions(path.Join(jarivsSim.BuildInOptionPath(), "global_options.yaml")); err != nil {
+		panic("Error in loading " + path.Join(jarivsSim.BuildInOptionPath(), "global_options.yaml") + ":" + err.Error())
 	}
 }

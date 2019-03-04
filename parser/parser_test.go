@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"github.com/shady831213/jarvisSim/parser"
+	_ "github.com/shady831213/jarvisSim/simulators"
 	"github.com/shady831213/jarvisSim/utils"
 	"math/rand"
 	"strings"

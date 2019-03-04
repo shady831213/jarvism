@@ -341,11 +341,11 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 			for k, _ := range validSimulators {
 				errMsg += k + " "
 			}
-			errMsg += "!"
+			errMsg += "]!"
 			return errors.New(errMsg)
 		}
-		if err := LoadBuildInOptions(simulator.BuildInOptionFile); err != nil {
-			panic("Error in loading " + simulator.BuildInOptionFile + ":" + err.Error())
+		if err := LoadBuildInOptions(simulator.BuildInOptionFile()); err != nil {
+			panic("Error in loading " + simulator.BuildInOptionFile() + ":" + err.Error())
 		}
 		setSimulator(simulator)
 		return nil
@@ -359,7 +359,7 @@ func (t *astEnv) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(GetSimulator().Name)
+			fmt.Sprintln(GetSimulator().Name())
 	})
 }
 
@@ -540,7 +540,7 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
 		testcases[i].astItems.Cat(&t.astItems)
-		testcases[i].Items["sim_option"].Cat(newAstItem(GetSimulator().SeedOption + strconv.Itoa(t.seeds[i])))
+		testcases[i].Items["sim_option"].Cat(newAstItem(GetSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
 		//copy build
 		testcases[i].Build = t.Build
 	}
