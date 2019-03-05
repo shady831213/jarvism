@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type uvmDiscoverer struct {
@@ -16,8 +17,12 @@ type uvmDiscoverer struct {
 func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	//AstParse tests
 	if err := parser.CfgToastItemOptional(cfg, "test_dir", func(item interface{}) error {
-		testDir, err := filepath.Abs(item.(string))
+		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
+			return err
+		}
+		//check path
+		if _, err := os.Stat(testDir); err != nil {
 			return err
 		}
 		d.testDir = testDir
@@ -27,7 +32,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	}
 	//use default
 	if d.testDir == "" {
-		d.testDir, _ = filepath.Abs(path.Join(os.ExpandEnv("PRJ_HOME"), "testcases"))
+		d.testDir, _ = filepath.Abs(path.Join(os.Getenv("PRJ_HOME"), "testcases"))
 	}
 	return nil
 }
@@ -72,11 +77,12 @@ func (d *uvmDiscoverer) filter(path string, f os.FileInfo, err error) error {
 	if f.IsDir() {
 		return nil
 	}
-	if filepath.Ext(path) != "sv" {
+	if filepath.Ext(path) != ".sv" {
 		return nil
 	}
-	if filepath.Base(path) == filepath.Base(filepath.Dir(path)) {
-		d.tests[filepath.Base(path)] = nil
+	fileName := strings.TrimSuffix(filepath.Base(path), ".sv")
+	if fileName == filepath.Base(filepath.Dir(path)) {
+		d.tests[fileName] = nil
 	}
 	return nil
 }
@@ -84,6 +90,18 @@ func (d *uvmDiscoverer) filter(path string, f os.FileInfo, err error) error {
 func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	_, ok := d.tests[test]
 	return ok
+}
+
+func (d *uvmDiscoverer) Clone() parser.TestDiscoverer {
+	inst := new(uvmDiscoverer)
+	inst.testDir = d.testDir
+	if d.tests != nil {
+		inst.tests = make(map[string]interface{})
+		for k, v := range d.tests {
+			inst.tests[k] = v
+		}
+	}
+	return inst
 }
 
 func newUvmDiscoverer() parser.TestDiscoverer {

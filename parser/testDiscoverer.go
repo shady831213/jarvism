@@ -7,9 +7,17 @@ type TestDiscoverer interface {
 	TestCmd() string
 	TestList() []string
 	IsValidTest(string) bool
+	Clone() TestDiscoverer
 }
 
 var validTestDiscoverers = make(map[string]TestDiscoverer)
+
+func GetTestDiscoverer(key string) TestDiscoverer {
+	if v, ok := validTestDiscoverers[key]; ok {
+		return v.Clone()
+	}
+	return nil
+}
 
 func RegisterTestDiscoverer(d TestDiscoverer) {
 	if _, ok := validTestDiscoverers[d.Name()]; ok {

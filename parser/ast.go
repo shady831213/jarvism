@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/shady831213/jarvisSim/utils"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -388,8 +389,7 @@ func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, []string, string) {
 
 func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	if err := CfgToastItemRequired(cfg, "type", func(item interface{}) error {
-		discoverer, ok := validTestDiscoverers[item.(string)]
-		if !ok {
+		if t.discoverer = GetTestDiscoverer(item.(string)); t.discoverer == nil {
 			errMsg := "Error in test_discoverer: type " + item.(string) + " is invalid! valid test_discoverer are [ "
 			for k, _ := range validTestDiscoverers {
 				errMsg += k + " "
@@ -397,7 +397,6 @@ func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 			errMsg += "]!"
 			return errors.New(errMsg)
 		}
-		t.discoverer = discoverer
 		return nil
 	}); err != nil {
 		return AstError("test_discoverer", err)
@@ -443,6 +442,10 @@ func newAstBuild(name string) *astBuild {
 	inst.Name = name
 	inst.astParseItem.init()
 	return inst
+}
+
+func (t *astBuild) GetTestDiscoverer() TestDiscoverer {
+	return t.testDiscoverer.discoverer
 }
 
 func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
@@ -819,7 +822,11 @@ func (t *astGroup) GetHierString(space int) string {
 			}) +
 			astHierFmt("Flatten Tests:", nextSpace, func() string {
 				s := ""
-				for _, test := range t.GetTestCases() {
+				tests := t.GetTestCases()
+				sort.Slice(tests, func(i, j int) bool {
+					return tests[i].Name < tests[j].Name
+				})
+				for _, test := range tests {
 					s += test.GetHierString(nextSpace + 1)
 				}
 				return s
@@ -876,8 +883,14 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	if err := CfgToastItemRequired(cfg, "builds", func(item interface{}) error {
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
-			if err := AstParse(t.Builds[name.(string)], (build.(map[interface{}]interface{}))); err != nil {
-				return err
+			if build != nil {
+				if err := AstParse(t.Builds[name.(string)], build.(map[interface{}]interface{})); err != nil {
+					return err
+				}
+			} else {
+				if err := AstParse(t.Builds[name.(string)], make(map[interface{}]interface{})); err != nil {
+					return err
+				}
 			}
 		}
 		return nil

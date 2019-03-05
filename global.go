@@ -17,6 +17,15 @@ func BuildInOptionPath() string {
 	return path.Join(getPkgPath(), "buildInOptions")
 }
 
+func TestDiscoverersPath() string {
+	return path.Join(getPkgPath(), "testDiscoverers")
+}
+
+func simulatorsPath() string {
+	return path.Join(getPkgPath(), "simulators")
+}
+
+
 func getPkgPath() string {
 	if pkgPath == "" {
 		_, file, _, ok := runtime.Caller(1)
