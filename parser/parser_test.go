@@ -6,6 +6,7 @@ import (
 	_ "github.com/shady831213/jarvisSim/testDiscoverers"
 	"github.com/shady831213/jarvisSim/utils"
 	"math/rand"
+	"os"
 	"regexp"
 	"strings"
 	"syscall"
@@ -51,4 +52,8 @@ func dealAstResult(result string) string {
 	_result = regexp.MustCompile(`\[[0-9]+\]`).ReplaceAllString(_result, "[seeds]")
 	return _result
 
+}
+
+func init() {
+	os.Setenv("PRJ_HOME", "testFiles")
 }

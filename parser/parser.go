@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"github.com/shady831213/jarvisSim"
 	"gopkg.in/yaml.v2"
 	"os"
@@ -19,6 +20,10 @@ func Lex(configFile string) (map[interface{}]interface{}, error) {
 }
 
 func Parse(cfg map[interface{}]interface{}) error {
+	//check env v
+	if os.Getenv("PRJ_HOME") == "" {
+		return errors.New("Env $PRJ_HOME must be set!")
+	}
 	if err := AstParse(jvsAstRoot, cfg); err != nil {
 		return err
 	}
