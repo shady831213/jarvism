@@ -55,5 +55,5 @@ func dealAstResult(result string) string {
 }
 
 func init() {
-	os.Setenv("PRJ_HOME", "testFiles")
+	os.Setenv("JVS_PRJ_HOME", "testFiles")
 }

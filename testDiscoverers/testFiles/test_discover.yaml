@@ -4,7 +4,7 @@ env:
 builds:
   build1:
     test_discoverer:
-      type : uvm_test
+      type: uvm_test
       attr:
-        test_dir: $PRJ_HOME/build1_testcases
+        test_dir: $JVS_PRJ_HOME/build1_testcases
   build2:

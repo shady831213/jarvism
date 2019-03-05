@@ -1,6 +1,7 @@
 package testDiscoverers
 
 import (
+	"github.com/shady831213/jarvisSim"
 	"github.com/shady831213/jarvisSim/parser"
 	"github.com/shady831213/jarvisSim/utils"
 	"os"
@@ -32,7 +33,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	}
 	//use default
 	if d.testDir == "" {
-		d.testDir, _ = filepath.Abs(path.Join(os.Getenv("PRJ_HOME"), "testcases"))
+		d.testDir, _ = filepath.Abs(path.Join(jarivsSim.GetPrjHome(), "testcases"))
 	}
 	return nil
 }
