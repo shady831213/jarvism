@@ -511,13 +511,10 @@ func (t *astBuild) GetHierString(space int) string {
 //Test and Group, linkable
 //------------------------
 type astTestOpts interface {
+	runTimeOpts
 	SetParent(parent astTestOpts)
 	//bottom-up search
 	GetOptionArgs() map[string]JvsOptionForTest
-	//bottom-up search
-	GetBuild() *astBuild
-	//top-down search
-	GetTestCases() []*AstTestCase
 }
 
 type astTest struct {
@@ -531,6 +528,10 @@ type astTest struct {
 func (t *astTest) init(name string) {
 	t.Name = name
 	t.OptionArgs = make(map[string]JvsOptionForTest)
+}
+
+func (t *astTest) GetName() string {
+	return t.Name
 }
 
 func (t *astTest) SetParent(parent astTestOpts) {
@@ -713,6 +714,7 @@ func newAstGroup(name string) *astGroup {
 func (t *astGroup) GetTestCases() []*AstTestCase {
 	testcases := make([]*AstTestCase, 0)
 	for _, test := range t.Tests {
+		test.Name = t.Name + "__" + test.Name
 		testcases = append(testcases, test.GetTestCases()...)
 	}
 	for _, group := range t.Groups {
