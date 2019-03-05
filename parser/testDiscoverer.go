@@ -7,21 +7,21 @@ type TestDiscoverer interface {
 	TestCmd() string
 	TestList() []string
 	IsValidTest(string) bool
-	Clone() TestDiscoverer
 }
 
-var validTestDiscoverers = make(map[string]TestDiscoverer)
+var validTestDiscoverers = make(map[string]func() TestDiscoverer)
 
 func GetTestDiscoverer(key string) TestDiscoverer {
 	if v, ok := validTestDiscoverers[key]; ok {
-		return v.Clone()
+		return v()
 	}
 	return nil
 }
 
-func RegisterTestDiscoverer(d TestDiscoverer) {
-	if _, ok := validTestDiscoverers[d.Name()]; ok {
-		panic("testDiscoverer " + d.Name() + " has been registered!")
+func RegisterTestDiscoverer(d func() TestDiscoverer) {
+	inst := d()
+	if _, ok := validTestDiscoverers[inst.Name()]; ok {
+		panic("testDiscoverer " + inst.Name() + " has been registered!")
 	}
-	validTestDiscoverers[d.Name()] = d
+	validTestDiscoverers[inst.Name()] = d
 }

@@ -93,23 +93,11 @@ func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	return ok
 }
 
-func (d *uvmDiscoverer) Clone() parser.TestDiscoverer {
-	inst := new(uvmDiscoverer)
-	inst.testDir = d.testDir
-	if d.tests != nil {
-		inst.tests = make(map[string]interface{})
-		for k, v := range d.tests {
-			inst.tests[k] = v
-		}
-	}
-	return inst
-}
-
 func newUvmDiscoverer() parser.TestDiscoverer {
 	inst := new(uvmDiscoverer)
 	return inst
 }
 
 func init() {
-	parser.RegisterTestDiscoverer(newUvmDiscoverer())
+	parser.RegisterTestDiscoverer(newUvmDiscoverer)
 }
