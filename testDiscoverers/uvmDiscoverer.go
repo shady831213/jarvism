@@ -2,7 +2,7 @@ package testDiscoverers
 
 import (
 	"github.com/shady831213/jarvisSim"
-	"github.com/shady831213/jarvisSim/parser"
+	"github.com/shady831213/jarvisSim/ast"
 	"github.com/shady831213/jarvisSim/utils"
 	"os"
 	"path"
@@ -17,7 +17,7 @@ type uvmDiscoverer struct {
 
 func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	//AstParse tests
-	if err := parser.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) error {
+	if err := ast.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) error {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
 			return err
@@ -29,7 +29,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 		d.testDir = testDir
 		return nil
 	}); err != nil {
-		return parser.AstError("test_dir of "+d.Name(), err)
+		return ast.AstError("test_dir of "+d.Name(), err)
 	}
 	//use default
 	if d.testDir == "" {
@@ -40,7 +40,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 
 func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := map[string]interface{}{"test_dir": nil}
-	if !parser.CheckKeyWord(s, keywords) {
+	if !ast.CheckKeyWord(s, keywords) {
 		return false, utils.KeyOfStringMap(keywords), "Error in " + d.Name() + ":"
 	}
 	return true, nil, ""
@@ -93,11 +93,11 @@ func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	return ok
 }
 
-func newUvmDiscoverer() parser.TestDiscoverer {
+func newUvmDiscoverer() ast.TestDiscoverer {
 	inst := new(uvmDiscoverer)
 	return inst
 }
 
 func init() {
-	parser.RegisterTestDiscoverer(newUvmDiscoverer)
+	ast.RegisterTestDiscoverer(newUvmDiscoverer)
 }

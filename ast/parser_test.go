@@ -1,7 +1,7 @@
-package parser_test
+package ast_test
 
 import (
-	"github.com/shady831213/jarvisSim/parser"
+	"github.com/shady831213/jarvisSim/ast"
 	_ "github.com/shady831213/jarvisSim/simulators"
 	_ "github.com/shady831213/jarvisSim/testDiscoverers"
 	"github.com/shady831213/jarvisSim/utils"
@@ -14,7 +14,7 @@ import (
 )
 
 func TestLex(t *testing.T) {
-	cfg, err := parser.Lex("testFiles/build.yaml")
+	cfg, err := ast.Lex("testFiles/build.yaml")
 	if err != nil {
 		t.Error(err)
 	}
@@ -22,21 +22,21 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	parser.SetRand(rand.New(rand.NewSource(1)))
-	cfg, err := parser.Lex("testFiles/build.yaml")
+	ast.SetRand(rand.New(rand.NewSource(1)))
+	cfg, err := ast.Lex("testFiles/build.yaml")
 	if err != nil {
 		t.Error(err)
 	}
-	err = parser.Parse(cfg)
+	err = ast.Parse(cfg)
 	if err != nil {
 		t.Error(err)
 	}
 	expect := utils.ReadFile("testFiles/build.ast")
-	result := parser.GetJvsAstRoot().GetHierString(0)
+	result := ast.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
 
 	if result != expect {
-		t.Log(parser.GetJvsAstRoot().GetHierString(0))
+		t.Log(ast.GetJvsAstRoot().GetHierString(0))
 		utils.WriteNewFile("testFiles/build.ast.result", result)
 		t.Error("not equal! please diff testFiles/build.ast and estFiles/build.ast.result")
 		return

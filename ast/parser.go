@@ -1,4 +1,4 @@
-package parser
+package ast
 
 import (
 	"github.com/shady831213/jarvisSim"

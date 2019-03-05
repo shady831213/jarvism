@@ -3,7 +3,7 @@ package testDiscoverers
 import (
 	"fmt"
 	"github.com/shady831213/jarvisSim"
-	"github.com/shady831213/jarvisSim/parser"
+	"github.com/shady831213/jarvisSim/ast"
 	_ "github.com/shady831213/jarvisSim/simulators"
 	"math/rand"
 	"os"
@@ -12,17 +12,17 @@ import (
 )
 
 func TestUvmDiscoverer(t *testing.T) {
-	parser.SetRand(rand.New(rand.NewSource(1)))
-	cfg, err := parser.Lex("testFiles/test_discover.yaml")
+	ast.SetRand(rand.New(rand.NewSource(1)))
+	cfg, err := ast.Lex("testFiles/test_discover.yaml")
 	if err != nil {
 		t.Error(err)
 	}
-	err = parser.Parse(cfg)
+	err = ast.Parse(cfg)
 	if err != nil {
 		t.Error(err)
 	}
-	build1 := parser.GetJvsAstRoot().GetBuild("build1")
-	build2 := parser.GetJvsAstRoot().GetBuild("build2")
+	build1 := ast.GetJvsAstRoot().GetBuild("build1")
+	build2 := ast.GetJvsAstRoot().GetBuild("build2")
 	compare(t, "discoverer of build1 name", "uvm_test", build1.GetTestDiscoverer().Name())
 	compare(t, "testDir of build1 name", path.Join(jarivsSim.TestDiscoverersPath(), "testFiles", "build1_testcases"), build1.GetTestDiscoverer().TestDir())
 	compare(t, "testList of build1 name", fmt.Sprint([]string{"test2"}), fmt.Sprint(build1.GetTestDiscoverer().TestList()))
