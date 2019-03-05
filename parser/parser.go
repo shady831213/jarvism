@@ -36,7 +36,7 @@ func LoadBuildInOptions(configFile string) error {
 	if err != nil {
 		panic(err)
 	}
-	if err := CfgToastItemRequired(cfg, "options", func(item interface{}) error {
+	if err := CfgToAstItemRequired(cfg, "options", func(item interface{}) error {
 		for name, option := range item.(map[interface{}]interface{}) {
 			jvsAstRoot.Options[name.(string)] = newAstOption(name.(string))
 			if err := AstParse(jvsAstRoot.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {

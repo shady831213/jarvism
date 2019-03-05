@@ -1,6 +1,3 @@
-env:
-  simulator: "vcs"
-
 builds:
   build1:
     test_discoverer:

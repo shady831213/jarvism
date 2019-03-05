@@ -4,7 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/shady831213/jarvisSim"
 	"github.com/shady831213/jarvisSim/utils"
+	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -50,7 +52,7 @@ func AstParse(parser astParser, cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func CfgToastItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
+func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
 	if item, ok := cfg[key]; ok {
 		flag.Args()
 		return handler(item)
@@ -58,7 +60,7 @@ func CfgToastItemRequired(cfg map[interface{}]interface{}, key string, handler f
 	return errors.New("not define " + key + "!")
 }
 
-func CfgToastItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
+func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
 	if item, ok := cfg[key]; ok {
 		return handler(item)
 	}
@@ -173,7 +175,7 @@ func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
 
 func (items *astParseItem) Parse(cfg map[interface{}]interface{}) error {
 	for k, _ := range items.Items {
-		if err := CfgToastItemOptional(cfg, k, func(i interface{}) error {
+		if err := CfgToAstItemOptional(cfg, k, func(i interface{}) error {
 			items.Items[k] = newAstItem(i)
 			return nil
 		}); err != nil {
@@ -275,7 +277,7 @@ func (t *AstOption) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToastItemOptional(cfg, "on_action", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) error {
 		if t.WithValue != nil {
 			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
 		}
@@ -284,7 +286,7 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return AstError("on_action of "+t.Name, err)
 	}
-	if err := CfgToastItemOptional(cfg, "with_value_action", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "with_value_action", func(item interface{}) error {
 		if t.On != nil {
 			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
 		}
@@ -327,7 +329,7 @@ type astEnv struct {
 }
 
 func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"simulator": nil}
+	keywords := map[string]interface{}{"simulator": nil, "work_dir": nil}
 	if !CheckKeyWord(s, keywords) {
 		return false, utils.KeyOfStringMap(keywords), "Error in Env:"
 	}
@@ -335,7 +337,7 @@ func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToastItemRequired(cfg, "simulator", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) error {
 		simulator, ok := validSimulators[item.(string)]
 		if !ok {
 			errMsg := "Error in Env: simulator " + item.(string) + " is invalid! valid simulator are [ "
@@ -351,7 +353,24 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 		setSimulator(simulator)
 		return nil
 	}); err != nil {
-		return AstError("Env", err)
+		return AstError("simulator in Env", err)
+	}
+	//use default
+	if GetSimulator() == nil {
+		simulator, _ := validSimulators["vcs"]
+		setSimulator(simulator)
+	}
+
+	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) error {
+		return SetWorkDir(item.(string))
+	}); err != nil {
+		return AstError("work_dir in Env", err)
+	}
+	//use default
+	if GetWorkDir() == "" {
+		if err := SetWorkDir(path.Join(jarivsSim.GetPrjHome(), "work")); err != nil {
+			return AstError("work_dir in Env", err)
+		}
 	}
 	return nil
 }
@@ -361,6 +380,9 @@ func (t *astEnv) GetHierString(space int) string {
 	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
 			fmt.Sprintln(GetSimulator().Name())
+	}) + astHierFmt("WorkDir:", nextSpace, func() string {
+		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
+			fmt.Sprintln(GetWorkDir())
 	})
 }
 
@@ -388,7 +410,7 @@ func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToastItemRequired(cfg, "type", func(item interface{}) error {
+	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) error {
 		if t.discoverer = GetTestDiscoverer(item.(string)); t.discoverer == nil {
 			errMsg := "Error in test_discoverer: type " + item.(string) + " is invalid! valid test_discoverer are [ "
 			for k, _ := range validTestDiscoverers {
@@ -401,7 +423,7 @@ func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return AstError("test_discoverer", err)
 	}
-	if err := CfgToastItemOptional(cfg, "attr", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "attr", func(item interface{}) error {
 		t.attr = item.(map[interface{}]interface{})
 		return nil
 	}); err != nil {
@@ -461,7 +483,7 @@ func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astBuild) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToastItemOptional(cfg, "test_discoverer", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "test_discoverer", func(item interface{}) error {
 		t.testDiscoverer = new(astTestDiscoverer)
 		return AstParse(t.testDiscoverer, item.(map[interface{}]interface{}))
 	}); err != nil {
@@ -548,7 +570,7 @@ func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToastItemOptional(cfg, "args", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) error {
 		t.args = make([]string, 0)
 		for _, arg := range (item.([]interface{})) {
 			t.args = append(t.args, arg.(string))
@@ -713,14 +735,14 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	if err := t.astTest.Parse(cfg); err != nil {
 		return err
 	}
-	if err := CfgToastItemOptional(cfg, "build", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) error {
 		t.buildName = item.(string)
 		return nil
 	}); err != nil {
 		return AstError("group "+t.Name, err)
 	}
 	//AstParse tests
-	if err := CfgToastItemOptional(cfg, "tests", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) error {
 		t.Tests = make(map[string]*AstTestCase)
 		for name, test := range item.(map[interface{}]interface{}) {
 			t.Tests[name.(string)] = newAstTestCase(name.(string))
@@ -734,7 +756,7 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	}
 
 	//AstParse groups
-	if err := CfgToastItemOptional(cfg, "groups", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
 		t.Groups = make(map[string]*astGroup)
 		for _, name := range item.([]interface{}) {
 			if _, ok := t.Groups[name.(string)]; ok {
@@ -847,7 +869,6 @@ type astRoot struct {
 
 func newAstRoot() *astRoot {
 	inst := new(astRoot)
-	inst.Env = new(astEnv)
 	inst.Builds = make(map[string]*astBuild)
 	inst.Groups = make(map[string]*astGroup)
 	inst.Options = make(map[string]*AstOption)
@@ -874,13 +895,24 @@ func (t *astRoot) KeywordsChecker(s string) (bool, []string, string) {
 
 func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	//parsing Env
-	if err := CfgToastItemRequired(cfg, "env", func(item interface{}) error {
-		return AstParse(t.Env, item.(map[interface{}]interface{}))
+	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) error {
+		t.Env = new(astEnv)
+		if item != nil {
+			return AstParse(t.Env, item.(map[interface{}]interface{}))
+		}
+		return AstParse(t.Env, make(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
+	//use default
+	if t.Env == nil {
+		t.Env = new(astEnv)
+		if err := AstParse(t.Env, make(map[interface{}]interface{})); err != nil {
+			return err
+		}
+	}
 	//parsing builds
-	if err := CfgToastItemRequired(cfg, "builds", func(item interface{}) error {
+	if err := CfgToAstItemRequired(cfg, "builds", func(item interface{}) error {
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
 			if build != nil {
@@ -898,7 +930,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 		return err
 	}
 	//parsing options
-	if err := CfgToastItemOptional(cfg, "options", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "options", func(item interface{}) error {
 		for name, option := range item.(map[interface{}]interface{}) {
 			t.Options[name.(string)] = newAstOption(name.(string))
 			if err := AstParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
@@ -911,7 +943,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	}
 
 	//parsing groups
-	if err := CfgToastItemOptional(cfg, "groups", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
 		for name, group := range item.(map[interface{}]interface{}) {
 			t.Groups[name.(string)] = newAstGroup(name.(string))
 			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {

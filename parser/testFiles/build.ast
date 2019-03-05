@@ -5,6 +5,10 @@ Env:
 Simulator:
 vcs
 
+-----------------
+WorkDir:
+/home/yli/work/jarivsSim/parser/testFiles/work
+
 
 -------------------
 Options:

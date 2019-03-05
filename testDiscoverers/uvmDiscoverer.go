@@ -17,7 +17,7 @@ type uvmDiscoverer struct {
 
 func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	//AstParse tests
-	if err := parser.CfgToastItemOptional(cfg, "test_dir", func(item interface{}) error {
+	if err := parser.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) error {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
 			return err

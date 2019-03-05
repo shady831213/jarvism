@@ -13,7 +13,6 @@ import (
 
 func TestUvmDiscoverer(t *testing.T) {
 	parser.SetRand(rand.New(rand.NewSource(1)))
-	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsSim.TestDiscoverersPath(), "testFiles"))
 	cfg, err := parser.Lex("testFiles/test_discover.yaml")
 	if err != nil {
 		t.Error(err)
@@ -36,4 +35,8 @@ func compare(t *testing.T, fields, exp, res string) {
 	if exp != res {
 		t.Error(fields + " expect " + exp + " but get " + res + "!")
 	}
+}
+
+func init() {
+	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsSim.TestDiscoverersPath(), "testFiles"))
 }
