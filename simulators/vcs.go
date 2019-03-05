@@ -2,7 +2,7 @@ package simulators
 
 import (
 	"github.com/shady831213/jarvisSim"
-	"github.com/shady831213/jarvisSim/ast"
+	"github.com/shady831213/jarvisSim/core"
 	"path"
 )
 
@@ -29,11 +29,11 @@ func (s *vcs) SeedOption() string {
 	return "+ntb_random_seed="
 }
 
-func newVcs() ast.Simulator {
+func newVcs() core.Simulator {
 	inst := new(vcs)
 	return inst
 }
 
 func init() {
-	ast.RegisterSimulator(newVcs())
+	core.RegisterSimulator(newVcs())
 }
