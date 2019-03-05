@@ -1,0 +1,10 @@
+env:
+  simulator: "vcs"
+
+builds:
+  build1:
+    test_discoverer:
+      type : uvm_test
+      attr:
+        test_dir: $PRJ_HOME/build1_testcases
+  build2:

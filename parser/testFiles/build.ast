@@ -228,6 +228,13 @@ sim_option:
 &{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
 
 
+----------------
+test_discoverer:
+uvm_test
+
+----------------
+discover_attr:
+
 ------------------
 build2:
 ----------------
@@ -254,6 +261,13 @@ pre_sim_option:
 sim_option:
 &{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
 
+
+----------------
+test_discoverer:
+uvm_test
+
+----------------
+discover_attr:
 
 
 -------------------

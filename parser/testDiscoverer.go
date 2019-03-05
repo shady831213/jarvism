@@ -5,6 +5,8 @@ type TestDiscoverer interface {
 	Name() string
 	TestDir() string
 	TestCmd() string
+	TestList() []string
+	IsValidTest(string) bool
 }
 
 var validTestDiscoverers = make(map[string]TestDiscoverer)
