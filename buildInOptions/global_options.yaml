@@ -6,5 +6,5 @@ options:
 
   compile_args:
     with_value_action:
-      sim_option:
-        - $complie_args
+      compile_option:
+        - $compile_args

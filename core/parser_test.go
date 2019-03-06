@@ -5,8 +5,6 @@ import (
 	_ "github.com/shady831213/jarvisSim/simulators"
 	_ "github.com/shady831213/jarvisSim/testDiscoverers"
 	"github.com/shady831213/jarvisSim/utils"
-	"math/rand"
-	"os"
 	"regexp"
 	"strings"
 	"syscall"
@@ -22,15 +20,6 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	core.SetRand(rand.New(rand.NewSource(1)))
-	cfg, err := core.Lex("testFiles/build.yaml")
-	if err != nil {
-		t.Error(err)
-	}
-	err = core.Parse(cfg)
-	if err != nil {
-		t.Error(err)
-	}
 	expect := utils.ReadFile("testFiles/build.ast")
 	result := core.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
@@ -52,8 +41,4 @@ func dealAstResult(result string) string {
 	_result = regexp.MustCompile(`\[[0-9]+\]`).ReplaceAllString(_result, "[seeds]")
 	return _result
 
-}
-
-func init() {
-	os.Setenv("JVS_PRJ_HOME", "testFiles")
 }

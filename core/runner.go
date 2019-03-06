@@ -1,18 +1,20 @@
 package core
 
+import "io"
 
 type Runner interface {
 	Name() string
-	Prepare() error
-	Compile() error
-	RunTest(*AstTestCase) error
-	RunGroup(*astGroup) error
+	PrepareBuild(*AstBuild, io.Writer) error
+	Build(*AstBuild, io.Writer) error
+	PrepareTest(*AstTestCase, io.Writer) error
+	RunTest(*AstTestCase, io.Writer) error
 }
 
 var runner Runner
 var validRunners = make(map[string]Runner)
 
-func setRunner(r Runner) {
+//Fix Me: export for test
+func SetRunner(r Runner) {
 	runner = r
 }
 

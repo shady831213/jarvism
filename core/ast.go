@@ -453,24 +453,24 @@ func (t *astTestDiscoverer) GetHierString(space int) string {
 	})
 }
 
-type astBuild struct {
+type AstBuild struct {
 	astParseItem
 	testDiscoverer *astTestDiscoverer
 	Name           string
 }
 
-func newAstBuild(name string) *astBuild {
-	inst := new(astBuild)
+func newAstBuild(name string) *AstBuild {
+	inst := new(AstBuild)
 	inst.Name = name
 	inst.astParseItem.init()
 	return inst
 }
 
-func (t *astBuild) GetTestDiscoverer() TestDiscoverer {
+func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 	return t.testDiscoverer.discoverer
 }
 
-func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
+func (t *AstBuild) KeywordsChecker(s string) (bool, []string, string) {
 	if ok, buildKeywords, _ := t.astParseItem.KeywordsChecker(s); !ok {
 		localKeyWords := map[string]interface{}{"test_discoverer": nil}
 		if CheckKeyWord(s, localKeyWords) {
@@ -482,7 +482,7 @@ func (t *astBuild) KeywordsChecker(s string) (bool, []string, string) {
 	return true, nil, ""
 }
 
-func (t *astBuild) Parse(cfg map[interface{}]interface{}) error {
+func (t *AstBuild) Parse(cfg map[interface{}]interface{}) error {
 	if err := CfgToAstItemOptional(cfg, "test_discoverer", func(item interface{}) error {
 		t.testDiscoverer = new(astTestDiscoverer)
 		return AstParse(t.testDiscoverer, item.(map[interface{}]interface{}))
@@ -499,7 +499,7 @@ func (t *astBuild) Parse(cfg map[interface{}]interface{}) error {
 	return t.astParseItem.Parse(cfg)
 }
 
-func (t *astBuild) GetHierString(space int) string {
+func (t *AstBuild) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
 		return t.astParseItem.GetHierString(nextSpace)
@@ -519,7 +519,7 @@ type astTestOpts interface {
 
 type astTest struct {
 	Name       string
-	Build      *astBuild
+	Build      *AstBuild
 	OptionArgs map[string]JvsOptionForTest
 	args       []string
 	parent     astTestOpts
@@ -552,7 +552,7 @@ func (t *astTest) GetOptionArgs() map[string]JvsOptionForTest {
 	return t.OptionArgs
 }
 
-func (t *astTest) GetBuild() *astBuild {
+func (t *astTest) GetBuild() *AstBuild {
 	if t.Build != nil {
 		return t.Build
 	}
@@ -673,6 +673,11 @@ func (t *AstTestCase) Link() error {
 	utils.ForeachStringKeysInOrder(keys, func(i string) {
 		args[i].TestHandler(t)
 	})
+
+	//link name
+	if t.parent != nil {
+		t.Name = t.parent.GetName() + "__" + t.Name
+	}
 	return nil
 }
 
@@ -704,7 +709,7 @@ type astGroup struct {
 	Groups    map[string]*astGroup
 }
 
-func newAstGroup(name string) *astGroup {
+func NewAstGroup(name string) *astGroup {
 	inst := new(astGroup)
 	inst.init(name)
 	inst.buildName = ""
@@ -714,7 +719,6 @@ func newAstGroup(name string) *astGroup {
 func (t *astGroup) GetTestCases() []*AstTestCase {
 	testcases := make([]*AstTestCase, 0)
 	for _, test := range t.Tests {
-		test.Name = t.Name + "__" + test.Name
 		testcases = append(testcases, test.GetTestCases()...)
 	}
 	for _, group := range t.Groups {
@@ -865,19 +869,19 @@ func (t *astGroup) GetHierString(space int) string {
 type astRoot struct {
 	Env     *astEnv
 	Options map[string]*AstOption
-	Builds  map[string]*astBuild
+	Builds  map[string]*AstBuild
 	Groups  map[string]*astGroup
 }
 
 func newAstRoot() *astRoot {
 	inst := new(astRoot)
-	inst.Builds = make(map[string]*astBuild)
+	inst.Builds = make(map[string]*AstBuild)
 	inst.Groups = make(map[string]*astGroup)
 	inst.Options = make(map[string]*AstOption)
 	return inst
 }
 
-func (t *astRoot) GetBuild(name string) *astBuild {
+func (t *astRoot) GetBuild(name string) *AstBuild {
 	if build, ok := t.Builds[name]; ok {
 		return build
 	}
@@ -947,7 +951,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	//parsing groups
 	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
 		for name, group := range item.(map[interface{}]interface{}) {
-			t.Groups[name.(string)] = newAstGroup(name.(string))
+			t.Groups[name.(string)] = NewAstGroup(name.(string))
 			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
 				return err
 			}
