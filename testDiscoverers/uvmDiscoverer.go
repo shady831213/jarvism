@@ -38,7 +38,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)  {
+func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("test_dir")
 	if !core.CheckKeyWord(s, keywords) {
@@ -90,6 +90,7 @@ func (d *uvmDiscoverer) filter(path string, f os.FileInfo, err error) error {
 }
 
 func (d *uvmDiscoverer) IsValidTest(test string) bool {
+	d.TestList()
 	_, ok := d.tests[test]
 	return ok
 }

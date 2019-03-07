@@ -694,7 +694,12 @@ func (t *AstTestCase) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
+	//set build and check test
 	t.Build = t.GetBuild()
+	if !t.Build.GetTestDiscoverer().IsValidTest(t.Name) {
+		return errors.New(utils.Red("Link Error: "+t.Name+" is not valid test of build"+t.Build.Name) + "\n" +
+			"valid tests:\n" + strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
+	}
 
 	//get options sim_options in order
 	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
