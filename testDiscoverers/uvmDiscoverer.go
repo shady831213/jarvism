@@ -38,10 +38,11 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"test_dir": nil}
+func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)  {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("test_dir")
 	if !core.CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), "Error in " + d.Name() + ":"
+		return false, keywords, "Error in " + d.Name() + ":"
 	}
 	return true, nil, ""
 }

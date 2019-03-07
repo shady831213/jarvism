@@ -15,7 +15,7 @@ import (
 type astParser interface {
 	//pass1:top-down AstParse
 	Parse(map[interface{}]interface{}) error
-	KeywordsChecker(string) (bool, []string, string)
+	KeywordsChecker(string) (bool, *utils.StringMapSet, string)
 }
 
 type astLinker interface {
@@ -28,8 +28,8 @@ func AstError(item string, err error) error {
 	return errors.New("Error in " + item + ": " + err.Error())
 }
 
-func CheckKeyWord(s string, keyWords map[string]interface{}) bool {
-	_, ok := keyWords[s]
+func CheckKeyWord(s string, keyWords *utils.StringMapSet) bool {
+	_, ok := keyWords.Get(s)
 	return ok
 }
 
@@ -177,13 +177,13 @@ type astParseItem struct {
 	astItems
 }
 
-func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := make(map[string]interface{})
+func (items *astParseItem) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
 	for k, _ := range items.items {
-		keywords[k] = nil
+		keywords.AddKey(k)
 	}
 	if !CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), ""
+		return false, keywords, ""
 	}
 	return true, nil, ""
 }
@@ -278,10 +278,11 @@ func (t *AstOption) TestHandler(test *AstTestCase) {
 	test.Cat(&t.WithValue.astItems)
 }
 
-func (t *AstOption) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"on_action": nil, "with_value_action": nil}
+func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("on_action", "with_value_action")
 	if !CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, keywords, "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
@@ -338,10 +339,11 @@ func (t *AstOption) GetHierString(space int) string {
 type astEnv struct {
 }
 
-func (t *astEnv) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"simulator": nil, "work_dir": nil}
+func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("simulator", "work_dir")
 	if !CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), "Error in Env:"
+		return false, keywords, "Error in Env:"
 	}
 	return true, nil, ""
 }
@@ -411,10 +413,11 @@ func newAstTestDiscoverer() *astTestDiscoverer {
 	return inst
 }
 
-func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"type": nil, "attr": nil}
+func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("type", "attr")
 	if !CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), "Error in test_discoverer:"
+		return false, keywords, "Error in test_discoverer:"
 	}
 	return true, nil, ""
 }
@@ -487,13 +490,14 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 	return t.testDiscoverer.discoverer
 }
 
-func (t *AstBuild) KeywordsChecker(s string) (bool, []string, string) {
+func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	if ok, buildKeywords, _ := t.astParseItem.KeywordsChecker(s); !ok {
-		localKeyWords := map[string]interface{}{"test_discoverer": nil}
-		if CheckKeyWord(s, localKeyWords) {
+		keywords := utils.NewStringMapSet()
+		keywords.AddKey("test_discoverer")
+		if CheckKeyWord(s, keywords) {
 			return true, nil, ""
 		}
-		return false, append(buildKeywords, utils.KeyOfStringMap(localKeyWords)...), "Error in build " + t.Name + ":"
+		return false, utils.StringMapSetUnion(buildKeywords, keywords), "Error in build " + t.Name + ":"
 	}
 
 	return true, nil, ""
@@ -531,21 +535,21 @@ type astTestOpts interface {
 	runTimeOpts
 	SetParent(parent astTestOpts)
 	//bottom-up search
-	GetOptionArgs() map[string]JvsOptionForTest
+	GetOptionArgs() *utils.StringMapSet
 }
 
 type astTest struct {
 	Name       string
 	buildName  string
 	Build      *AstBuild
-	OptionArgs map[string]JvsOptionForTest
+	OptionArgs *utils.StringMapSet
 	args       []string
 	parent     astTestOpts
 }
 
 func (t *astTest) init(name string) {
 	t.Name = name
-	t.OptionArgs = make(map[string]JvsOptionForTest)
+	t.OptionArgs = utils.NewStringMapSet()
 }
 
 func (t *astTest) GetName() string {
@@ -556,16 +560,9 @@ func (t *astTest) SetParent(parent astTestOpts) {
 	t.parent = parent
 }
 
-func (t *astTest) GetOptionArgs() map[string]JvsOptionForTest {
+func (t *astTest) GetOptionArgs() *utils.StringMapSet {
 	if t.parent != nil {
-		options := make(map[string]JvsOptionForTest)
-		for k, v := range t.parent.GetOptionArgs() {
-			options[k] = v
-		}
-		for k, v := range t.OptionArgs {
-			options[k] = v
-		}
-		return options
+		return utils.StringMapSetUnion(t.parent.GetOptionArgs(), t.OptionArgs)
 	}
 	return t.OptionArgs
 }
@@ -580,10 +577,11 @@ func (t *astTest) GetBuild() *AstBuild {
 	return nil
 }
 
-func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"build": nil, "args": nil}
+func (t *astTest) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("build", "args")
 	if !CheckKeyWord(s, keywords) {
-		return false, utils.KeyOfStringMap(keywords), "Error in " + t.Name + ":"
+		return false, keywords, "Error in " + t.Name + ":"
 	}
 	return true, nil, ""
 }
@@ -628,7 +626,7 @@ func (t *astTest) Link() error {
 		if !ok {
 			return nil
 		}
-		t.OptionArgs[v.GetName()] = v
+		t.OptionArgs.Add(v.GetName(), v)
 
 	}
 	return nil
@@ -644,18 +642,13 @@ func (t *astTest) GetHierString(space int) string {
 	}) +
 		astHierFmt("OptionArgs:", nextSpace, func() string {
 			s := ""
-			keys := make([]string, 0)
-			args := t.GetOptionArgs()
-			for k := range args {
-				keys = append(keys, k)
-			}
-			utils.ForeachStringKeysInOrder(keys, func(i string) {
-				if v, ok := args[i].(*AstOption); ok {
+			for _, arg := range t.GetOptionArgs().SortedList() {
+				if v, ok := arg.(*AstOption); ok {
 					s += v.GetHierString(nextSpace + 1)
 				} else {
-					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + args[i].GetName())
+					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + arg.(JvsOptionForTest).GetName())
 				}
-			})
+			}
 			return s
 		})
 }
@@ -693,15 +686,9 @@ func (t *AstTestCase) Link() error {
 	t.Build = t.GetBuild()
 
 	//get options sim_options in order
-	keys := make([]string, 0)
-	args := t.GetOptionArgs()
-	for k := range args {
-		keys = append(keys, k)
+	for _, arg := range t.GetOptionArgs().SortedList() {
+		arg.(JvsOptionForTest).TestHandler(t)
 	}
-	utils.ForeachStringKeysInOrder(keys, func(i string) {
-		args[i].TestHandler(t)
-	})
-
 	//link name
 	if t.parent != nil {
 		t.Name = t.parent.GetName() + "__" + t.Name
@@ -754,11 +741,12 @@ func (t *astGroup) GetTestCases() []*AstTestCase {
 	return testcases
 }
 
-func (t *astGroup) KeywordsChecker(s string) (bool, []string, string) {
+func (t *astGroup) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	if ok, testKeywords, _ := t.astTest.KeywordsChecker(s); !ok {
-		groupKeywords := map[string]interface{}{"tests": nil, "groups": nil}
-		if !CheckKeyWord(s, groupKeywords) {
-			return false, append(testKeywords, utils.KeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
+		keywords := utils.NewStringMapSet()
+		keywords.AddKey("tests", "groups")
+		if !CheckKeyWord(s, keywords) {
+			return false, utils.StringMapSetUnion(testKeywords, keywords), "Error in group " + t.Name + ":"
 		}
 	}
 	return true, nil, ""
@@ -908,7 +896,7 @@ func (t *astRoot) GetGroup(name string) *astGroup {
 	return nil
 }
 
-func (t *astRoot) KeywordsChecker(s string) (bool, []string, string) {
+func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	return true, nil, ""
 }
 
