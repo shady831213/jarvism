@@ -2,7 +2,6 @@ package core
 
 import (
 	"container/list"
-	"errors"
 	"fmt"
 	"github.com/shady831213/jarvisSim/utils"
 	"io"
@@ -110,36 +109,6 @@ type runTime struct {
 	done      chan bool
 }
 
-func (r *runTime) init1(name string) {
-	r.Name = name
-	r.runFlow = make(map[string]*runFlow)
-	r.timeStamp = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
-	r.flowWg = sync.WaitGroup{}
-	r.done = make(chan bool)
-}
-
-func (r *runTime) initOnlyBuild(build *AstBuild) {
-	r.init1(build.Name)
-	r.cmdStdout = os.Stdout
-	build.Name = r.timeStamp + "__" + build.Name
-	r.runFlow[build.Name] = newRunFlow(build, &r.cmdStdout)
-}
-
-func (r *runTime) initWithGroup(group *astGroup) {
-	r.init1(group.GetName())
-	testcases := group.GetTestCases()
-	for _, test := range testcases {
-		r.initSubTest(test)
-	}
-}
-
-func (r *runTime) initWithTest(test *AstTestCase) {
-	r.init1(test.GetName())
-	if r.initSubTest(test) == 1 {
-		r.cmdStdout = os.Stdout
-	}
-}
-
 func (r *runTime) initSubTest(test *AstTestCase) int {
 	testcases := test.GetTestCases()
 	if _, ok := r.runFlow[test.GetBuild().Name]; !ok {
@@ -151,6 +120,28 @@ func (r *runTime) initSubTest(test *AstTestCase) int {
 		r.runFlow[test.GetBuild().Name].PushBack(t)
 	}
 	return len(testcases)
+}
+
+func (r *runTime) init(group *astGroup) {
+	r.Name = group.GetName()
+	r.runFlow = make(map[string]*runFlow)
+	r.timeStamp = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
+	r.flowWg = sync.WaitGroup{}
+	r.done = make(chan bool)
+
+	testcases := group.GetTestCases()
+	testCnt := 0
+	for _, test := range testcases {
+		testCnt += r.initSubTest(test)
+	}
+	//build only
+	if testCnt == 0 {
+		group.Build.Name = r.timeStamp + "__" + group.Build.Name
+		r.runFlow[group.GetBuild().Name] = newRunFlow(group.GetBuild(), &r.cmdStdout)
+	}
+	if testCnt <= 1 {
+		r.cmdStdout = os.Stdout
+	}
 }
 
 func (r *runTime) run() {
@@ -166,51 +157,41 @@ func (r *runTime) run() {
 	r.flowWg.Wait()
 }
 
-func RunGroup(group *astGroup) {
+func convertArgs(args []string) []interface{} {
+	_args := make([]interface{}, 0)
+	if args != nil {
+		for _, a := range args {
+			_args = append(_args, a)
+		}
+	}
+	return _args
+}
+
+func run(cfg map[interface{}]interface{}) error {
+	group := newAstGroup("Jarvis")
+	if err := group.Parse(cfg); err != nil {
+		return err
+	}
+	if err := group.Link(); err != nil {
+		return err
+	}
 	r := new(runTime)
-	r.initWithGroup(group)
+	r.init(group)
 	r.run()
+	return nil
+}
+
+func RunGroup(group *astGroup, args []string) error {
+	return run(map[interface{}]interface{}{"args": convertArgs(args), "groups": []interface{}{group.Name}})
 }
 
 func RunTest(testName, buildName string, args []string) error {
-	test := newAstTestCase(testName)
-	if test.Build = GetJvsAstRoot().GetBuild(buildName); test.Build == nil {
-		return errors.New(utils.Red("Error: no valid build " + buildName + "!"))
-	}
-	_args := make([]interface{}, len(args))
-	for i := range args {
-		_args[i] = args[i]
-	}
-	if err := test.Parse(map[interface{}]interface{}{"args": _args}); err != nil {
-		return err
-	}
-	if err := test.Link(); err != nil {
-		return err
-	}
-	r := new(runTime)
-	r.initWithTest(test)
-	r.run()
-	return nil
+	return run(map[interface{}]interface{}{"build": buildName,
+		"args":  convertArgs(args),
+		"tests": map[interface{}]interface{}{testName: nil}})
 }
 
 func RunOnlyBuild(buildName string, args []string) error {
-	if build := GetJvsAstRoot().GetBuild(buildName); build == nil {
-		return errors.New(utils.Red("Error: no valid build " + buildName + "!"))
-	}
-	//for _, arg := range args {
-	//	opt, err := GetOption(arg)
-	//	if err != nil {
-	//		return errors.New(utils.Red("Error :" + err.Error()))
-	//	}
-	//	v, ok := opt.Clone().(JvsOptionForTest)
-	//	if !ok {
-	//		return nil
-	//	}
-	//	if v.IsCompileOption() {
-	//		return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
-	//	}
-	//	t.OptionArgs[v.GetName()] = v
-	//
-	//}
-	return nil
+	return run(map[interface{}]interface{}{"build": buildName,
+		"args": convertArgs(args)})
 }

@@ -40,8 +40,13 @@ func (r *testRunner) RunTest(testCase *core.AstTestCase, cmdStdout *io.Writer) e
 
 func TestGroupTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
-	core.RunGroup(core.GetJvsAstRoot().GetGroup("group1"))
-	core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"))
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group1"), nil); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"), []string{}); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSingleTest(t *testing.T) {
@@ -54,6 +59,13 @@ func TestSingleTest(t *testing.T) {
 func TestSingleRepeatTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
 	if err := core.RunTest("test1", "build1", []string{"-repeat 10"}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRunOnlyBuild(t *testing.T) {
+	core.SetRunner(new(testRunner))
+	if err := core.RunOnlyBuild("build1", []string{"-has_pre_phase jarvis"}); err != nil {
 		t.Error(err)
 	}
 }

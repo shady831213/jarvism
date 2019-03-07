@@ -560,6 +560,7 @@ type astTest struct {
 
 func (t *astTest) init(name string) {
 	t.Name = name
+	t.args = make([]string, 0)
 	t.OptionArgs = utils.NewStringMapSet()
 }
 
@@ -605,7 +606,6 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
 		return AstError(t.Name, err)
 	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) error {
-		t.args = make([]string, 0)
 		for _, arg := range (item.([]interface{})) {
 			t.args = append(t.args, arg.(string))
 		}
@@ -779,7 +779,13 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 		t.Tests = make(map[string]*AstTestCase)
 		for name, test := range item.(map[interface{}]interface{}) {
 			t.Tests[name.(string)] = newAstTestCase(name.(string))
-			if err := AstParse(t.Tests[name.(string)], test.(map[interface{}]interface{})); err != nil {
+			if v, ok := test.(map[interface{}]interface{}); ok {
+				if err := AstParse(t.Tests[name.(string)], v); err != nil {
+					return err
+				}
+				continue
+			}
+			if err := AstParse(t.Tests[name.(string)], make(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
