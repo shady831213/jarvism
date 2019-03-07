@@ -206,7 +206,6 @@ func NewAstOptionAction() *AstOptionAction {
 
 type JvsOptionForTest interface {
 	JvsOption
-	IsCompileOption() bool
 	TestHandler(test *AstTestCase)
 }
 
@@ -256,10 +255,6 @@ func (t *AstOption) String() string {
 
 func (t *AstOption) IsBoolFlag() bool {
 	return t.WithValue == nil
-}
-
-func (t *AstOption) IsCompileOption() bool {
-	return t.WithValue != nil && !t.WithValue.IsSimOnly() || t.On != nil && !t.On.IsSimOnly()
 }
 
 func (t *AstOption) Usage() string {
@@ -473,6 +468,13 @@ func newAstBuild(name string) *AstBuild {
 	return inst
 }
 
+func (t *AstBuild) Clone() *AstBuild {
+	inst := newAstBuild(t.Name)
+	inst.astParseItem.Cat(&t.astParseItem.astItems)
+	inst.testDiscoverer = t.testDiscoverer
+	return inst
+}
+
 func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 	return t.testDiscoverer.discoverer
 }
@@ -526,6 +528,7 @@ type astTestOpts interface {
 
 type astTest struct {
 	Name       string
+	buildName  string
 	Build      *AstBuild
 	OptionArgs map[string]JvsOptionForTest
 	args       []string
@@ -570,7 +573,7 @@ func (t *astTest) GetBuild() *AstBuild {
 }
 
 func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
-	keywords := map[string]interface{}{"args": nil}
+	keywords := map[string]interface{}{"build": nil, "args": nil}
 	if !CheckKeyWord(s, keywords) {
 		return false, utils.KeyOfStringMap(keywords), "Error in " + t.Name + ":"
 	}
@@ -578,6 +581,12 @@ func (t *astTest) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) error {
+		t.buildName = item.(string)
+		return nil
+	}); err != nil {
+		return AstError(t.Name, err)
+	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) error {
 		t.args = make([]string, 0)
 		for _, arg := range (item.([]interface{})) {
@@ -592,6 +601,15 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
 
 //because Link is top-down, the last repeated args take effect
 func (t *astTest) Link() error {
+	//link build
+	//builds have been all parsed
+	if t.buildName != "" {
+		build := jvsAstRoot.GetBuild(t.buildName)
+		if build == nil {
+			return errors.New("build " + t.buildName + " of " + t.Name + "is undef!")
+		}
+		t.Build = build
+	}
 	for _, arg := range t.args {
 		//Options have been all parsed
 		opt, err := GetOption(arg)
@@ -601,9 +619,6 @@ func (t *astTest) Link() error {
 		v, ok := opt.Clone().(JvsOptionForTest)
 		if !ok {
 			return nil
-		}
-		if v.IsCompileOption() {
-			return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
 		}
 		t.OptionArgs[v.GetName()] = v
 
@@ -657,7 +672,7 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		//copy sim_options and set seed
 		testcases[i].astItems.Cat(&t.astItems)
 		testcases[i].CatItem("sim_option", newAstItem(GetSimulator().SeedOption()+strconv.Itoa(t.seeds[i])))
-		//copy build
+		//clone build
 		testcases[i].Build = t.Build
 	}
 	return testcases
@@ -667,7 +682,6 @@ func (t *AstTestCase) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
-	//get build sim_options
 	t.Build = t.GetBuild()
 
 	//get options sim_options in order
@@ -710,9 +724,8 @@ func (t *AstTestCase) GetHierString(space int) string {
 
 type astGroup struct {
 	astTest
-	buildName string
-	Tests     map[string]*AstTestCase
-	Groups    map[string]*astGroup
+	Tests  map[string]*AstTestCase
+	Groups map[string]*astGroup
 }
 
 func newAstGroup(name string) *astGroup {
@@ -735,7 +748,7 @@ func (t *astGroup) GetTestCases() []*AstTestCase {
 
 func (t *astGroup) KeywordsChecker(s string) (bool, []string, string) {
 	if ok, testKeywords, _ := t.astTest.KeywordsChecker(s); !ok {
-		groupKeywords := map[string]interface{}{"build": nil, "tests": nil, "groups": nil}
+		groupKeywords := map[string]interface{}{"tests": nil, "groups": nil}
 		if !CheckKeyWord(s, groupKeywords) {
 			return false, append(testKeywords, utils.KeyOfStringMap(groupKeywords)...), "Error in group " + t.Name + ":"
 		}
@@ -747,12 +760,7 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 	if err := t.astTest.Parse(cfg); err != nil {
 		return err
 	}
-	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) error {
-		t.buildName = item.(string)
-		return nil
-	}); err != nil {
-		return AstError("group "+t.Name, err)
-	}
+
 	//AstParse tests
 	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) error {
 		t.Tests = make(map[string]*AstTestCase)
@@ -784,16 +792,7 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 }
 
 func (t *astGroup) Link() error {
-	//link build
-	//builds have been all parsed
-	if t.buildName != "" {
-		build := jvsAstRoot.GetBuild(t.buildName)
-		if build == nil {
-			return errors.New("build " + t.buildName + "of group " + t.Name + "is undef!")
-		}
-		t.Build = build
-	}
-	//link args
+
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
