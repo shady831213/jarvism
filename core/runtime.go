@@ -2,14 +2,24 @@ package core
 
 import (
 	"container/list"
+	"crypto/sha256"
 	"fmt"
 	"github.com/shady831213/jarvisSim/utils"
 	"io"
+	"math"
+	"math/big"
 	"os"
 	"strings"
 	"sync"
 	"time"
 )
+
+func hash(s string) string {
+	h := new(big.Int).SetBytes(sha256.New().Sum(([]byte)(s)))
+	mb := big.NewInt(math.MaxInt64)
+	h.Mod(h, mb)
+	return h.String()
+}
 
 type runTimeOpts interface {
 	GetName() string
@@ -75,6 +85,12 @@ func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) erro
 	return runTestFlowPhase(GetRunner().RunTest, "Run Test ")(testCase, cmdStdout)
 }
 
+func (f *runFlow) AddTest(test *AstTestCase) {
+	test.Name = f.build.Name + "__" + test.Name
+	test.Build = f.build
+	f.PushBack(test)
+}
+
 func (f *runFlow) run() {
 	if err := f.prepareBuildPhase(f.build, f.cmdStdout); err != nil {
 		fmt.Println(utils.Red(err.Error()))
@@ -102,30 +118,18 @@ func (f *runFlow) run() {
 
 type runTime struct {
 	cmdStdout io.Writer
-	timeStamp string
+	runtimeId string
 	Name      string
 	runFlow   map[string]*runFlow
 	flowWg    sync.WaitGroup
 	done      chan bool
 }
 
-func (r *runTime) initSubTest(test *AstTestCase) int {
-	testcases := test.GetTestCases()
-	if _, ok := r.runFlow[test.GetBuild().Name]; !ok {
-		test.Build.Name = r.timeStamp + "__" + test.Build.Name
-		r.runFlow[test.GetBuild().Name] = newRunFlow(test.GetBuild(), &r.cmdStdout)
-	}
-	for _, t := range test.GetTestCases() {
-		t.Name = r.timeStamp + "__" + t.Name
-		r.runFlow[test.GetBuild().Name].PushBack(t)
-	}
-	return len(testcases)
-}
-
-func (r *runTime) init(group *astGroup) {
-	r.Name = group.GetName()
+func newRunTime(name string, group *astGroup) *runTime {
+	r := new(runTime)
+	r.Name = name
 	r.runFlow = make(map[string]*runFlow)
-	r.timeStamp = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
+	r.runtimeId = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
 	r.flowWg = sync.WaitGroup{}
 	r.done = make(chan bool)
 
@@ -136,12 +140,52 @@ func (r *runTime) init(group *astGroup) {
 	}
 	//build only
 	if testCnt == 0 {
-		group.Build.Name = r.timeStamp + "__" + group.Build.Name
-		r.runFlow[group.GetBuild().Name] = newRunFlow(group.GetBuild(), &r.cmdStdout)
+		//Fix Me : support build only get args
+		r.createFlow(group.GetBuild(), nil)
 	}
 	if testCnt <= 1 {
 		r.cmdStdout = os.Stdout
 	}
+	return r
+}
+
+func (r *runTime) createFlow(build *AstBuild, items *astItems) *runFlow {
+	var preCompileOpt, CompileOpt, postCompileOpt *astItem
+	options := ""
+	if items != nil {
+		preCompileOpt = items.GetItem("pre_compile_option")
+		if preCompileOpt != nil {
+			options += preCompileOpt.GetString()
+		}
+		CompileOpt = items.GetItem("compile_option")
+		if CompileOpt != nil {
+			options += CompileOpt.GetString()
+		}
+		postCompileOpt = items.GetItem("post_compile_option")
+		if postCompileOpt != nil {
+			options += postCompileOpt.GetString()
+		}
+	}
+	hash := hash(build.Name + options + r.runtimeId)
+	if _, ok := r.runFlow[hash]; !ok {
+		newBuild := build.Clone()
+		newBuild.astParseItem.GetItem("pre_compile_option").Cat(preCompileOpt)
+		newBuild.astParseItem.GetItem("compile_option").Cat(CompileOpt)
+		newBuild.astParseItem.GetItem("post_compile_option").Cat(postCompileOpt)
+		newBuild.Name = r.runtimeId + "__" + newBuild.Name + "_" + hash
+		r.runFlow[hash] = newRunFlow(newBuild, &r.cmdStdout)
+	}
+
+	return r.runFlow[hash]
+}
+
+func (r *runTime) initSubTest(test *AstTestCase) int {
+	testcases := test.GetTestCases()
+	flow := r.createFlow(test.GetBuild(), &test.astItems)
+	for _, t := range test.GetTestCases() {
+		flow.AddTest(t)
+	}
+	return len(testcases)
 }
 
 func (r *runTime) run() {
@@ -167,7 +211,7 @@ func convertArgs(args []string) []interface{} {
 	return _args
 }
 
-func run(cfg map[interface{}]interface{}) error {
+func run(name string, cfg map[interface{}]interface{}) error {
 	group := newAstGroup("Jarvis")
 	if err := group.Parse(cfg); err != nil {
 		return err
@@ -175,23 +219,21 @@ func run(cfg map[interface{}]interface{}) error {
 	if err := group.Link(); err != nil {
 		return err
 	}
-	r := new(runTime)
-	r.init(group)
-	r.run()
+	newRunTime(name, group).run()
 	return nil
 }
 
 func RunGroup(group *astGroup, args []string) error {
-	return run(map[interface{}]interface{}{"args": convertArgs(args), "groups": []interface{}{group.Name}})
+	return run(group.Name, map[interface{}]interface{}{"args": convertArgs(args), "groups": []interface{}{group.Name}})
 }
 
 func RunTest(testName, buildName string, args []string) error {
-	return run(map[interface{}]interface{}{"build": buildName,
+	return run(testName, map[interface{}]interface{}{"build": buildName,
 		"args":  convertArgs(args),
 		"tests": map[interface{}]interface{}{testName: nil}})
 }
 
 func RunOnlyBuild(buildName string, args []string) error {
-	return run(map[interface{}]interface{}{"build": buildName,
+	return run(buildName, map[interface{}]interface{}{"build": buildName,
 		"args": convertArgs(args)})
 }

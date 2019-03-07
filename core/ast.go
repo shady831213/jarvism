@@ -160,8 +160,11 @@ func (items *astItems) Replace(old, new string, cnt int) {
 	}
 }
 
-func (items *astItems) IsSimOnly() bool {
-	return items.items["pre_compile_option"] == nil && items.items["compile_option"] == nil && items.items["post_compile_option"] == nil
+func (items *astItems) GetItem(key string) *astItem {
+	if v, ok := items.items[key]; ok {
+		return v
+	}
+	return nil
 }
 
 func (items *astItems) GetHierString(space int) string {
@@ -684,8 +687,6 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		//copy sim_options and set seed
 		testcases[i].astItems.Cat(&t.astItems)
 		testcases[i].CatItem("sim_option", newAstItem(GetSimulator().SeedOption()+strconv.Itoa(t.seeds[i])))
-		//clone build
-		testcases[i].Build = t.Build
 	}
 	return testcases
 }
@@ -722,7 +723,10 @@ func (t *AstTestCase) GetHierString(space int) string {
 				return strings.Repeat(" ", nextSpace) + fmt.Sprintln(t.seeds)
 			}) +
 			astHierFmt("Builds:", nextSpace, func() string {
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.GetBuild().Name)
+				if b := t.GetBuild(); b != nil {
+					return fmt.Sprintln(strings.Repeat(" ", nextSpace) + b.Name)
+				}
+				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + fmt.Sprint(nil))
 			}) +
 			astHierFmt("Flatten Tests:", nextSpace, func() string {
 				s := ""
