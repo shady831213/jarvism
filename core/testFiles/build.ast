@@ -98,7 +98,7 @@ false
 On:
 ---------------
 compile_option:
--q+lint=none
++lint=none-q
 
 ---------------
 post_compile_option:

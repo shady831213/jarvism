@@ -14,14 +14,6 @@ func KeyOfStringMap(m map[string]interface{}) []string {
 	return keys
 }
 
-func KeyOfInterfaceMap(m map[interface{}]interface{}) []interface{} {
-	keys := make([]interface{}, 0)
-	for k, _ := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 func ForeachStringKeysInOrder(keys []string, handler func(string)) {
 	sort.Strings(keys)
 	for _, k := range keys {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/fatih/set"
 	"github.com/shady831213/jarvisSim"
 	"github.com/shady831213/jarvisSim/utils"
 	"path"
@@ -68,13 +69,14 @@ func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler f
 }
 
 type astItem struct {
-	content string
+	content *set.SetNonTS
 }
 
 func newAstItem(content interface{}) *astItem {
 	inst := new(astItem)
+	inst.content = set.New(set.NonThreadSafe).(*set.SetNonTS)
 	if value, ok := content.(string); ok {
-		inst.content = value
+		inst.content.Add(value)
 		return inst
 	}
 	if value, ok := content.([]interface{}); ok {
@@ -84,7 +86,7 @@ func newAstItem(content interface{}) *astItem {
 				panic(fmt.Sprintf("content must be string or []interface{}, but it is %T !", content))
 				return nil
 			}
-			inst.content += " " + s
+			inst.content.Add(s)
 		}
 
 		return inst
@@ -97,15 +99,24 @@ func (item *astItem) Cat(i *astItem) {
 	if i == nil {
 		return
 	}
-	item.content += i.content
+	item.content.Merge(i.content)
 }
 
 func (item *astItem) Replace(old, new string, cnt int) {
-	item.content = strings.Replace(item.content, old, new, cnt)
+	newS := set.New(set.NonThreadSafe).(*set.SetNonTS)
+	item.content.Each(func(i interface{}) bool {
+		s := strings.Replace(i.(string), old, new, cnt)
+		newS.Add(s)
+		return true
+	})
+	item.content.Clear()
+	item.content = newS
 }
 
 func (item *astItem) GetString() string {
-	return item.content
+	l := set.StringSlice(item.content)
+	sort.Strings(l)
+	return strings.Join(l, " ")
 }
 
 type astItems struct {
@@ -686,9 +697,10 @@ func (t *AstTestCase) Link() error {
 	t.Build = t.GetBuild()
 
 	//get options sim_options in order
-	for _, arg := range t.GetOptionArgs().SortedList() {
-		arg.(JvsOptionForTest).TestHandler(t)
-	}
+	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
+		v.(JvsOptionForTest).TestHandler(t)
+		return false
+	})
 	//link name
 	if t.parent != nil {
 		t.Name = t.parent.GetName() + "__" + t.Name
