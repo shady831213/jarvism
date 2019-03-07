@@ -105,54 +105,61 @@ func (item *astItem) Replace(old, new string, cnt int) {
 }
 
 type astItems struct {
-	Items map[string]*astItem
+	items map[string]*astItem
 }
 
 func (items *astItems) init() {
-	items.Items = make(map[string]*astItem)
-	items.Items["pre_sim_option"] = nil
-	items.Items["sim_option"] = nil
-	items.Items["post_sim_option"] = nil
-	items.Items["pre_compile_option"] = nil
-	items.Items["compile_option"] = nil
-	items.Items["post_compile_option"] = nil
+	items.items = make(map[string]*astItem)
+	items.items["pre_sim_option"] = nil
+	items.items["sim_option"] = nil
+	items.items["post_sim_option"] = nil
+	items.items["pre_compile_option"] = nil
+	items.items["compile_option"] = nil
+	items.items["post_compile_option"] = nil
+}
+
+func (items *astItems) CatItem(key string, i *astItem) {
+	if i == nil {
+		return
+	}
+	if items.items[key] == nil {
+		items.items[key] = newAstItem("")
+	}
+	items.items[key].Cat(i)
 }
 
 func (items *astItems) Cat(i *astItems) {
 	if i == nil {
 		return
 	}
-	for k, _ := range i.Items {
-		if items.Items[k] == nil && i.Items[k] != nil {
-			items.Items[k] = newAstItem("")
-		}
-		items.Items[k].Cat(i.Items[k])
+	for k, v := range i.items {
+		items.CatItem(k, v)
 	}
 }
 
 func (items *astItems) Replace(old, new string, cnt int) {
-	for k, v := range items.Items {
+	for k, v := range items.items {
 		if v != nil {
-			items.Items[k].Replace(old, new, cnt)
+			items.items[k].Replace(old, new, cnt)
 		}
 	}
 }
 
 func (items *astItems) IsSimOnly() bool {
-	return items.Items["pre_compile_option"] == nil && items.Items["compile_option"] == nil && items.Items["post_compile_option"] == nil
+	return items.items["pre_compile_option"] == nil && items.items["compile_option"] == nil && items.items["post_compile_option"] == nil
 }
 
 func (items *astItems) GetHierString(space int) string {
 	nextSpace := space + 1
 	s := ""
 	keys := make([]string, 0)
-	for k := range items.Items {
+	for k := range items.items {
 		keys = append(keys, k)
 	}
 	utils.ForeachStringKeysInOrder(keys, func(i string) {
 		s += astHierFmt(i+":", nextSpace, func() string {
 			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(items.Items[i])
+				fmt.Sprintln(items.items[i])
 		})
 	})
 	return s
@@ -164,7 +171,7 @@ type astParseItem struct {
 
 func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
 	keywords := make(map[string]interface{})
-	for k, _ := range items.Items {
+	for k, _ := range items.items {
 		keywords[k] = nil
 	}
 	if !CheckKeyWord(s, keywords) {
@@ -174,9 +181,9 @@ func (items *astParseItem) KeywordsChecker(s string) (bool, []string, string) {
 }
 
 func (items *astParseItem) Parse(cfg map[interface{}]interface{}) error {
-	for k, _ := range items.Items {
+	for k, _ := range items.items {
 		if err := CfgToAstItemOptional(cfg, k, func(i interface{}) error {
-			items.Items[k] = newAstItem(i)
+			items.items[k] = newAstItem(i)
 			return nil
 		}); err != nil {
 			return err
@@ -649,10 +656,7 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
 		testcases[i].astItems.Cat(&t.astItems)
-		if testcases[i].Items["sim_option"] == nil {
-			testcases[i].Items["sim_option"] = newAstItem("")
-		}
-		testcases[i].Items["sim_option"].Cat(newAstItem(GetSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
+		testcases[i].CatItem("sim_option", newAstItem(GetSimulator().SeedOption()+strconv.Itoa(t.seeds[i])))
 		//copy build
 		testcases[i].Build = t.Build
 	}
