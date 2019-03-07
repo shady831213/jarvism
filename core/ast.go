@@ -649,6 +649,9 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
 		testcases[i].astItems.Cat(&t.astItems)
+		if testcases[i].Items["sim_option"] == nil {
+			testcases[i].Items["sim_option"] = newAstItem("")
+		}
 		testcases[i].Items["sim_option"].Cat(newAstItem(GetSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
 		//copy build
 		testcases[i].Build = t.Build
@@ -662,7 +665,6 @@ func (t *AstTestCase) Link() error {
 	}
 	//get build sim_options
 	t.Build = t.GetBuild()
-	t.Cat(&t.Build.astItems)
 
 	//get options sim_options in order
 	keys := make([]string, 0)
@@ -709,7 +711,7 @@ type astGroup struct {
 	Groups    map[string]*astGroup
 }
 
-func NewAstGroup(name string) *astGroup {
+func newAstGroup(name string) *astGroup {
 	inst := new(astGroup)
 	inst.init(name)
 	inst.buildName = ""
@@ -951,7 +953,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	//parsing groups
 	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
 		for name, group := range item.(map[interface{}]interface{}) {
-			t.Groups[name.(string)] = NewAstGroup(name.(string))
+			t.Groups[name.(string)] = newAstGroup(name.(string))
 			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
 				return err
 			}

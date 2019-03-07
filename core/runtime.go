@@ -2,6 +2,7 @@ package core
 
 import (
 	"container/list"
+	"errors"
 	"fmt"
 	"github.com/shady831213/jarvisSim/utils"
 	"io"
@@ -109,16 +110,26 @@ type runTime struct {
 	done      chan bool
 }
 
-func (r *runTime) init(opts runTimeOpts) {
-	r.Name = opts.GetName()
+func (r *runTime) init1(name string) {
+	r.Name = name
 	r.runFlow = make(map[string]*runFlow)
 	r.timeStamp = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
+	r.flowWg = sync.WaitGroup{}
+	r.done = make(chan bool)
+}
+
+func (r *runTime) initOnlyBuild(build *AstBuild) {
+	r.init1(build.Name)
+	r.cmdStdout = os.Stdout
+	r.runFlow[build.Name] = newRunFlow(build, r.cmdStdout)
+}
+
+func (r *runTime) initWithTests(opts runTimeOpts) {
+	r.init1(opts.GetName())
 	testcases := opts.GetTestCases()
 	if len(testcases) <= 1 {
 		r.cmdStdout = os.Stdout
 	}
-	r.flowWg = sync.WaitGroup{}
-	r.done = make(chan bool)
 	for _, test := range testcases {
 		test.Name = r.timeStamp + "__" + test.Name
 		if _, ok := r.runFlow[test.GetBuild().Name]; !ok {
@@ -143,6 +154,47 @@ func (r *runTime) run() {
 
 func Run(opts runTimeOpts) {
 	r := new(runTime)
-	r.init(opts)
+	r.initWithTests(opts)
 	r.run()
+}
+
+func RunTest(testName, buildName string, args []string) error {
+	test := newAstTestCase(testName)
+	if test.Build = GetJvsAstRoot().GetBuild(buildName); test.Build == nil {
+		return errors.New(utils.Red("Error: no valid build " + buildName + "!"))
+	}
+	_args := make([]interface{}, len(args))
+	for i := range args {
+		_args[i] = args[i]
+	}
+	if err := test.Parse(map[interface{}]interface{}{"args": _args}); err != nil {
+		return err
+	}
+	if err := test.Link(); err != nil {
+		return err
+	}
+	Run(test)
+	return nil
+}
+
+func RunOnlyBuild(buildName string, args []string) error {
+	if build := GetJvsAstRoot().GetBuild(buildName); build == nil {
+		return errors.New(utils.Red("Error: no valid build " + buildName + "!"))
+	}
+	//for _, arg := range args {
+	//	opt, err := GetOption(arg)
+	//	if err != nil {
+	//		return errors.New(utils.Red("Error :" + err.Error()))
+	//	}
+	//	v, ok := opt.Clone().(JvsOptionForTest)
+	//	if !ok {
+	//		return nil
+	//	}
+	//	if v.IsCompileOption() {
+	//		return errors.New("Error in args of " + t.Name + ":" + v.GetName() + " is a compile option! compile option can't be in groups and tests!")
+	//	}
+	//	t.OptionArgs[v.GetName()] = v
+	//
+	//}
+	return nil
 }

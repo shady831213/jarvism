@@ -45,9 +45,14 @@ func TestGroupTest(t *testing.T) {
 
 func TestSingleTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
-	g := core.NewAstGroup("test1")
-	g.Parse(map[interface{}]interface{}{"build": "build1",
-		"tests": map[interface{}]interface{}{"test1": map[interface{}]interface{}{"args": []interface{}{"-seed 1"}}}})
-	g.Link()
-	core.Run(g)
+	if err := core.RunTest("test1", "build1", []string{"-seed 1"}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSingleRepeatTest(t *testing.T) {
+	core.SetRunner(new(testRunner))
+	if err := core.RunTest("test1", "build1", []string{"-repeat 10"}); err != nil {
+		t.Error(err)
+	}
 }

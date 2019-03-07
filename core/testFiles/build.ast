@@ -380,7 +380,7 @@ null
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -388,7 +388,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -396,11 +396,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL}
+&{+UVM_VERBOSITY=UVM_FULL}
 
 ---------------
 seeds:
@@ -423,7 +423,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -431,7 +431,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -439,11 +439,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -468,7 +468,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -476,7 +476,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -484,11 +484,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -513,7 +513,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -521,7 +521,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -529,11 +529,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -558,7 +558,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -566,7 +566,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -574,11 +574,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -603,7 +603,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -611,7 +611,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -619,11 +619,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -648,7 +648,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -656,7 +656,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -664,11 +664,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -693,7 +693,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -701,7 +701,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -709,11 +709,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -738,7 +738,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -746,7 +746,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -754,11 +754,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -783,7 +783,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -791,7 +791,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -799,11 +799,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -828,7 +828,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -836,7 +836,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -844,11 +844,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -915,7 +915,7 @@ null
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -923,7 +923,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -931,11 +931,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL}
+&{+UVM_VERBOSITY=UVM_FULL}
 
 ---------------
 seeds:
@@ -958,7 +958,7 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 ------------
 post_compile_option:
@@ -966,7 +966,7 @@ post_compile_option:
 
 ------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 ------------
 pre_compile_option:
@@ -974,11 +974,11 @@ pre_compile_option:
 
 ------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1011,7 +1011,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1019,7 +1019,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1027,11 +1027,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1056,7 +1056,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1064,7 +1064,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1072,11 +1072,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1101,7 +1101,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1109,7 +1109,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1117,11 +1117,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1146,7 +1146,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1154,7 +1154,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1162,11 +1162,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1191,7 +1191,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1199,7 +1199,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1207,11 +1207,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1236,7 +1236,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1244,7 +1244,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1252,11 +1252,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1281,7 +1281,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1289,7 +1289,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1297,11 +1297,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1326,7 +1326,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1334,7 +1334,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1342,11 +1342,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1371,7 +1371,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1379,7 +1379,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1387,11 +1387,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1416,7 +1416,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1424,7 +1424,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1432,11 +1432,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1461,7 +1461,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -1469,7 +1469,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -1477,11 +1477,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -1601,11 +1601,11 @@ null
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -1613,7 +1613,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -1621,7 +1621,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL}
+&{+UVM_VERBOSITY=UVM_FULL}
 
 ---------------
 seeds:
@@ -1644,11 +1644,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1656,7 +1656,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1664,7 +1664,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1689,11 +1689,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1701,7 +1701,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1709,7 +1709,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1734,11 +1734,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1746,7 +1746,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1754,7 +1754,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1779,11 +1779,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1791,7 +1791,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1799,7 +1799,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1824,11 +1824,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1836,7 +1836,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1844,7 +1844,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1869,11 +1869,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1881,7 +1881,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1889,7 +1889,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1914,11 +1914,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1926,7 +1926,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1934,7 +1934,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -1959,11 +1959,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -1971,7 +1971,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -1979,7 +1979,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -2004,11 +2004,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -2016,7 +2016,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -2024,7 +2024,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -2049,11 +2049,11 @@ OptionArgs:
 
 ------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 ------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 ------------
 post_sim_option:
@@ -2061,7 +2061,7 @@ post_sim_option:
 
 ------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 ------------
 pre_sim_option:
@@ -2069,7 +2069,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 -------------
 seeds:
@@ -2103,7 +2103,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2111,7 +2111,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2119,11 +2119,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2148,7 +2148,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2156,7 +2156,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2164,11 +2164,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2193,7 +2193,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2201,7 +2201,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2209,11 +2209,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2238,7 +2238,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2246,7 +2246,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2254,11 +2254,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2283,7 +2283,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2291,7 +2291,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2299,11 +2299,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2328,7 +2328,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2336,7 +2336,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2344,11 +2344,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2373,7 +2373,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2381,7 +2381,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2389,11 +2389,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2418,7 +2418,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2426,7 +2426,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2434,11 +2434,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2463,7 +2463,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2471,7 +2471,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2479,11 +2479,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2508,7 +2508,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2516,7 +2516,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2524,11 +2524,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2553,7 +2553,7 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+<nil>
 
 --------------
 post_compile_option:
@@ -2561,7 +2561,7 @@ post_compile_option:
 
 --------------
 post_sim_option:
-&{echo"post_sim_build1"}
+<nil>
 
 --------------
 pre_compile_option:
@@ -2569,11 +2569,11 @@ pre_compile_option:
 
 --------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+<nil>
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2598,11 +2598,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2610,7 +2610,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2618,7 +2618,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2643,11 +2643,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2655,7 +2655,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2663,7 +2663,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2688,11 +2688,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2700,7 +2700,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2708,7 +2708,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2733,11 +2733,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2745,7 +2745,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2753,7 +2753,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2778,11 +2778,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2790,7 +2790,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2798,7 +2798,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2823,11 +2823,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2835,7 +2835,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2843,7 +2843,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2868,11 +2868,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2880,7 +2880,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2888,7 +2888,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2913,11 +2913,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2925,7 +2925,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2933,7 +2933,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -2958,11 +2958,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -2970,7 +2970,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -2978,7 +2978,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
@@ -3003,11 +3003,11 @@ OptionArgs:
 
 --------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+<nil>
 
 --------------
 post_compile_option:
-&{echo"post_compile_build2"}
+<nil>
 
 --------------
 post_sim_option:
@@ -3015,7 +3015,7 @@ post_sim_option:
 
 --------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+<nil>
 
 --------------
 pre_sim_option:
@@ -3023,7 +3023,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
+&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
 
 ---------------
 seeds:
