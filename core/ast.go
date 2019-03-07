@@ -104,6 +104,10 @@ func (item *astItem) Replace(old, new string, cnt int) {
 	item.content = strings.Replace(item.content, old, new, cnt)
 }
 
+func (item *astItem) GetString() string {
+	return item.content
+}
+
 type astItems struct {
 	items map[string]*astItem
 }
@@ -158,8 +162,12 @@ func (items *astItems) GetHierString(space int) string {
 	}
 	utils.ForeachStringKeysInOrder(keys, func(i string) {
 		s += astHierFmt(i+":", nextSpace, func() string {
+			if items.items[i] != nil {
+				return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
+					fmt.Sprintln(items.items[i].GetString())
+			}
 			return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-				fmt.Sprintln(items.items[i])
+				fmt.Sprintln(nil)
 		})
 	})
 	return s

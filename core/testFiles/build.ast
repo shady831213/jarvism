@@ -26,7 +26,7 @@ null
 WithValue:
 ---------------
 compile_option:
-&{$compile_args}
+$compile_args
 
 ---------------
 post_compile_option:
@@ -68,19 +68,19 @@ compile_option:
 
 ---------------
 post_compile_option:
-&{echo"post_compile_option$has_pre_phase"}
+echo"post_compile_option$has_pre_phase"
 
 ---------------
 post_sim_option:
-&{echo"post_sim_option$has_pre_phase"}
+echo"post_sim_option$has_pre_phase"
 
 ---------------
 pre_compile_option:
-&{echo"pre_compile_option$has_pre_phase"}
+echo"pre_compile_option$has_pre_phase"
 
 ---------------
 pre_sim_option:
-&{echo"pre_sim_option$has_pre_phase"}
+echo"pre_sim_option$has_pre_phase"
 
 ---------------
 sim_option:
@@ -98,7 +98,7 @@ false
 On:
 ---------------
 compile_option:
-&{-q+lint=none}
+-q+lint=none
 
 ---------------
 post_compile_option:
@@ -160,7 +160,7 @@ pre_sim_option:
 
 ---------------
 sim_option:
-&{$sim_args}
+$sim_args
 
 
 
@@ -194,7 +194,7 @@ pre_sim_option:
 
 ---------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 -----------------
@@ -209,7 +209,7 @@ Builds:
 build1:
 ----------------
 compile_option:
-&{-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps}
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 
 ----------------
 post_compile_option:
@@ -217,7 +217,7 @@ post_compile_option:
 
 ----------------
 post_sim_option:
-&{echo"post_sim_build1"}
+echo"post_sim_build1"
 
 ----------------
 pre_compile_option:
@@ -225,11 +225,11 @@ pre_compile_option:
 
 ----------------
 pre_sim_option:
-&{echo"pre_sim_build1"}
+echo"pre_sim_build1"
 
 ----------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 
 
 ----------------
@@ -243,11 +243,11 @@ discover_attr:
 build2:
 ----------------
 compile_option:
-&{-debug_access+pp-sverilog-ntb_optsuvm-1.2}
+-debug_access+pp-sverilog-ntb_optsuvm-1.2
 
 ----------------
 post_compile_option:
-&{echo"post_compile_build2"}
+echo"post_compile_build2"
 
 ----------------
 post_sim_option:
@@ -255,7 +255,7 @@ post_sim_option:
 
 ----------------
 pre_compile_option:
-&{echo"pre_compile_build2"}
+echo"pre_compile_build2"
 
 ----------------
 pre_sim_option:
@@ -263,7 +263,7 @@ pre_sim_option:
 
 ----------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE}
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 
 
 ----------------
@@ -315,7 +315,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 --------------
@@ -369,7 +369,7 @@ pre_sim_option:
 
 ----------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 ------------
@@ -400,7 +400,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 ---------------
 seeds:
@@ -443,7 +443,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -488,7 +488,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -533,7 +533,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -578,7 +578,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -623,7 +623,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -668,7 +668,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -713,7 +713,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -758,7 +758,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -803,7 +803,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -848,7 +848,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -904,7 +904,7 @@ pre_sim_option:
 
 ----------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 ------------
@@ -935,7 +935,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 ---------------
 seeds:
@@ -978,7 +978,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1031,7 +1031,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1076,7 +1076,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1121,7 +1121,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1166,7 +1166,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1211,7 +1211,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1256,7 +1256,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1301,7 +1301,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1346,7 +1346,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1391,7 +1391,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1436,7 +1436,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1481,7 +1481,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -1536,7 +1536,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 --------------
@@ -1590,7 +1590,7 @@ pre_sim_option:
 
 ----------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 
 ------------
@@ -1621,7 +1621,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL}
++UVM_VERBOSITY=UVM_FULL
 
 ---------------
 seeds:
@@ -1664,7 +1664,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1709,7 +1709,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1754,7 +1754,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1799,7 +1799,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1844,7 +1844,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1889,7 +1889,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1934,7 +1934,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -1979,7 +1979,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -2024,7 +2024,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -2069,7 +2069,7 @@ pre_sim_option:
 
 ------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 -------------
 seeds:
@@ -2123,7 +2123,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2168,7 +2168,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2213,7 +2213,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2258,7 +2258,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2303,7 +2303,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2348,7 +2348,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2393,7 +2393,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2438,7 +2438,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2483,7 +2483,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2528,7 +2528,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2573,7 +2573,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2618,7 +2618,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2663,7 +2663,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2708,7 +2708,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2753,7 +2753,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2798,7 +2798,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2843,7 +2843,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2888,7 +2888,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2933,7 +2933,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -2978,7 +2978,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
@@ -3023,7 +3023,7 @@ pre_sim_option:
 
 --------------
 sim_option:
-&{+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed}
++UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
 ---------------
 seeds:
