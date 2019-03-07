@@ -4,10 +4,10 @@ import "io"
 
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, io.Writer) error
-	Build(*AstBuild, io.Writer) error
-	PrepareTest(*AstTestCase, io.Writer) error
-	RunTest(*AstTestCase, io.Writer) error
+	PrepareBuild(*AstBuild, *io.Writer) error
+	Build(*AstBuild,  *io.Writer) error
+	PrepareTest(*AstTestCase,  *io.Writer) error
+	RunTest(*AstTestCase,  *io.Writer) error
 }
 
 var runner Runner

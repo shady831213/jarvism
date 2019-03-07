@@ -24,11 +24,11 @@ type runFlow struct {
 	build *AstBuild
 	list.List
 	testWg    sync.WaitGroup
-	cmdStdout io.Writer
+	cmdStdout *io.Writer
 }
 
-func runBuildFlowPhase(phase func(build *AstBuild, cmdStdout io.Writer) error, phaseName string) func(*AstBuild, io.Writer) error {
-	return func(build *AstBuild, cmdStdout io.Writer) error {
+func runBuildFlowPhase(phase func(build *AstBuild, cmdStdout *io.Writer) error, phaseName string) func(*AstBuild, *io.Writer) error {
+	return func(build *AstBuild, cmdStdout *io.Writer) error {
 		utils.PrintStatus(utils.Blue, utils.Blue)(phaseName+build.Name, "BEGIN")
 		if err := phase(build, cmdStdout); err != nil {
 			utils.PrintStatus(utils.Blue, utils.Red)(phaseName+build.Name, "FAIL")
@@ -39,8 +39,8 @@ func runBuildFlowPhase(phase func(build *AstBuild, cmdStdout io.Writer) error, p
 	}
 }
 
-func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout io.Writer) error, phaseName string) func(*AstTestCase, io.Writer) error {
-	return func(testCase *AstTestCase, cmdStdout io.Writer) error {
+func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout *io.Writer) error, phaseName string) func(*AstTestCase, *io.Writer) error {
+	return func(testCase *AstTestCase, cmdStdout *io.Writer) error {
 		utils.PrintStatus(utils.Blue, utils.Blue)(phaseName+testCase.Name, "BEGIN")
 		if err := phase(testCase, cmdStdout); err != nil {
 			utils.PrintStatus(utils.Blue, utils.Red)(phaseName+testCase.Name, "FAIL")
@@ -51,7 +51,7 @@ func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout io.Writer) err
 	}
 }
 
-func newRunFlow(build *AstBuild, cmdStdout io.Writer) *runFlow {
+func newRunFlow(build *AstBuild, cmdStdout *io.Writer) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
@@ -60,19 +60,19 @@ func newRunFlow(build *AstBuild, cmdStdout io.Writer) *runFlow {
 	return inst
 }
 
-func (f *runFlow) prepareBuildPhase(build *AstBuild, cmdStdout io.Writer) error {
+func (f *runFlow) prepareBuildPhase(build *AstBuild, cmdStdout *io.Writer) error {
 	return runBuildFlowPhase(GetRunner().PrepareBuild, "Prepare Build ")(build, cmdStdout)
 }
 
-func (f *runFlow) buildPhase(build *AstBuild, cmdStdout io.Writer) error {
+func (f *runFlow) buildPhase(build *AstBuild, cmdStdout *io.Writer) error {
 	return runBuildFlowPhase(GetRunner().Build, "Build Build ")(build, cmdStdout)
 }
 
-func (f *runFlow) prepareTestPhase(testCase *AstTestCase, cmdStdout io.Writer) error {
+func (f *runFlow) prepareTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) error {
 	return runTestFlowPhase(GetRunner().PrepareTest, "Prepare Test ")(testCase, cmdStdout)
 }
 
-func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout io.Writer) error {
+func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) error {
 	return runTestFlowPhase(GetRunner().RunTest, "Run Test ")(testCase, cmdStdout)
 }
 
@@ -121,22 +121,36 @@ func (r *runTime) init1(name string) {
 func (r *runTime) initOnlyBuild(build *AstBuild) {
 	r.init1(build.Name)
 	r.cmdStdout = os.Stdout
-	r.runFlow[build.Name] = newRunFlow(build, r.cmdStdout)
+	build.Name = r.timeStamp + "__" + build.Name
+	r.runFlow[build.Name] = newRunFlow(build, &r.cmdStdout)
 }
 
-func (r *runTime) initWithTests(opts runTimeOpts) {
-	r.init1(opts.GetName())
-	testcases := opts.GetTestCases()
-	if len(testcases) <= 1 {
+func (r *runTime) initWithGroup(group *astGroup) {
+	r.init1(group.GetName())
+	testcases := group.GetTestCases()
+	for _, test := range testcases {
+		r.initSubTest(test)
+	}
+}
+
+func (r *runTime) initWithTest(test *AstTestCase) {
+	r.init1(test.GetName())
+	if r.initSubTest(test) == 1 {
 		r.cmdStdout = os.Stdout
 	}
-	for _, test := range testcases {
-		test.Name = r.timeStamp + "__" + test.Name
-		if _, ok := r.runFlow[test.GetBuild().Name]; !ok {
-			r.runFlow[test.GetBuild().Name] = newRunFlow(test.GetBuild(), r.cmdStdout)
-		}
-		r.runFlow[test.GetBuild().Name].PushBack(test)
+}
+
+func (r *runTime) initSubTest(test *AstTestCase) int {
+	testcases := test.GetTestCases()
+	if _, ok := r.runFlow[test.GetBuild().Name]; !ok {
+		test.Build.Name = r.timeStamp + "__" + test.Build.Name
+		r.runFlow[test.GetBuild().Name] = newRunFlow(test.GetBuild(), &r.cmdStdout)
 	}
+	for _, t := range test.GetTestCases() {
+		t.Name = r.timeStamp + "__" + t.Name
+		r.runFlow[test.GetBuild().Name].PushBack(t)
+	}
+	return len(testcases)
 }
 
 func (r *runTime) run() {
@@ -146,15 +160,15 @@ func (r *runTime) run() {
 		r.flowWg.Add(1)
 		go func(flow *runFlow) {
 			defer r.flowWg.Add(-1)
-			f.run()
+			flow.run()
 		}(f)
 	}
 	r.flowWg.Wait()
 }
 
-func Run(opts runTimeOpts) {
+func RunGroup(group *astGroup) {
 	r := new(runTime)
-	r.initWithTests(opts)
+	r.initWithGroup(group)
 	r.run()
 }
 
@@ -173,7 +187,9 @@ func RunTest(testName, buildName string, args []string) error {
 	if err := test.Link(); err != nil {
 		return err
 	}
-	Run(test)
+	r := new(runTime)
+	r.initWithTest(test)
+	r.run()
 	return nil
 }
 

@@ -750,7 +750,7 @@ func newAstGroup(name string) *astGroup {
 func (t *astGroup) GetTestCases() []*AstTestCase {
 	testcases := make([]*AstTestCase, 0)
 	for _, test := range t.Tests {
-		testcases = append(testcases, test.GetTestCases()...)
+		testcases = append(testcases, test)
 	}
 	for _, group := range t.Groups {
 		testcases = append(testcases, group.GetTestCases()...)
@@ -868,11 +868,15 @@ func (t *astGroup) GetHierString(space int) string {
 			}) +
 			astHierFmt("Flatten Tests:", nextSpace, func() string {
 				s := ""
+				allTests := make([]*AstTestCase, 0)
 				tests := t.GetTestCases()
-				sort.Slice(tests, func(i, j int) bool {
-					return tests[i].Name < tests[j].Name
-				})
 				for _, test := range tests {
+					allTests = append(allTests, test.GetTestCases()...)
+				}
+				sort.Slice(allTests, func(i, j int) bool {
+					return allTests[i].Name < allTests[j].Name
+				})
+				for _, test := range allTests {
 					s += test.GetHierString(nextSpace + 1)
 				}
 				return s
