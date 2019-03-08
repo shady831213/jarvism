@@ -1,10 +1,10 @@
 package core_test
 
 import (
-	"github.com/shady831213/jarvisSim/core"
-	_ "github.com/shady831213/jarvisSim/simulators"
-	_ "github.com/shady831213/jarvisSim/testDiscoverers"
-	"github.com/shady831213/jarvisSim/utils"
+	"github.com/shady831213/jarvism/core"
+	_ "github.com/shady831213/jarvism/simulators"
+	_ "github.com/shady831213/jarvism/testDiscoverers"
+	"github.com/shady831213/jarvism/utils"
 	"regexp"
 	"strings"
 	"syscall"

@@ -1,8 +1,8 @@
-package simulators
+package mulators
 
 import (
-	"github.com/shady831213/jarvisSim"
-	"github.com/shady831213/jarvisSim/core"
+	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"path"
 )
 
@@ -14,7 +14,7 @@ func (s *vcs) Name() string {
 }
 
 func (s *vcs) BuildInOptionFile() string {
-	return path.Join(jarivsSim.BuildInOptionPath(), "vcs_options.yaml")
+	return path.Join(jarivsm.BuildInOptionPath(), "vcs_options.yaml")
 }
 
 func (s *vcs) CompileCmd() string {

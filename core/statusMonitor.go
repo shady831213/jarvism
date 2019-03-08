@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/shady831213/jarvisSim/utils"
+	"github.com/shady831213/jarvism/utils"
 	"strconv"
 )
 

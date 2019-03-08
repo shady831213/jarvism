@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"github.com/shady831213/jarvisSim/core"
+	"github.com/shady831213/jarvism/core"
 	"math/rand"
 	"os"
 )

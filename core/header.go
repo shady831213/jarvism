@@ -1,6 +1,6 @@
 package core
 
-import "github.com/shady831213/jarvisSim/utils"
+import "github.com/shady831213/jarvism/utils"
 
 type JVSTestStatus int
 

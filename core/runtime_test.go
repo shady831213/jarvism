@@ -1,7 +1,7 @@
 package core_test
 
 import (
-	"github.com/shady831213/jarvisSim/core"
+	"github.com/shady831213/jarvism/core"
 	"io"
 	"math/rand"
 	"os/exec"
@@ -19,21 +19,21 @@ func (r *testRunner) Name() string {
 func (r *testRunner) PrepareBuild(build *core.AstBuild, cmdStdout *io.Writer) error {
 	cmd := exec.Command("echo", " prepare build ", build.Name)
 	cmd.Stdout = *cmdStdout
-	time.Sleep(time.Duration(rand.Int63n(1000)) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmd.Run()
 }
 
 func (r *testRunner) Build(build *core.AstBuild, cmdStdout *io.Writer) error {
 	cmd := exec.Command("echo", " build build ", build.Name)
 	cmd.Stdout = *cmdStdout
-	time.Sleep(time.Duration(rand.Int63n(1000)) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmd.Run()
 }
 
 func (r *testRunner) PrepareTest(testCase *core.AstTestCase, cmdStdout *io.Writer) *core.JVSTestResult {
 	cmd := exec.Command("echo", " prepare test ", testCase.Name)
 	cmd.Stdout = *cmdStdout
-	time.Sleep(time.Duration(rand.Int63n(1000)) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	if err := cmd.Run(); err != nil {
 		return core.JVSTestResultFail(err.Error())
 	}
@@ -43,7 +43,7 @@ func (r *testRunner) PrepareTest(testCase *core.AstTestCase, cmdStdout *io.Write
 func (r *testRunner) RunTest(testCase *core.AstTestCase, cmdStdout *io.Writer) *core.JVSTestResult {
 	cmd := exec.Command("echo", " run test ", testCase.Name)
 	cmd.Stdout = *cmdStdout
-	time.Sleep(time.Duration(rand.Int63n(1000)) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	if err := cmd.Run(); err != nil {
 		return core.JVSTestResultFail(err.Error())
 	}

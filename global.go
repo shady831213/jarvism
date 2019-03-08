@@ -1,4 +1,4 @@
-package jarivsSim
+package jarivsm
 
 import (
 	"errors"
