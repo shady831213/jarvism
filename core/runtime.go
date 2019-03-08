@@ -36,38 +36,44 @@ type runFlow struct {
 	list.List
 	testWg    sync.WaitGroup
 	cmdStdout *io.Writer
+	buildDone chan error
+	testDone  chan *JVSTestResult
 }
 
 func runBuildFlowPhase(phase func(build *AstBuild, cmdStdout *io.Writer) error, phaseName string) func(*AstBuild, *io.Writer) error {
 	return func(build *AstBuild, cmdStdout *io.Writer) error {
-		utils.PrintStatus(utils.Blue, utils.Blue)(phaseName+build.Name, "BEGIN")
+		PrintStatus(phaseName+build.Name, utils.Blue("BEGIN"))
 		if err := phase(build, cmdStdout); err != nil {
-			utils.PrintStatus(utils.Blue, utils.Red)(phaseName+build.Name, "FAIL")
+			PrintStatus(phaseName+build.Name, utils.Red("FAIL"))
 			return err
 		}
-		utils.PrintStatus(utils.Blue, utils.Green)(phaseName+build.Name, "DONE")
+		PrintStatus(phaseName+build.Name, utils.Green("DONE"))
 		return nil
 	}
 }
 
-func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout *io.Writer) error, phaseName string) func(*AstTestCase, *io.Writer) error {
-	return func(testCase *AstTestCase, cmdStdout *io.Writer) error {
-		utils.PrintStatus(utils.Blue, utils.Blue)(phaseName+testCase.Name, "BEGIN")
-		if err := phase(testCase, cmdStdout); err != nil {
-			utils.PrintStatus(utils.Blue, utils.Red)(phaseName+testCase.Name, "FAIL")
-			return err
+func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult, phaseName string) func(*AstTestCase, *io.Writer) *JVSTestResult {
+	return func(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
+		PrintStatus(phaseName+testCase.Name, utils.Blue("BEGIN"))
+		result := phase(testCase, cmdStdout)
+		if result == nil {
+			result = JVSTestResultUnknown("No Result!")
+			PrintStatus(phaseName+testCase.Name, result.Error())
+			return result
 		}
-		utils.PrintStatus(utils.Blue, utils.Green)(phaseName+testCase.Name, "DONE")
-		return nil
+		PrintStatus(phaseName+testCase.Name, result.Error())
+		return result
 	}
 }
 
-func newRunFlow(build *AstBuild, cmdStdout *io.Writer) *runFlow {
+func newRunFlow(build *AstBuild, cmdStdout *io.Writer, buildDone chan error, testDone chan *JVSTestResult) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
 	inst.cmdStdout = cmdStdout
 	inst.List.Init()
+	inst.buildDone = buildDone
+	inst.testDone = testDone
 	return inst
 }
 
@@ -79,11 +85,11 @@ func (f *runFlow) buildPhase(build *AstBuild, cmdStdout *io.Writer) error {
 	return runBuildFlowPhase(GetRunner().Build, "Build Build ")(build, cmdStdout)
 }
 
-func (f *runFlow) prepareTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) error {
+func (f *runFlow) prepareTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
 	return runTestFlowPhase(GetRunner().PrepareTest, "Prepare Test ")(testCase, cmdStdout)
 }
 
-func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) error {
+func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
 	return runTestFlowPhase(GetRunner().RunTest, "Run Test ")(testCase, cmdStdout)
 }
 
@@ -96,35 +102,41 @@ func (f *runFlow) AddTest(test *AstTestCase) {
 func (f *runFlow) run() {
 	if err := f.prepareBuildPhase(f.build, f.cmdStdout); err != nil {
 		fmt.Println(utils.Red(err.Error()))
+		f.buildDone <- err
 		return
 	}
 	if err := f.buildPhase(f.build, f.cmdStdout); err != nil {
 		fmt.Println(utils.Red(err.Error()))
+		f.buildDone <- err
 		return
 	}
+	f.buildDone <- nil
 	for e := f.Front(); e != nil; e = e.Next() {
 		f.testWg.Add(1)
 		go func(testCase *AstTestCase) {
 			defer f.testWg.Add(-1)
-			if err := f.prepareTestPhase(testCase, f.cmdStdout); err != nil {
-				fmt.Println(utils.Red(err.Error()))
+			result := f.prepareTestPhase(testCase, f.cmdStdout)
+			if result.status != JVSTestPass {
+				f.testDone <- result
 				return
 			}
-			if err := f.runTestPhase(testCase, f.cmdStdout); err != nil {
-				fmt.Println(utils.Red(err.Error()))
-			}
+			result = f.runTestPhase(testCase, f.cmdStdout)
+			f.testDone <- result
 		}(e.Value.(*AstTestCase))
 	}
 	f.testWg.Wait()
 }
 
 type runTime struct {
-	cmdStdout io.Writer
-	runtimeId string
-	Name      string
-	runFlow   map[string]*runFlow
-	flowWg    sync.WaitGroup
-	done      chan bool
+	cmdStdout                   io.Writer
+	runtimeId                   string
+	Name                        string
+	totalTest                   int
+	runFlow                     map[string]*runFlow
+	flowWg                      sync.WaitGroup
+	processingDone, monitorDone chan bool
+	buildDone                   chan error
+	testDone                    chan *JVSTestResult
 }
 
 func newRunTime(name string, group *astGroup) *runTime {
@@ -133,19 +145,22 @@ func newRunTime(name string, group *astGroup) *runTime {
 	r.runFlow = make(map[string]*runFlow)
 	r.runtimeId = strings.Replace(time.Now().Format("20060102_150405.0000"), ".", "", 1)
 	r.flowWg = sync.WaitGroup{}
-	r.done = make(chan bool)
+	r.processingDone = make(chan bool)
+	r.monitorDone = make(chan bool)
+	r.buildDone = make(chan error, 100)
+	r.testDone = make(chan *JVSTestResult, 100)
 
 	testcases := group.GetTestCases()
-	testCnt := 0
+	r.totalTest = 0
 	for _, test := range testcases {
-		testCnt += r.initSubTest(test)
+		r.totalTest += r.initSubTest(test)
 	}
 	//build only
-	if testCnt == 0 {
+	if r.totalTest == 0 {
 		group.ParseArgs()
 		r.createFlow(group.GetBuild())
 	}
-	if testCnt <= 1 {
+	if r.totalTest <= 1 {
 		r.cmdStdout = os.Stdout
 	}
 	return r
@@ -156,7 +171,7 @@ func (r *runTime) createFlow(build *AstBuild) *runFlow {
 	if _, ok := r.runFlow[hash]; !ok {
 		newBuild := build.Clone()
 		newBuild.Name = r.runtimeId + "__" + build.Name + "_" + hash
-		r.runFlow[hash] = newRunFlow(newBuild, &r.cmdStdout)
+		r.runFlow[hash] = newRunFlow(newBuild, &r.cmdStdout, r.buildDone, r.testDone)
 	}
 
 	return r.runFlow[hash]
@@ -173,8 +188,19 @@ func (r *runTime) initSubTest(test *AstTestCase) int {
 }
 
 func (r *runTime) run() {
-	go utils.PrintProccessing(utils.Blue)(r.Name+" is running", r.done)
-	defer func() { r.done <- true }()
+	var status string
+	go PrintProccessing(utils.Brown)(r.Name+" is running", &status, r.processingDone)
+	defer func() {
+		r.processingDone <- true
+		close(r.processingDone)
+	}()
+	go statusMonitor(&status, len(r.runFlow), r.totalTest, r.buildDone, r.testDone, r.monitorDone)
+	defer func() {
+		r.monitorDone <- true
+		close(r.monitorDone)
+		close(r.buildDone)
+		close(r.testDone)
+	}()
 	for _, f := range r.runFlow {
 		r.flowWg.Add(1)
 		go func(flow *runFlow) {

@@ -4,31 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 )
 
-func PrintProccessing(color func(str string, modifier ...interface{}) string) func(s string, done chan bool) {
-	return func(s string, done chan bool) {
-	forLable:
-		for {
-			select {
-			case <-done:
-				break forLable
-			default:
-				for _, v := range `-\|/` {
-					time.Sleep(100 * time.Millisecond)
-					fmt.Print(color(s + "..." + string(v) + "\r"))
-				}
-			}
-		}
-	}
-}
-
-func PrintStatus(colors, colorStatus func(str string, modifier ...interface{}) string) func(s, status string) {
-	return func(s, status string) {
-		fmt.Println(colors(s+"...") + colorStatus(status) + strings.Repeat(" ", 10))
-	}
-}
 
 func Green(str string, modifier ...interface{}) string {
 	return printer(str, 32, 0, modifier...)

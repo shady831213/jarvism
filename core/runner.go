@@ -5,9 +5,9 @@ import "io"
 type Runner interface {
 	Name() string
 	PrepareBuild(*AstBuild, *io.Writer) error
-	Build(*AstBuild,  *io.Writer) error
-	PrepareTest(*AstTestCase,  *io.Writer) error
-	RunTest(*AstTestCase,  *io.Writer) error
+	Build(*AstBuild, *io.Writer) error
+	PrepareTest(*AstTestCase, *io.Writer) *JVSTestResult
+	RunTest(*AstTestCase, *io.Writer) *JVSTestResult
 }
 
 var runner Runner
