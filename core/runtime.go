@@ -3,6 +3,7 @@ package core
 import (
 	"container/list"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"github.com/shady831213/jarvisSim/utils"
 	"io"
@@ -18,7 +19,7 @@ func hash(s string) string {
 	h := new(big.Int).SetBytes(sha256.New().Sum(([]byte)(s)))
 	mb := big.NewInt(math.MaxInt64)
 	h.Mod(h, mb)
-	return h.String()
+	return hex.EncodeToString(h.Bytes())
 }
 
 type runTimeOpts interface {

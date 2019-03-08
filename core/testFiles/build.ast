@@ -24,65 +24,11 @@ null
 
 -----------------
 WithValue:
----------------
+----------------
 compile_option:
 $compile_args
 
----------------
-post_compile_option:
-<nil>
-
----------------
-post_sim_option:
-<nil>
-
----------------
-pre_compile_option:
-<nil>
-
----------------
-pre_sim_option:
-<nil>
-
----------------
-sim_option:
-<nil>
-
-
-
-------------------
-has_pre_phase:
------------------
-Value:
-false
-
------------------
-On:
-null
-
------------------
-WithValue:
----------------
-compile_option:
-<nil>
-
----------------
-post_compile_option:
-echo"post_compile_option$has_pre_phase"
-
----------------
-post_sim_option:
-echo"post_sim_option$has_pre_phase"
-
----------------
-pre_compile_option:
-echo"pre_compile_option$has_pre_phase"
-
----------------
-pre_sim_option:
-echo"pre_sim_option$has_pre_phase"
-
----------------
+----------------
 sim_option:
 <nil>
 
@@ -96,27 +42,11 @@ false
 
 -----------------
 On:
----------------
+----------------
 compile_option:
 +lint=none-q
 
----------------
-post_compile_option:
-<nil>
-
----------------
-post_sim_option:
-<nil>
-
----------------
-pre_compile_option:
-<nil>
-
----------------
-pre_sim_option:
-<nil>
-
----------------
+----------------
 sim_option:
 <nil>
 
@@ -138,29 +68,35 @@ null
 
 -----------------
 WithValue:
----------------
+----------------
 compile_option:
 <nil>
 
----------------
-post_compile_option:
-<nil>
-
----------------
-post_sim_option:
-<nil>
-
----------------
-pre_compile_option:
-<nil>
-
----------------
-pre_sim_option:
-<nil>
-
----------------
+----------------
 sim_option:
 $sim_args
+
+
+
+------------------
+test_phase:
+-----------------
+Value:
+false
+
+-----------------
+On:
+null
+
+-----------------
+WithValue:
+----------------
+compile_option:
+echo"compile_option$test_phase"
+
+----------------
+sim_option:
+echo"sim_option$test_phase"
 
 
 
@@ -172,27 +108,11 @@ true
 
 -----------------
 On:
----------------
+----------------
 compile_option:
 <nil>
 
----------------
-post_compile_option:
-<nil>
-
----------------
-post_sim_option:
-<nil>
-
----------------
-pre_compile_option:
-<nil>
-
----------------
-pre_sim_option:
-<nil>
-
----------------
+----------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -205,68 +125,68 @@ null
 
 -------------------
 Builds:
-------------------
+-----------------
 build1:
-----------------
+-----------------
 compile_option:
 -sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 
-----------------
-post_compile_option:
-<nil>
-
-----------------
-post_sim_option:
-echo"post_sim_build1"
-
-----------------
-pre_compile_option:
-<nil>
-
-----------------
-pre_sim_option:
-echo"pre_sim_build1"
-
-----------------
+-----------------
 sim_option:
 +UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 
 
-----------------
+-----------------
+post_compile_option:
+
+
+-----------------
+post_sim_option:
+echo"post_sim_build1"
+
+-----------------
+pre_compile_option:
+
+
+-----------------
+pre_sim_option:
+echo"pre_sim_build1"
+
+-----------------
 test_discoverer:
 uvm_test
 
 ----------------
 discover_attr:
 
-------------------
+-----------------
 build2:
-----------------
+-----------------
 compile_option:
 -debug_access+pp-sverilog-ntb_optsuvm-1.2
 
-----------------
-post_compile_option:
-echo"post_compile_build2"
-
-----------------
-post_sim_option:
-<nil>
-
-----------------
-pre_compile_option:
-echo"pre_compile_build2"
-
-----------------
-pre_sim_option:
-<nil>
-
-----------------
+-----------------
 sim_option:
 +UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 
 
-----------------
+-----------------
+post_compile_option:
+echo"post_compile_build2"
+
+-----------------
+post_sim_option:
+
+
+-----------------
+pre_compile_option:
+echo"pre_compile_build2"
+
+-----------------
+pre_sim_option:
+
+
+-----------------
 test_discoverer:
 uvm_test
 
@@ -293,27 +213,11 @@ true
 
 --------------
 On:
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -347,27 +251,11 @@ true
 
 ------------
 On:
-----------
+-----------
 compile_option:
 <nil>
 
-----------
-post_compile_option:
-<nil>
-
-----------
-post_sim_option:
-<nil>
-
-----------
-pre_compile_option:
-<nil>
-
-----------
-pre_sim_option:
-<nil>
-
-----------
+-----------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -378,27 +266,11 @@ null
 
 
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -421,27 +293,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -466,27 +322,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -511,27 +351,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -556,27 +380,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -601,27 +409,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -646,27 +438,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -691,27 +467,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -736,27 +496,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -781,27 +525,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -826,27 +554,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -882,27 +594,11 @@ true
 
 ------------
 On:
-----------
+-----------
 compile_option:
 <nil>
 
-----------
-post_compile_option:
-<nil>
-
-----------
-post_sim_option:
-<nil>
-
-----------
-pre_compile_option:
-<nil>
-
-----------
-pre_sim_option:
-<nil>
-
-----------
+-----------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -913,27 +609,11 @@ null
 
 
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -956,27 +636,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1009,27 +673,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1054,27 +702,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1099,27 +731,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1144,27 +760,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1189,27 +789,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1234,27 +818,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1279,27 +847,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1324,27 +876,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1369,27 +905,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1414,27 +934,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1459,27 +963,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1514,27 +1002,11 @@ true
 
 --------------
 On:
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -1568,27 +1040,11 @@ true
 
 ------------
 On:
-----------
+-----------
 compile_option:
 <nil>
 
-----------
-post_compile_option:
-<nil>
-
-----------
-post_sim_option:
-<nil>
-
-----------
-pre_compile_option:
-<nil>
-
-----------
-pre_sim_option:
-<nil>
-
-----------
+-----------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -1599,27 +1055,11 @@ null
 
 
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL
 
@@ -1642,27 +1082,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1687,27 +1111,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1732,27 +1140,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1777,27 +1169,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1822,27 +1198,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1867,27 +1227,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1912,27 +1256,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -1957,27 +1285,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2002,27 +1314,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2047,27 +1343,11 @@ null
 ------------
 OptionArgs:
 
-------------
+-------------
 compile_option:
 <nil>
 
-------------
-post_compile_option:
-<nil>
-
-------------
-post_sim_option:
-<nil>
-
-------------
-pre_compile_option:
-<nil>
-
-------------
-pre_sim_option:
-<nil>
-
-------------
+-------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2101,27 +1381,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2146,27 +1410,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2191,27 +1439,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2236,27 +1468,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2281,27 +1497,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2326,27 +1526,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2371,27 +1555,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2416,27 +1584,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2461,27 +1613,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2506,27 +1642,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2551,27 +1671,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2596,27 +1700,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2641,27 +1729,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2686,27 +1758,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2731,27 +1787,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2776,27 +1816,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2821,27 +1845,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2866,27 +1874,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2911,27 +1903,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -2956,27 +1932,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 
@@ -3001,27 +1961,11 @@ null
 --------------
 OptionArgs:
 
---------------
+---------------
 compile_option:
 <nil>
 
---------------
-post_compile_option:
-<nil>
-
---------------
-post_sim_option:
-<nil>
-
---------------
-pre_compile_option:
-<nil>
-
---------------
-pre_sim_option:
-<nil>
-
---------------
+---------------
 sim_option:
 +UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 

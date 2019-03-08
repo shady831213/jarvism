@@ -39,16 +39,12 @@ options:
       sim_option:
         - +UVM_VERBOSITY=UVM_FULL
 
-  has_pre_phase:
+  test_phase:
     with_value_action:
-      pre_compile_option:
-        - echo "pre_compile_option $has_pre_phase"
-      post_compile_option:
-        - echo "post_compile_option $has_pre_phase"
-      pre_sim_option:
-        - echo "pre_sim_option $has_pre_phase"
-      post_sim_option:
-        - echo "post_sim_option $has_pre_phase"
+      compile_option:
+        - echo "compile_option $test_phase"
+      sim_option:
+        - echo "sim_option $test_phase"
 
 groups:
   group1:

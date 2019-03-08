@@ -65,7 +65,7 @@ func TestSingleRepeatTest(t *testing.T) {
 
 func TestRunOnlyBuild(t *testing.T) {
 	core.SetRunner(new(testRunner))
-	if err := core.RunOnlyBuild("build1", []string{"-has_pre_phase jarvis"}); err != nil {
+	if err := core.RunOnlyBuild("build1", []string{"-test_phase jarvis"}); err != nil {
 		t.Error(err)
 	}
 }
