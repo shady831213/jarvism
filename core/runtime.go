@@ -46,6 +46,12 @@ func (l *runTimeJobLimiter) close() {
 
 var runTimeLimiter runTimeJobLimiter
 
+func runTimeFinish() {
+	runTimeLimiter.close()
+	runTimeMaxJob = -1
+	runTimeSimOnly = false
+}
+
 type runTimeOpts interface {
 	GetName() string
 	//bottom-up search
@@ -122,20 +128,25 @@ func (f *runFlow) AddTest(test *AstTestCase) {
 }
 
 func (f *runFlow) run() {
-	if err := f.prepareBuildPhase(f.build, f.cmdStdout); err != nil {
-		fmt.Println(utils.Red(err.Error()))
-		f.buildDone <- err
-		runTimeLimiter.get()
-		return
+	//run compile
+	if !runTimeSimOnly {
+		if err := f.prepareBuildPhase(f.build, f.cmdStdout); err != nil {
+			fmt.Println(utils.Red(err.Error()))
+			f.buildDone <- err
+			runTimeLimiter.get()
+			return
+		}
+		if err := f.buildPhase(f.build, f.cmdStdout); err != nil {
+			fmt.Println(utils.Red(err.Error()))
+			f.buildDone <- err
+			runTimeLimiter.get()
+			return
+		}
+		f.buildDone <- nil
 	}
-	if err := f.buildPhase(f.build, f.cmdStdout); err != nil {
-		fmt.Println(utils.Red(err.Error()))
-		f.buildDone <- err
-		runTimeLimiter.get()
-		return
-	}
-	f.buildDone <- nil
 	runTimeLimiter.get()
+
+	//run tests
 	for e := f.Front(); e != nil; e = e.Next() {
 		runTimeLimiter.put()
 		f.testWg.Add(1)
@@ -220,7 +231,7 @@ func (r *runTime) initSubTest(test *AstTestCase) int {
 }
 
 func (r *runTime) run() {
-	defer runTimeLimiter.close()
+	defer runTimeFinish()
 	var status string
 	go PrintProccessing(utils.Brown)("Jarvism is running", &status, r.processingDone)
 	defer func() {

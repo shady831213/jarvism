@@ -33,33 +33,42 @@ func setUpOnlyBuild(buildName string, args []string) (*runTime, error) {
 }
 
 func TestGroupSetup(t *testing.T) {
-	if r, err := setUpGroup(GetJvsAstRoot().GetGroup("group1"), nil); err != nil {
+	r, err := setUpGroup(GetJvsAstRoot().GetGroup("group1"), []string{"-max_job 5"})
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
-	} else {
-		if len(r.runFlow) != 1 {
-			t.Error("expect 1 runFlow but get " + string(len(r.runFlow)))
-			t.FailNow()
-		}
+	}
+	if len(r.runFlow) != 1 {
+		t.Error("expect 1 runFlow but get " + string(len(r.runFlow)))
+		t.FailNow()
+	}
+	if runTimeMaxJob != 5 {
+		t.Error("runTimeMaxJob expect 5, but get " + strconv.Itoa(runTimeMaxJob))
+		t.FailNow()
 	}
 
-	if r, err := setUpGroup(GetJvsAstRoot().GetGroup("group2"), []string{}); err != nil {
+	r, err = setUpGroup(GetJvsAstRoot().GetGroup("group2"), []string{"-sim_only"})
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
-	} else {
-		if len(r.runFlow) != 2 {
-			t.Error("expect 2 runFlow but get " + string(len(r.runFlow)))
-			t.FailNow()
-		}
 	}
-	if r, err := setUpGroup(GetJvsAstRoot().GetGroup("group3"), []string{}); err != nil {
+	if len(r.runFlow) != 2 {
+		t.Error("expect 2 runFlow but get " + string(len(r.runFlow)))
+		t.FailNow()
+	}
+	if runTimeSimOnly != true {
+		t.Error("runTimeSimOnly expect true, but get false")
+		t.FailNow()
+	}
+
+	r, err = setUpGroup(GetJvsAstRoot().GetGroup("group3"), []string{})
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
-	} else {
-		if len(r.runFlow) != 2 {
-			t.Error("expect 2 runFlow but get " + string(len(r.runFlow)))
-			t.FailNow()
-		}
+	}
+	if len(r.runFlow) != 2 {
+		t.Error("expect 2 runFlow but get " + string(len(r.runFlow)))
+		t.FailNow()
 	}
 }
 

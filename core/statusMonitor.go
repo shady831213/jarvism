@@ -73,10 +73,8 @@ LableFor:
 				break
 			}
 		case <-done:
-			*status = finishStatusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)
 			break LableFor
-		default:
-			*status = statusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)
 		}
 	}
+	*status = finishStatusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)
 }

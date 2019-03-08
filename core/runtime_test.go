@@ -53,7 +53,7 @@ func (r *testRunner) RunTest(testCase *core.AstTestCase, cmdStdout *io.Writer) *
 
 func TestGroup(t *testing.T) {
 	core.SetRunner(new(testRunner))
-	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group1"), nil); err != nil {
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group1"), []string{"-sim_only"}); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}

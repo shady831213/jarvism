@@ -64,6 +64,7 @@ func (t *jvsAstNonBoolOption) IsBoolFlag() bool {
 
 //buildin options
 var runTimeMaxJob int
+var runTimeSimOnly bool
 
 type jvsAstTestOption struct {
 	jvsAstNonBoolOption
@@ -173,6 +174,7 @@ func init() {
 	RegisterJvsAstOption(newRepeatOption(), "run each testcase repeatly n times")
 	RegisterJvsAstOption(newSeedOption(), "run testcase with specific seed")
 	jvsOptions.IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
+	jvsOptions.BoolVar(&runTimeSimOnly, "sim_only", false, "bypass compile and only run simulation, default is false.")
 }
 
 //global
