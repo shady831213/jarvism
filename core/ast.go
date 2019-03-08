@@ -120,110 +120,155 @@ func (item *astItem) GetString() string {
 }
 
 type astItems struct {
-	items map[string]*astItem
+	name       string
+	preAction  string
+	postAction string
+	option     *astItem
 }
 
-func (items *astItems) init() {
-	items.items = make(map[string]*astItem)
-	items.items["sim_option"] = nil
-	items.items["compile_option"] = nil
+func newAstItems(name string) *astItems {
+	inst := new(astItems)
+	inst.name = name
+	inst.option = newAstItem("")
+	return inst
 }
 
-func (items *astItems) CatItem(key string, i *astItem) {
-	if i == nil {
-		return
-	}
-	if items.items[key] == nil {
-		items.items[key] = newAstItem("")
-	}
-	items.items[key].Cat(i)
+func (items *astItems) preActionName() string {
+	return "pre_" + items.name + "_option"
+}
+
+func (items *astItems) postActionName() string {
+	return "post_" + items.name + "_option"
+}
+
+func (items *astItems) optionName() string {
+	return items.name + "_option"
 }
 
 func (items *astItems) Cat(i *astItems) {
 	if i == nil {
 		return
 	}
-	for k, v := range i.items {
-		items.CatItem(k, v)
-	}
+	items.preAction += " " + i.postAction
+	items.postAction += " " + i.postAction
+	items.option.Cat(i.option)
 }
 
 func (items *astItems) Replace(old, new string, cnt int) {
-	for k, v := range items.items {
-		if v != nil {
-			items.items[k].Replace(old, new, cnt)
-		}
-	}
+	strings.Replace(items.preAction, old, new, cnt)
+	strings.Replace(items.postAction, old, new, cnt)
+	items.option.Replace(old, new, cnt)
 }
 
-func (items *astItems) GetItem(key string) *astItem {
-	if v, ok := items.items[key]; ok {
-		return v
-	}
-	return nil
-}
-
-func (items *astItems) GetHierString(space int) string {
-	s := ""
-	keys := make([]string, 0)
-	for k := range items.items {
-		keys = append(keys, k)
-	}
-	utils.ForeachStringKeysInOrder(keys, func(i string) {
-		s += astHierFmt(i+":", space, func() string {
-			if items.items[i] != nil {
-				return fmt.Sprint(strings.Repeat(" ", space)) +
-					fmt.Sprintln(items.items[i].GetString())
-			}
-			return fmt.Sprint(strings.Repeat(" ", space)) +
-				fmt.Sprintln(nil)
-		})
-	})
-	return s
-}
-
-type astParseItem struct {
-	astItems
-}
-
-func (items *astParseItem) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+func (items *astItems) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
-	for k, _ := range items.items {
-		keywords.AddKey(k)
-	}
+	keywords.AddKey(items.preActionName())
+	keywords.AddKey(items.optionName())
+	keywords.AddKey(items.postActionName())
 	if !CheckKeyWord(s, keywords) {
 		return false, keywords, ""
 	}
 	return true, nil, ""
 }
 
-func (items *astParseItem) Parse(cfg map[interface{}]interface{}) error {
-	for k, _ := range items.items {
-		if err := CfgToAstItemOptional(cfg, k, func(i interface{}) error {
-			items.items[k] = newAstItem(i)
-			return nil
-		}); err != nil {
-			return err
+func (items *astItems) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToAstItemOptional(cfg, items.preActionName(), func(i interface{}) error {
+		if l, ok := i.([]interface{}); ok {
+			for _, s := range l {
+				items.preAction += s.(string)
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
+	if err := CfgToAstItemOptional(cfg, items.optionName(), func(i interface{}) error {
+		items.option.Cat(newAstItem(i))
+		return nil
+	}); err != nil {
+		return err
+	}
+	if err := CfgToAstItemOptional(cfg, items.postActionName(), func(i interface{}) error {
+		if l, ok := i.([]interface{}); ok {
+			for _, s := range l {
+				items.postAction += s.(string)
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (items *astItems) GetHierString(space int) string {
+	return astHierFmt(items.preActionName()+":", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", space) + items.preAction)
+	}) + astHierFmt(items.optionName()+":", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", space) + items.option.GetString())
+	}) + astHierFmt(items.postActionName()+":", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", space) + items.postAction)
+	})
 }
 
 //Options
 //------------------------
 type AstOptionAction struct {
-	astParseItem
+	compileOption, simOption *astItem
 }
 
 func NewAstOptionAction() *AstOptionAction {
 	inst := new(AstOptionAction)
-	inst.astParseItem.init()
+	inst.compileOption = newAstItem("")
+	inst.simOption = newAstItem("")
 	return inst
+}
+
+func (a *AstOptionAction) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("compile_option")
+	keywords.AddKey("sim_option")
+	if !CheckKeyWord(s, keywords) {
+		return false, keywords, ""
+	}
+	return true, nil, ""
+}
+
+func (a *AstOptionAction) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "compile_option", func(i interface{}) error {
+		a.compileOption.Cat(newAstItem(i))
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := CfgToAstItemOptional(cfg, "sim_option", func(i interface{}) error {
+		a.simOption.Cat(newAstItem(i))
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *AstOptionAction) GetHierString(space int) string {
+	return astHierFmt("compile_option:", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", space) + a.compileOption.GetString())
+	}) + astHierFmt("sim_option:", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", space) + a.simOption.GetString())
+	})
 }
 
 type JvsOptionForTest interface {
 	JvsOption
 	TestHandler(test *AstTestCase)
+}
+
+type JvsOptionForBuild interface {
+	JvsOption
+	BuildHandler(build *AstBuild)
 }
 
 type AstOption struct {
@@ -280,11 +325,20 @@ func (t *AstOption) Usage() string {
 
 func (t *AstOption) TestHandler(test *AstTestCase) {
 	if t.IsBoolFlag() {
-		test.Cat(&t.On.astItems)
+		test.simItems.option.Cat(t.On.simOption)
 		return
 	}
-	t.WithValue.Replace("$"+t.Name, t.Value, -1)
-	test.Cat(&t.WithValue.astItems)
+	t.WithValue.simOption.Replace("$"+t.Name, t.Value, -1)
+	test.simItems.option.Cat(t.WithValue.simOption)
+}
+
+func (t *AstOption) BuildHandler(build *AstBuild) {
+	if t.IsBoolFlag() {
+		build.compileItems.option.Cat(t.On.compileOption)
+		return
+	}
+	t.WithValue.compileOption.Replace("$"+t.Name, t.Value, -1)
+	build.compileItems.option.Cat(t.WithValue.compileOption)
 }
 
 func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -476,32 +530,24 @@ func (t *astTestDiscoverer) GetHierString(space int) string {
 }
 
 type AstBuild struct {
-	astParseItem
-	testDiscoverer *astTestDiscoverer
-	Name           string
-	prePostOption  map[string]string
+	Name                   string
+	compileItems, simItems *astItems
+	testDiscoverer         *astTestDiscoverer
 }
 
 func newAstBuild(name string) *AstBuild {
 	inst := new(AstBuild)
 	inst.Name = name
-	inst.prePostOption = make(map[string]string)
-	inst.prePostOption["pre_compile_option"] = ""
-	inst.prePostOption["post_compile_option"] = ""
-	inst.prePostOption["pre_sim_option"] = ""
-	inst.prePostOption["post_sim_option"] = ""
-	inst.astParseItem.init()
-
+	inst.simItems = newAstItems("sim")
+	inst.compileItems = newAstItems("compile")
 	return inst
 }
 
 func (t *AstBuild) Clone() *AstBuild {
 	inst := newAstBuild(t.Name)
-	inst.astParseItem.Cat(&t.astParseItem.astItems)
 	inst.testDiscoverer = t.testDiscoverer
-	for k, v := range t.prePostOption {
-		inst.prePostOption[k] = v
-	}
+	inst.simItems.Cat(t.simItems)
+	inst.compileItems.Cat(t.compileItems)
 	return inst
 }
 
@@ -510,18 +556,16 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 }
 
 func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
-	if ok, buildKeywords, _ := t.astParseItem.KeywordsChecker(s); !ok {
-		keywords := utils.NewStringMapSet()
-		keywords.AddKey("test_discoverer")
-		for k, _ := range t.prePostOption {
-			keywords.AddKey(k)
+	if ok, compileKeywors, _ := t.compileItems.KeywordsChecker(s); !ok {
+		if ok, simKeywors, _ := t.simItems.KeywordsChecker(s); !ok {
+			keywords := utils.NewStringMapSet()
+			keywords.AddKey("test_discoverer")
+			if CheckKeyWord(s, keywords) {
+				return true, nil, ""
+			}
+			return false, utils.StringMapSetUnion(compileKeywors, simKeywors, keywords), "Error in build " + t.Name + ":"
 		}
-		if CheckKeyWord(s, keywords) {
-			return true, nil, ""
-		}
-		return false, utils.StringMapSetUnion(buildKeywords, keywords), "Error in build " + t.Name + ":"
 	}
-
 	return true, nil, ""
 }
 
@@ -539,35 +583,23 @@ func (t *AstBuild) Parse(cfg map[interface{}]interface{}) error {
 			return AstError("group "+t.Name, err)
 		}
 	}
-	//pre post options
-	for k, _ := range t.prePostOption {
-		if err := CfgToAstItemOptional(cfg, k, func(i interface{}) error {
-			for _, s := range i.([]interface{}) {
-				t.prePostOption[k] += " " + s.(string)
-			}
-			return nil
-		}); err != nil {
-			return err
-		}
+	//options
+	if err := t.compileItems.Parse(cfg); err != nil {
+		return err
 	}
-	return t.astParseItem.Parse(cfg)
+	if err := t.simItems.Parse(cfg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *AstBuild) GetHierString(space int) string {
 	nextSpace := space + 1
-	s := ""
-	keys := make([]string, 0)
-	for k := range t.prePostOption {
-		keys = append(keys, k)
-	}
-	utils.ForeachStringKeysInOrder(keys, func(i string) {
-		s += astHierFmt(i+":", nextSpace, func() string {
-			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.prePostOption[i])
-		})
-	})
 	return astHierFmt(t.Name+":", nextSpace, func() string {
-		return t.astParseItem.GetHierString(nextSpace)
-	}) + s + t.testDiscoverer.GetHierString(nextSpace)
+		return t.compileItems.GetHierString(nextSpace) +
+			t.simItems.GetHierString(nextSpace) +
+			t.testDiscoverer.GetHierString(nextSpace)
+	})
 }
 
 //------------------------
@@ -665,11 +697,7 @@ func (t *astTest) Link() error {
 		if err != nil {
 			return AstError("args of "+t.Name, err)
 		}
-		v, ok := opt.Clone().(JvsOptionForTest)
-		if !ok {
-			return nil
-		}
-		t.OptionArgs.Add(v.GetName(), v)
+		t.OptionArgs.Add(opt.GetName(), opt.Clone())
 
 	}
 	return nil
@@ -698,15 +726,29 @@ func (t *astTest) GetHierString(space int) string {
 
 type AstTestCase struct {
 	astTest
-	astItems
-	seeds []int
+	simItems *astItems
+	seeds    []int
 }
 
 func newAstTestCase(name string) *AstTestCase {
 	inst := new(AstTestCase)
 	inst.astTest.init(name)
-	inst.astItems.init()
+	inst.simItems = newAstItems("sim")
 	return inst
+}
+
+func (t *AstTestCase) ParseArgs() {
+	t.Build = t.GetBuild().Clone()
+	//get options sim_options in order
+	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
+		if a, ok := v.(JvsOptionForTest); ok {
+			a.TestHandler(t)
+		}
+		if a, ok := v.(JvsOptionForBuild); ok {
+			a.BuildHandler(t.Build)
+		}
+		return false
+	})
 }
 
 func (t *AstTestCase) GetTestCases() []*AstTestCase {
@@ -714,8 +756,9 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 	for i := range testcases {
 		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
-		testcases[i].astItems.Cat(&t.astItems)
-		testcases[i].CatItem("sim_option", newAstItem(GetSimulator().SeedOption()+strconv.Itoa(t.seeds[i])))
+		testcases[i].simItems.Cat(t.GetBuild().simItems)
+		testcases[i].simItems.Cat(t.simItems)
+		testcases[i].simItems.option.Cat(newAstItem(GetSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
 	}
 	return testcases
 }
@@ -725,17 +768,11 @@ func (t *AstTestCase) Link() error {
 		return err
 	}
 	//set build and check test
-	t.Build = t.GetBuild()
-	if !t.Build.GetTestDiscoverer().IsValidTest(t.Name) {
+	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
 		return errors.New(utils.Red("Link Error: "+t.Name+" is not valid test of build"+t.Build.Name) + "\n" +
 			"valid tests:\n" + strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
 	}
 
-	//get options sim_options in order
-	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
-		v.(JvsOptionForTest).TestHandler(t)
-		return false
-	})
 	//link name
 	if t.parent != nil {
 		t.Name = t.parent.GetName() + "__" + t.Name
@@ -747,7 +784,7 @@ func (t *AstTestCase) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
-			t.astItems.GetHierString(nextSpace) +
+			t.simItems.GetHierString(nextSpace) +
 			astHierFmt("seeds:", nextSpace, func() string {
 				return strings.Repeat(" ", nextSpace) + fmt.Sprintln(t.seeds)
 			}) +
@@ -778,6 +815,17 @@ func newAstGroup(name string) *astGroup {
 	inst.init(name)
 	inst.buildName = ""
 	return inst
+}
+
+func (t *astGroup) ParseArgs() {
+	t.Build = t.GetBuild().Clone()
+	//get options sim_options in order
+	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
+		if a, ok := v.(JvsOptionForBuild); ok {
+			a.BuildHandler(t.Build)
+		}
+		return false
+	})
 }
 
 func (t *astGroup) GetTestCases() []*AstTestCase {

@@ -28,6 +28,7 @@ type runTimeOpts interface {
 	GetBuild() *AstBuild
 	//top-down search
 	GetTestCases() []*AstTestCase
+	ParseArgs()
 }
 
 type runFlow struct {
@@ -141,8 +142,8 @@ func newRunTime(name string, group *astGroup) *runTime {
 	}
 	//build only
 	if testCnt == 0 {
-		//Fix Me : support build only get args
-		r.createFlow(group.GetBuild(), nil)
+		group.ParseArgs()
+		r.createFlow(group.GetBuild())
 	}
 	if testCnt <= 1 {
 		r.cmdStdout = os.Stdout
@@ -150,30 +151,11 @@ func newRunTime(name string, group *astGroup) *runTime {
 	return r
 }
 
-func (r *runTime) createFlow(build *AstBuild, items *astItems) *runFlow {
-	var preCompileOpt, CompileOpt, postCompileOpt *astItem
-	options := ""
-	if items != nil {
-		preCompileOpt = items.GetItem("pre_compile_option")
-		if preCompileOpt != nil {
-			options += preCompileOpt.GetString()
-		}
-		CompileOpt = items.GetItem("compile_option")
-		if CompileOpt != nil {
-			options += CompileOpt.GetString()
-		}
-		postCompileOpt = items.GetItem("post_compile_option")
-		if postCompileOpt != nil {
-			options += postCompileOpt.GetString()
-		}
-	}
-	hash := hash(build.Name + options + r.runtimeId)
+func (r *runTime) createFlow(build *AstBuild) *runFlow {
+	hash := hash(build.Name + build.compileItems.preAction + build.compileItems.option.GetString() + build.compileItems.postAction + r.runtimeId)
 	if _, ok := r.runFlow[hash]; !ok {
 		newBuild := build.Clone()
-		newBuild.astParseItem.GetItem("pre_compile_option").Cat(preCompileOpt)
-		newBuild.astParseItem.GetItem("compile_option").Cat(CompileOpt)
-		newBuild.astParseItem.GetItem("post_compile_option").Cat(postCompileOpt)
-		newBuild.Name = r.runtimeId + "__" + newBuild.Name + "_" + hash
+		newBuild.Name = r.runtimeId + "__" + build.Name + "_" + hash
 		r.runFlow[hash] = newRunFlow(newBuild, &r.cmdStdout)
 	}
 
@@ -181,8 +163,9 @@ func (r *runTime) createFlow(build *AstBuild, items *astItems) *runFlow {
 }
 
 func (r *runTime) initSubTest(test *AstTestCase) int {
+	test.ParseArgs()
+	flow := r.createFlow(test.GetBuild())
 	testcases := test.GetTestCases()
-	flow := r.createFlow(test.GetBuild(), &test.astItems)
 	for _, t := range test.GetTestCases() {
 		flow.AddTest(t)
 	}

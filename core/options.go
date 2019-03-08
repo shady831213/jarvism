@@ -106,17 +106,20 @@ func (t *RepeatOption) String() string {
 }
 
 func (t *RepeatOption) TestHandler(test *AstTestCase) {
-	test.seeds = make([]int, 0)
-	seedsMap := make(map[int]interface{})
-	for len(seedsMap) < t.n {
-		seed := jvsRand.Intn(math.MaxInt32)
-		if _, ok := seedsMap[seed]; !ok {
-			seedsMap[seed] = nil
-			test.seeds = append(test.seeds, seed)
+	//no one touch it
+	if test.seeds == nil {
+		test.seeds = make([]int, 0)
+		seedsMap := make(map[int]interface{})
+		for len(seedsMap) < t.n {
+			seed := jvsRand.Intn(math.MaxInt32)
+			if _, ok := seedsMap[seed]; !ok {
+				seedsMap[seed] = nil
+				test.seeds = append(test.seeds, seed)
+			}
 		}
-	}
-	if len(test.seeds) != t.n {
-		panic(fmt.Sprintf("len of seeds %d != t.n %d !", len(test.seeds), t.n))
+		if len(test.seeds) != t.n {
+			panic(fmt.Sprintf("len of seeds %d != t.n %d !", len(test.seeds), t.n))
+		}
 	}
 }
 
@@ -155,15 +158,12 @@ func (t *SeedOption) String() string {
 }
 
 func (t *SeedOption) TestHandler(test *AstTestCase) {
-	//no one touch it
-	if test.seeds == nil {
-		test.seeds = make([]int, 1)
-		if t.n == 0 {
-			test.seeds[0] = jvsRand.Intn(math.MaxInt32)
-			return
-		}
-		test.seeds[0] = t.n
+	test.seeds = make([]int, 1)
+	if t.n == 0 {
+		test.seeds[0] = jvsRand.Intn(math.MaxInt32)
+		return
 	}
+	test.seeds[0] = t.n
 }
 
 func SetRand(rand *rand.Rand) {
