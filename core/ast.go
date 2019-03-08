@@ -133,11 +133,11 @@ func newAstItems(name string) *astItems {
 }
 
 func (items *astItems) preActionName() string {
-	return "pre_" + items.name + "_option"
+	return "pre_" + items.name + "_action"
 }
 
 func (items *astItems) postActionName() string {
-	return "post_" + items.name + "_option"
+	return "post_" + items.name + "_action"
 }
 
 func (items *astItems) optionName() string {
@@ -262,26 +262,18 @@ func (a *AstOptionAction) GetHierString(space int) string {
 	})
 }
 
-type JvsOptionForTest interface {
-	JvsAstOption
-	TestHandler(test *AstTestCase)
-}
-
-type JvsOptionForBuild interface {
-	JvsAstOption
-	BuildHandler(build *AstBuild)
-}
-
 type AstOption struct {
 	On        *AstOptionAction
 	WithValue *AstOptionAction
 	Value     string
 	Name      string
+	usage     string
 }
 
 func newAstOption(name string) *AstOption {
 	inst := new(AstOption)
 	inst.Init(name)
+	inst.usage = "user-defined flag"
 	return inst
 }
 
@@ -321,7 +313,7 @@ func (t *AstOption) IsBoolFlag() bool {
 }
 
 func (t *AstOption) Usage() string {
-	return "user-defined flag"
+	return t.usage
 }
 
 func (t *AstOption) TestHandler(test *AstTestCase) {
@@ -342,7 +334,7 @@ func (t *AstOption) BuildHandler(build *AstBuild) {
 
 func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
-	keywords.AddKey("on_action", "with_value_action")
+	keywords.AddKey("on_action", "with_value_action", "usage")
 	if !CheckKeyWord(s, keywords) {
 		return false, keywords, "Error in " + t.Name + ":"
 	}
@@ -350,6 +342,12 @@ func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string
 }
 
 func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "usage", func(item interface{}) error {
+		t.usage = item.(string)
+		return nil
+	}); err != nil {
+		return AstError("on_action of "+t.Name, err)
+	}
 	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) error {
 		if t.WithValue != nil {
 			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
@@ -369,14 +367,16 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 		return AstError("with_value_action of "+t.Name, err)
 	}
 	//add to flagSet
-	RegisterJvsAstOption(t, t.Usage())
+	RegisterJvsAstOption(t)
 	return nil
 }
 
 func (t *AstOption) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
-		return astHierFmt("On:", nextSpace, func() string {
+		return astHierFmt("Usage:", nextSpace, func() string {
+			return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + t.Usage())
+		}) + astHierFmt("On:", nextSpace, func() string {
 			if t.On != nil {
 				return t.On.GetHierString(nextSpace + 1)
 			}
@@ -727,7 +727,7 @@ func (t *astTest) GetHierString(space int) string {
 				if v, ok := arg.(*AstOption); ok {
 					s += v.GetHierString(nextSpace + 1)
 				} else {
-					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + arg.(JvsOptionForTest).GetName())
+					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + arg.(JvsAstOptionForTest).GetName())
 				}
 			}
 			return s
@@ -763,10 +763,10 @@ func (t *AstTestCase) ParseArgs() {
 	t.Build = t.GetBuild().Clone()
 	//get options sim_options in order
 	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
-		if a, ok := v.(JvsOptionForTest); ok {
+		if a, ok := v.(JvsAstOptionForTest); ok {
 			a.TestHandler(t)
 		}
-		if a, ok := v.(JvsOptionForBuild); ok {
+		if a, ok := v.(JvsAstOptionForBuild); ok {
 			a.BuildHandler(t.Build)
 		}
 		return false
@@ -854,7 +854,7 @@ func (t *astGroup) ParseArgs() {
 	t.Build = t.GetBuild().Clone()
 	//get options sim_options in order
 	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
-		if a, ok := v.(JvsOptionForBuild); ok {
+		if a, ok := v.(JvsAstOptionForBuild); ok {
 			a.BuildHandler(t.Build)
 		}
 		return false

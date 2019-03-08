@@ -1,5 +1,7 @@
 options:
   quite_comp:
+    usage:
+      quite compiling with -q, and close lint with +lint=none
     on_action:
       compile_option:
         - -q

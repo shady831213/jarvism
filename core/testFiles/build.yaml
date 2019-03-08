@@ -15,20 +15,20 @@ builds:
     compile_option:
       - *common_compile
       - -timescale=1ns/10ps
-    pre_sim_option:
+    pre_sim_action:
       - echo "pre_sim_build1"
     sim_option:
       - *common_sim
-    post_sim_option:
+    post_sim_action:
       - echo "post_sim_build1"
 
   build2:
-    pre_compile_option:
+    pre_compile_action:
       - echo "pre_compile_build2"
     compile_option:
       - -debug_access+pp
       - *common_compile
-    post_compile_option:
+    post_compile_action:
       - echo "post_compile_build2"
     sim_option:
       - *common_sim

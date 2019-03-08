@@ -15,10 +15,21 @@ type JvsAstOption interface {
 	flag.Value
 	GetName() string
 	Clone() JvsAstOption
+	Usage() string
 }
 
-func RegisterJvsAstOption(v JvsAstOption, usage string) {
-	jvsOptions.Var(v, v.GetName(), usage)
+type JvsAstOptionForTest interface {
+	JvsAstOption
+	TestHandler(test *AstTestCase)
+}
+
+type JvsAstOptionForBuild interface {
+	JvsAstOption
+	BuildHandler(build *AstBuild)
+}
+
+func RegisterJvsAstOption(v JvsAstOption) {
+	jvsOptions.Var(v, v.GetName(), v.Usage())
 }
 
 func argToOption(s string) (string, error) {
@@ -66,16 +77,8 @@ func (t *jvsAstNonBoolOption) IsBoolFlag() bool {
 var runTimeMaxJob int
 var runTimeSimOnly bool
 
-type jvsAstTestOption struct {
-	jvsAstNonBoolOption
-}
-
-func (t *jvsAstTestOption) IsCompileOption() bool {
-	return false
-}
-
 type RepeatOption struct {
-	jvsAstTestOption
+	jvsAstNonBoolOption
 	n int
 }
 
@@ -126,8 +129,12 @@ func (t *RepeatOption) TestHandler(test *AstTestCase) {
 	}
 }
 
+func (t *RepeatOption) Usage() string {
+	return "run each testcase repeatly n times"
+}
+
 type SeedOption struct {
-	jvsAstTestOption
+	jvsAstNonBoolOption
 	n int
 }
 
@@ -169,10 +176,14 @@ func (t *SeedOption) TestHandler(test *AstTestCase) {
 	test.seeds[0] = t.n
 }
 
+func (t *SeedOption) Usage() string {
+	return "run testcase with specific seed"
+}
+
 func init() {
 	jvsRand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	RegisterJvsAstOption(newRepeatOption(), "run each testcase repeatly n times")
-	RegisterJvsAstOption(newSeedOption(), "run testcase with specific seed")
+	RegisterJvsAstOption(newRepeatOption())
+	RegisterJvsAstOption(newSeedOption())
 	jvsOptions.IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
 	jvsOptions.BoolVar(&runTimeSimOnly, "sim_only", false, "bypass compile and only run simulation, default is false.")
 }

@@ -15,6 +15,10 @@ Options:
 ------------------
 compile_args:
 -----------------
+Usage:
+compilingargspasstosimulator
+
+-----------------
 On:
 null
 
@@ -30,6 +34,10 @@ sim_option:
 
 ------------------
 quite_comp:
+-----------------
+Usage:
+quitecompilingwith-q,andcloselintwith+lint=none
+
 -----------------
 On:
 ----------------
@@ -47,6 +55,10 @@ null
 ------------------
 sim_args:
 -----------------
+Usage:
+simulationargspasstosimulator
+
+-----------------
 On:
 null
 
@@ -63,6 +75,10 @@ $sim_args
 ------------------
 test_phase:
 -----------------
+Usage:
+user-definedflag
+
+-----------------
 On:
 null
 
@@ -78,6 +94,10 @@ echo"sim_option$test_phase"
 
 ------------------
 vh:
+-----------------
+Usage:
+user-definedflag
+
 -----------------
 On:
 ----------------
@@ -98,22 +118,22 @@ Builds:
 -----------------
 build1:
 -----------------
-pre_compile_option:
+pre_compile_action:
 
 -----------------
 compile_option:
 -sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 -----------------
-post_compile_option:
+post_compile_action:
 
 -----------------
-pre_sim_option:
+pre_sim_action:
 echo"pre_sim_build1"
 -----------------
 sim_option:
 +UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 -----------------
-post_sim_option:
+post_sim_action:
 echo"post_sim_build1"
 -----------------
 test_discoverer:
@@ -126,22 +146,22 @@ discover_attr:
 -----------------
 build2:
 -----------------
-pre_compile_option:
+pre_compile_action:
 echo"pre_compile_build2"
 -----------------
 compile_option:
 -debug_access+pp-sverilog-ntb_optsuvm-1.2
 -----------------
-post_compile_option:
+post_compile_action:
 echo"post_compile_build2"
 -----------------
-pre_sim_option:
+pre_sim_action:
 
 -----------------
 sim_option:
 +UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 -----------------
-post_sim_option:
+post_sim_action:
 
 -----------------
 test_discoverer:
@@ -165,6 +185,10 @@ OptionArgs:
 buildInOption:repeat
 ---------------
 vh:
+--------------
+Usage:
+user-definedflag
+
 --------------
 On:
 -------------
@@ -198,6 +222,10 @@ buildInOption:repeat
 -------------
 vh:
 ------------
+Usage:
+user-definedflag
+
+------------
 On:
 -----------
 compile_option:
@@ -213,13 +241,13 @@ null
 
 
 ---------------
-pre_sim_option:
+pre_sim_action:
 
 ---------------
 sim_option:
 
 ---------------
-post_sim_option:
+post_sim_action:
 
 ---------------
 seeds:
@@ -243,6 +271,10 @@ buildInOption:seed
 -------------
 vh:
 ------------
+Usage:
+user-definedflag
+
+------------
 On:
 -----------
 compile_option:
@@ -258,13 +290,13 @@ null
 
 
 ---------------
-pre_sim_option:
+pre_sim_action:
 
 ---------------
 sim_option:
 
 ---------------
-post_sim_option:
+post_sim_action:
 
 ---------------
 seeds:
@@ -291,6 +323,10 @@ OptionArgs:
 buildInOption:repeat
 ---------------
 vh:
+--------------
+Usage:
+user-definedflag
+
 --------------
 On:
 -------------
@@ -324,6 +360,10 @@ buildInOption:repeat
 -------------
 vh:
 ------------
+Usage:
+user-definedflag
+
+------------
 On:
 -----------
 compile_option:
@@ -339,13 +379,13 @@ null
 
 
 ---------------
-pre_sim_option:
+pre_sim_action:
 
 ---------------
 sim_option:
 
 ---------------
-post_sim_option:
+post_sim_action:
 
 ---------------
 seeds:
@@ -370,6 +410,10 @@ OptionArgs:
 buildInOption:repeat
 -------------
 vh:
+------------
+Usage:
+user-definedflag
+
 ------------
 On:
 -----------
@@ -403,6 +447,10 @@ buildInOption:repeat
 -----------
 vh:
 ----------
+Usage:
+user-definedflag
+
+----------
 On:
 ---------
 compile_option:
@@ -418,13 +466,13 @@ null
 
 
 -------------
-pre_sim_option:
+pre_sim_action:
 
 -------------
 sim_option:
 
 -------------
-post_sim_option:
+post_sim_action:
 
 -------------
 seeds:
@@ -448,6 +496,10 @@ buildInOption:seed
 -----------
 vh:
 ----------
+Usage:
+user-definedflag
+
+----------
 On:
 ---------
 compile_option:
@@ -463,13 +515,13 @@ null
 
 
 -------------
-pre_sim_option:
+pre_sim_action:
 
 -------------
 sim_option:
 
 -------------
-post_sim_option:
+post_sim_action:
 
 -------------
 seeds:
@@ -498,6 +550,10 @@ OptionArgs:
 buildInOption:repeat
 ---------------
 vh:
+--------------
+Usage:
+user-definedflag
+
 --------------
 On:
 -------------
@@ -531,6 +587,10 @@ buildInOption:repeat
 -------------
 vh:
 ------------
+Usage:
+user-definedflag
+
+------------
 On:
 -----------
 compile_option:
@@ -546,13 +606,13 @@ null
 
 
 ---------------
-pre_sim_option:
+pre_sim_action:
 
 ---------------
 sim_option:
 
 ---------------
-post_sim_option:
+post_sim_action:
 
 ---------------
 seeds:
@@ -577,6 +637,10 @@ OptionArgs:
 buildInOption:repeat
 -------------
 vh:
+------------
+Usage:
+user-definedflag
+
 ------------
 On:
 -----------
@@ -610,6 +674,10 @@ buildInOption:repeat
 -----------
 vh:
 ----------
+Usage:
+user-definedflag
+
+----------
 On:
 ---------
 compile_option:
@@ -625,13 +693,13 @@ null
 
 
 -------------
-pre_sim_option:
+pre_sim_action:
 
 -------------
 sim_option:
 
 -------------
-post_sim_option:
+post_sim_action:
 
 -------------
 seeds:
@@ -655,6 +723,10 @@ buildInOption:seed
 -----------
 vh:
 ----------
+Usage:
+user-definedflag
+
+----------
 On:
 ---------
 compile_option:
@@ -670,13 +742,13 @@ null
 
 
 -------------
-pre_sim_option:
+pre_sim_action:
 
 -------------
 sim_option:
 
 -------------
-post_sim_option:
+post_sim_action:
 
 -------------
 seeds:
@@ -703,6 +775,10 @@ OptionArgs:
 buildInOption:repeat
 -------------
 vh:
+------------
+Usage:
+user-definedflag
+
 ------------
 On:
 -----------
@@ -736,6 +812,10 @@ buildInOption:repeat
 -----------
 vh:
 ----------
+Usage:
+user-definedflag
+
+----------
 On:
 ---------
 compile_option:
@@ -751,13 +831,13 @@ null
 
 
 -------------
-pre_sim_option:
+pre_sim_action:
 
 -------------
 sim_option:
 
 -------------
-post_sim_option:
+post_sim_action:
 
 -------------
 seeds:
@@ -782,6 +862,10 @@ OptionArgs:
 buildInOption:repeat
 -----------
 vh:
+----------
+Usage:
+user-definedflag
+
 ----------
 On:
 ---------
@@ -815,6 +899,10 @@ buildInOption:repeat
 ---------
 vh:
 --------
+Usage:
+user-definedflag
+
+--------
 On:
 -------
 compile_option:
@@ -830,13 +918,13 @@ null
 
 
 -----------
-pre_sim_option:
+pre_sim_action:
 
 -----------
 sim_option:
 
 -----------
-post_sim_option:
+post_sim_action:
 
 -----------
 seeds:
@@ -860,6 +948,10 @@ buildInOption:seed
 ---------
 vh:
 --------
+Usage:
+user-definedflag
+
+--------
 On:
 -------
 compile_option:
@@ -875,13 +967,13 @@ null
 
 
 -----------
-pre_sim_option:
+pre_sim_action:
 
 -----------
 sim_option:
 
 -----------
-post_sim_option:
+post_sim_action:
 
 -----------
 seeds:

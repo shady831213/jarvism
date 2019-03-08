@@ -46,6 +46,7 @@ func TestGroupSetup(t *testing.T) {
 		t.Error("runTimeMaxJob expect 5, but get " + strconv.Itoa(runTimeMaxJob))
 		t.FailNow()
 	}
+	runTimeFinish()
 
 	r, err = setUpGroup(GetJvsAstRoot().GetGroup("group2"), []string{"-sim_only"})
 	if err != nil {
@@ -60,6 +61,7 @@ func TestGroupSetup(t *testing.T) {
 		t.Error("runTimeSimOnly expect true, but get false")
 		t.FailNow()
 	}
+	runTimeFinish()
 
 	r, err = setUpGroup(GetJvsAstRoot().GetGroup("group3"), []string{})
 	if err != nil {
@@ -70,9 +72,11 @@ func TestGroupSetup(t *testing.T) {
 		t.Error("expect 2 runFlow but get " + string(len(r.runFlow)))
 		t.FailNow()
 	}
+	runTimeFinish()
 }
 
 func TestSingleTestSetup(t *testing.T) {
+	defer runTimeFinish()
 	r, err := setUpTest("test1", "build1", []string{"-seed 1"})
 	if err != nil {
 		t.Error(err)
@@ -89,6 +93,7 @@ func TestSingleTestSetup(t *testing.T) {
 }
 
 func TestRunOnlyBuildSetup(t *testing.T) {
+	defer runTimeFinish()
 	r, err := setUpOnlyBuild("build1", []string{"-test_phase jarvis", "-max_job 10"})
 	if err != nil {
 		t.Error(err)
@@ -102,4 +107,5 @@ func TestRunOnlyBuildSetup(t *testing.T) {
 		t.Error("runTimeMaxJob expect 10, but get " + strconv.Itoa(runTimeMaxJob))
 		t.FailNow()
 	}
+
 }

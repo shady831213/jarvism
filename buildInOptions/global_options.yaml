@@ -1,10 +1,14 @@
 options:
   sim_args:
+    usage:
+      simulation args pass to simulator
     with_value_action:
       sim_option:
         - $sim_args
 
   compile_args:
+    usage:
+      compiling args pass to simulator
     with_value_action:
       compile_option:
         - $compile_args
