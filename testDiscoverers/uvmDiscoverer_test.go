@@ -5,14 +5,12 @@ import (
 	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core"
 	_ "github.com/shady831213/jarvism/simulators"
-	"math/rand"
 	"os"
 	"path"
 	"testing"
 )
 
 func TestUvmDiscoverer(t *testing.T) {
-	core.SetRand(rand.New(rand.NewSource(1)))
 	cfg, err := core.Lex("testFiles/test_discover.yaml")
 	if err != nil {
 		t.Error(err)

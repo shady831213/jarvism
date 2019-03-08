@@ -23,12 +23,12 @@ func TestPrinter(t *testing.T) {
 	}()
 	go func() {
 		for i := 0; i < 10; i++ {
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			core.PrintStatus(strconv.Itoa(i), utils.Green("done"))
 			job <- true
 		}
 	}()
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 	done1 <- true
 	time.Sleep(time.Second)
 }

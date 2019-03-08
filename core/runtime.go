@@ -22,6 +22,30 @@ func hash(s string) string {
 	return hex.EncodeToString(h.Bytes())
 }
 
+type runTimeJobLimiter struct {
+	maxJob chan bool
+}
+
+func (l *runTimeJobLimiter) put() {
+	if l.maxJob != nil {
+		l.maxJob <- true
+	}
+}
+
+func (l *runTimeJobLimiter) get() {
+	if l.maxJob != nil {
+		<-l.maxJob
+	}
+}
+
+func (l *runTimeJobLimiter) close() {
+	if l.maxJob != nil {
+		close(l.maxJob)
+	}
+}
+
+var runTimeLimiter runTimeJobLimiter
+
 type runTimeOpts interface {
 	GetName() string
 	//bottom-up search
@@ -40,32 +64,6 @@ type runFlow struct {
 	testDone  chan *JVSTestResult
 }
 
-func runBuildFlowPhase(phase func(build *AstBuild, cmdStdout *io.Writer) error, phaseName string) func(*AstBuild, *io.Writer) error {
-	return func(build *AstBuild, cmdStdout *io.Writer) error {
-		PrintStatus(phaseName+build.Name, utils.Blue("BEGIN"))
-		if err := phase(build, cmdStdout); err != nil {
-			PrintStatus(phaseName+build.Name, utils.Red("FAIL"))
-			return err
-		}
-		PrintStatus(phaseName+build.Name, utils.Green("DONE"))
-		return nil
-	}
-}
-
-func runTestFlowPhase(phase func(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult, phaseName string) func(*AstTestCase, *io.Writer) *JVSTestResult {
-	return func(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
-		PrintStatus(phaseName+testCase.Name, utils.Blue("BEGIN"))
-		result := phase(testCase, cmdStdout)
-		if result == nil {
-			result = JVSTestResultUnknown("No Result!")
-			PrintStatus(phaseName+testCase.Name, result.Error())
-			return result
-		}
-		PrintStatus(phaseName+testCase.Name, result.Error())
-		return result
-	}
-}
-
 func newRunFlow(build *AstBuild, cmdStdout *io.Writer, buildDone chan error, testDone chan *JVSTestResult) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
@@ -78,19 +76,43 @@ func newRunFlow(build *AstBuild, cmdStdout *io.Writer, buildDone chan error, tes
 }
 
 func (f *runFlow) prepareBuildPhase(build *AstBuild, cmdStdout *io.Writer) error {
-	return runBuildFlowPhase(GetRunner().PrepareBuild, "Prepare Build ")(build, cmdStdout)
+	PrintStatus(build.Name, utils.Blue("BEGIN"))
+	if err := GetRunner().PrepareBuild(build, cmdStdout); err != nil {
+		PrintStatus(build.Name, utils.Red("FAIL"))
+		return err
+	}
+	return nil
 }
 
 func (f *runFlow) buildPhase(build *AstBuild, cmdStdout *io.Writer) error {
-	return runBuildFlowPhase(GetRunner().Build, "Build Build ")(build, cmdStdout)
+	if err := GetRunner().Build(build, cmdStdout); err != nil {
+		PrintStatus(build.Name, utils.Red("FAIL"))
+		return err
+	}
+	PrintStatus(build.Name, utils.Green("DONE"))
+	return nil
 }
 
 func (f *runFlow) prepareTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
-	return runTestFlowPhase(GetRunner().PrepareTest, "Prepare Test ")(testCase, cmdStdout)
+	PrintStatus(testCase.Name, utils.Blue("BEGIN"))
+	result := GetRunner().PrepareTest(testCase, cmdStdout)
+	if result == nil {
+		result = JVSTestResultUnknown("No Result!")
+		PrintStatus(testCase.Name, result.Error())
+		return result
+	}
+	return result
 }
 
 func (f *runFlow) runTestPhase(testCase *AstTestCase, cmdStdout *io.Writer) *JVSTestResult {
-	return runTestFlowPhase(GetRunner().RunTest, "Run Test ")(testCase, cmdStdout)
+	result := GetRunner().RunTest(testCase, cmdStdout)
+	if result == nil {
+		result = JVSTestResultUnknown("No Result!")
+		PrintStatus(testCase.Name, result.Error())
+		return result
+	}
+	PrintStatus(testCase.Name, result.Error())
+	return result
 }
 
 func (f *runFlow) AddTest(test *AstTestCase) {
@@ -103,18 +125,23 @@ func (f *runFlow) run() {
 	if err := f.prepareBuildPhase(f.build, f.cmdStdout); err != nil {
 		fmt.Println(utils.Red(err.Error()))
 		f.buildDone <- err
+		runTimeLimiter.get()
 		return
 	}
 	if err := f.buildPhase(f.build, f.cmdStdout); err != nil {
 		fmt.Println(utils.Red(err.Error()))
 		f.buildDone <- err
+		runTimeLimiter.get()
 		return
 	}
 	f.buildDone <- nil
+	runTimeLimiter.get()
 	for e := f.Front(); e != nil; e = e.Next() {
+		runTimeLimiter.put()
 		f.testWg.Add(1)
 		go func(testCase *AstTestCase) {
 			defer f.testWg.Add(-1)
+			defer runTimeLimiter.get()
 			result := f.prepareTestPhase(testCase, f.cmdStdout)
 			if result.status != JVSTestPass {
 				f.testDone <- result
@@ -149,6 +176,11 @@ func newRunTime(name string, group *astGroup) *runTime {
 	r.monitorDone = make(chan bool)
 	r.buildDone = make(chan error, 100)
 	r.testDone = make(chan *JVSTestResult, 100)
+	if runTimeMaxJob > 0 {
+		runTimeLimiter = runTimeJobLimiter{make(chan bool, runTimeMaxJob)}
+	} else {
+		runTimeLimiter = runTimeJobLimiter{nil}
+	}
 
 	testcases := group.GetTestCases()
 	r.totalTest = 0
@@ -188,6 +220,7 @@ func (r *runTime) initSubTest(test *AstTestCase) int {
 }
 
 func (r *runTime) run() {
+	defer runTimeLimiter.close()
 	var status string
 	go PrintProccessing(utils.Brown)("Jarvism is running", &status, r.processingDone)
 	defer func() {
@@ -202,6 +235,7 @@ func (r *runTime) run() {
 		close(r.testDone)
 	}()
 	for _, f := range r.runFlow {
+		runTimeLimiter.put()
 		r.flowWg.Add(1)
 		go func(flow *runFlow) {
 			defer r.flowWg.Add(-1)
@@ -211,11 +245,14 @@ func (r *runTime) run() {
 	r.flowWg.Wait()
 }
 
-func convertArgs(args []string) []interface{} {
+func filterAstArgs(args []string) []interface{} {
 	_args := make([]interface{}, 0)
 	if args != nil {
-		for _, a := range args {
-			_args = append(_args, a)
+		for _, arg := range args {
+			//Parse all args and only pass the jvsAstOption to Ast
+			if a, _ := getJvsAstOption(arg); a != nil {
+				_args = append(_args, arg)
+			}
 		}
 	}
 	return _args
@@ -234,16 +271,16 @@ func run(name string, cfg map[interface{}]interface{}) error {
 }
 
 func RunGroup(group *astGroup, args []string) error {
-	return run(group.Name, map[interface{}]interface{}{"args": convertArgs(args), "groups": []interface{}{group.Name}})
+	return run(group.Name, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{group.Name}})
 }
 
 func RunTest(testName, buildName string, args []string) error {
 	return run(testName, map[interface{}]interface{}{"build": buildName,
-		"args":  convertArgs(args),
+		"args":  filterAstArgs(args),
 		"tests": map[interface{}]interface{}{testName: nil}})
 }
 
 func RunOnlyBuild(buildName string, args []string) error {
 	return run(buildName, map[interface{}]interface{}{"build": buildName,
-		"args": convertArgs(args)})
+		"args": filterAstArgs(args)})
 }

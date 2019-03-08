@@ -5,6 +5,7 @@ import (
 	"io"
 	"math/rand"
 	"os/exec"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -57,11 +58,11 @@ func TestGroup(t *testing.T) {
 		t.FailNow()
 	}
 
-	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"), []string{}); err != nil {
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"), []string{"-max_job " + strconv.Itoa(rand.Intn(2)+1)}); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group3"), []string{}); err != nil {
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group3"), []string{"-max_job " + strconv.Itoa(rand.Intn(50)+1)}); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
@@ -77,7 +78,7 @@ func TestSingleTest(t *testing.T) {
 
 func TestSingleRepeatTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
-	if err := core.RunTest("test1", "build1", []string{"-repeat 10"}); err != nil {
+	if err := core.RunTest("test1", "build1", []string{"-repeat 10", "-max_job " + strconv.Itoa(rand.Intn(15)+1)}); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}

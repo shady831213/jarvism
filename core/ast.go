@@ -263,12 +263,12 @@ func (a *AstOptionAction) GetHierString(space int) string {
 }
 
 type JvsOptionForTest interface {
-	JvsOption
+	JvsAstOption
 	TestHandler(test *AstTestCase)
 }
 
 type JvsOptionForBuild interface {
-	JvsOption
+	JvsAstOption
 	BuildHandler(build *AstBuild)
 }
 
@@ -294,7 +294,7 @@ func (t *AstOption) GetName() string {
 	return t.Name
 }
 
-func (t *AstOption) Clone() JvsOption {
+func (t *AstOption) Clone() JvsAstOption {
 	inst := newAstOption(t.Name)
 	inst.Value = t.Value
 	inst.On = t.On
@@ -369,7 +369,7 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 		return AstError("with_value_action of "+t.Name, err)
 	}
 	//add to flagSet
-	RegisterJvsOption(t, t.Usage())
+	RegisterJvsAstOption(t, t.Usage())
 	return nil
 }
 
@@ -703,7 +703,7 @@ func (t *astTest) Link() error {
 	}
 	for _, arg := range t.args {
 		//Options have been all parsed
-		opt, err := GetOption(arg)
+		opt, err := getJvsAstOption(arg)
 		if err != nil {
 			return AstError("args of "+t.Name, err)
 		}

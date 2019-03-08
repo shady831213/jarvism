@@ -13,10 +13,24 @@ testFail,
 testWarning,
 testUnknown,
 totalTest int) string {
-	return utils.Brown("[b:(") + utils.Green("p:"+strconv.Itoa(buildPass)) + utils.Brown("/") + utils.Red("f:"+strconv.Itoa(buildFail)) + utils.Brown("/") +
-		utils.Brown("d:"+strconv.Itoa(buildPass+buildFail)+"/t"+strconv.Itoa(totalBuild)+")][t:(") + utils.Green("p:"+strconv.Itoa(testPass)) + utils.Brown("/") +
-		utils.Red("f:"+strconv.Itoa(testFail)) + utils.Brown("/") + utils.Yellow("w:"+strconv.Itoa(testWarning)) + utils.Brown("/") + utils.LightRed("u:"+strconv.Itoa(testUnknown)) +
-		utils.Brown("/") + utils.Brown("d:"+strconv.Itoa(testPass+testFail+testWarning+testUnknown)+"/t:"+strconv.Itoa(totalTest)+")]")
+	return utils.Brown("[B:(") + utils.Green("P:"+strconv.Itoa(buildPass)) + utils.Brown("/") + utils.Red("F:"+strconv.Itoa(buildFail)) + utils.Brown("/") +
+		utils.Brown("D:"+strconv.Itoa(buildPass+buildFail)+"/T"+strconv.Itoa(totalBuild)+")][T:(") + utils.Green("P:"+strconv.Itoa(testPass)) + utils.Brown("/") +
+		utils.Red("F:"+strconv.Itoa(testFail)) + utils.Brown("/") + utils.Yellow("W:"+strconv.Itoa(testWarning)) + utils.Brown("/") + utils.LightRed("U:"+strconv.Itoa(testUnknown)) +
+		utils.Brown("/") + utils.Brown("D:"+strconv.Itoa(testPass+testFail+testWarning+testUnknown)+"/T:"+strconv.Itoa(totalTest)+")]")
+}
+
+func finishStatusString(buildPass,
+buildFail,
+totalBuild,
+testPass,
+testFail,
+testWarning,
+testUnknown,
+totalTest int) string {
+	return utils.Brown("[Builds:(") + utils.Green("PASS:"+strconv.Itoa(buildPass)) + utils.Brown("/") + utils.Red("FAIL:"+strconv.Itoa(buildFail)) + utils.Brown("/") +
+		utils.Brown("DONE:"+strconv.Itoa(buildPass+buildFail)+"/TOTAL:"+strconv.Itoa(totalBuild)+")][Tests:(") + utils.Green("PASS:"+strconv.Itoa(testPass)) + utils.Brown("/") +
+		utils.Red("FAIL:"+strconv.Itoa(testFail)) + utils.Brown("/") + utils.Yellow("WARNING:"+strconv.Itoa(testWarning)) + utils.Brown("/") + utils.LightRed("UNKNOWN:"+strconv.Itoa(testUnknown)) +
+		utils.Brown("/") + utils.Brown("DONE:"+strconv.Itoa(testPass+testFail+testWarning+testUnknown)+"/TOTAL:"+strconv.Itoa(totalTest)+")]")
 }
 
 func statusMonitor(status *string, totalBuild, totalTest int, buildDone chan error, testDone chan *JVSTestResult, done chan bool) {
@@ -59,7 +73,7 @@ LableFor:
 				break
 			}
 		case <-done:
-			*status = statusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)
+			*status = finishStatusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)
 			break LableFor
 		default:
 			*status = statusString(buildPass, buildFail, totalBuild, testPass, testFail, testWarning, testUnknown, totalTest)

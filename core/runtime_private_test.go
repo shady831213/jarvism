@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -17,18 +18,18 @@ func setUp(name string, cfg map[interface{}]interface{}) (*runTime, error) {
 }
 
 func setUpGroup(group *astGroup, args []string) (*runTime, error) {
-	return setUp(group.Name, map[interface{}]interface{}{"args": convertArgs(args), "groups": []interface{}{group.Name}})
+	return setUp(group.Name, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{group.Name}})
 }
 
 func setUpTest(testName, buildName string, args []string) (*runTime, error) {
 	return setUp(testName, map[interface{}]interface{}{"build": buildName,
-		"args":  convertArgs(args),
+		"args":  filterAstArgs(args),
 		"tests": map[interface{}]interface{}{testName: nil}})
 }
 
 func setUpOnlyBuild(buildName string, args []string) (*runTime, error) {
 	return setUp(buildName, map[interface{}]interface{}{"build": buildName,
-		"args": convertArgs(args)})
+		"args": filterAstArgs(args)})
 }
 
 func TestGroupSetup(t *testing.T) {
@@ -63,25 +64,33 @@ func TestGroupSetup(t *testing.T) {
 }
 
 func TestSingleTestSetup(t *testing.T) {
-	if r, err := setUpTest("test1", "build1", []string{"-seed 1"}); err != nil {
+	r, err := setUpTest("test1", "build1", []string{"-seed 1"})
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
-	} else {
-		if r.cmdStdout != os.Stdout {
-			t.Error("when running single test, expect stdout is open but closed")
-			t.FailNow()
-		}
+	}
+	if r.cmdStdout != os.Stdout {
+		t.Error("when running single test, expect stdout is open but closed")
+		t.FailNow()
+	}
+	if runTimeMaxJob != -1 {
+		t.Error("runTimeMaxJob expect -1, but get " + strconv.Itoa(runTimeMaxJob))
+		t.FailNow()
 	}
 }
 
 func TestRunOnlyBuildSetup(t *testing.T) {
-	if r, err := setUpOnlyBuild("build1", []string{"-test_phase jarvis"}); err != nil {
+	r, err := setUpOnlyBuild("build1", []string{"-test_phase jarvis", "-max_job 10"})
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
-	} else {
-		if r.cmdStdout != os.Stdout {
-			t.Error("when running only build, expect stdout is open but closed")
-			t.FailNow()
-		}
+	}
+	if r.cmdStdout != os.Stdout {
+		t.Error("when running only build, expect stdout is open but closed")
+		t.FailNow()
+	}
+	if runTimeMaxJob != 10 {
+		t.Error("runTimeMaxJob expect 10, but get " + strconv.Itoa(runTimeMaxJob))
+		t.FailNow()
 	}
 }

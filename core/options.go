@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-type JvsOption interface {
+type JvsAstOption interface {
 	flag.Value
 	GetName() string
-	Clone() JvsOption
+	Clone() JvsAstOption
 }
 
-func RegisterJvsOption(v JvsOption, usage string) {
+func RegisterJvsAstOption(v JvsAstOption, usage string) {
 	jvsOptions.Var(v, v.GetName(), usage)
 }
 
@@ -39,7 +39,7 @@ func argToOption(s string) (string, error) {
 	return name, nil
 }
 
-func GetOption(arg string) (JvsOption, error) {
+func getJvsAstOption(arg string) (JvsAstOption, error) {
 	args := strings.Split(arg, " ")
 	if err := jvsOptions.Parse(args); err != nil {
 		return nil, err
@@ -48,31 +48,33 @@ func GetOption(arg string) (JvsOption, error) {
 	if err != nil {
 		return nil, err
 	}
-	v, ok := jvsOptions.Lookup(optName).Value.(JvsOption)
+	v, ok := jvsOptions.Lookup(optName).Value.(JvsAstOption)
 	if !ok {
-		panic(fmt.Sprintf("expect type JvsOption but get %T", jvsOptions.Lookup(optName).Value))
+		return nil, errors.New("Not JvsAstOption")
 	}
 	return v, nil
 }
 
-type jvsNonBoolOption struct {
+type jvsAstNonBoolOption struct {
 }
 
-func (t *jvsNonBoolOption) IsBoolFlag() bool {
+func (t *jvsAstNonBoolOption) IsBoolFlag() bool {
 	return false
 }
 
 //buildin options
-type jvsTestOption struct {
-	jvsNonBoolOption
+var runTimeMaxJob int
+
+type jvsAstTestOption struct {
+	jvsAstNonBoolOption
 }
 
-func (t *jvsTestOption) IsCompileOption() bool {
+func (t *jvsAstTestOption) IsCompileOption() bool {
 	return false
 }
 
 type RepeatOption struct {
-	jvsTestOption
+	jvsAstTestOption
 	n int
 }
 
@@ -86,7 +88,7 @@ func (t *RepeatOption) GetName() string {
 	return "repeat"
 }
 
-func (t *RepeatOption) Clone() JvsOption {
+func (t *RepeatOption) Clone() JvsAstOption {
 	inst := newRepeatOption()
 	inst.n = t.n
 	return inst
@@ -124,7 +126,7 @@ func (t *RepeatOption) TestHandler(test *AstTestCase) {
 }
 
 type SeedOption struct {
-	jvsTestOption
+	jvsAstTestOption
 	n int
 }
 
@@ -138,7 +140,7 @@ func (t *SeedOption) GetName() string {
 	return "seed"
 }
 
-func (t *SeedOption) Clone() JvsOption {
+func (t *SeedOption) Clone() JvsAstOption {
 	inst := newSeedOption()
 	inst.n = t.n
 	return inst
@@ -166,14 +168,11 @@ func (t *SeedOption) TestHandler(test *AstTestCase) {
 	test.seeds[0] = t.n
 }
 
-func SetRand(rand *rand.Rand) {
-	jvsRand = rand
-}
-
 func init() {
 	jvsRand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	RegisterJvsOption(newRepeatOption(), "run each testcase repeatly n times")
-	RegisterJvsOption(newSeedOption(), "run testcase with specific seed")
+	RegisterJvsAstOption(newRepeatOption(), "run each testcase repeatly n times")
+	RegisterJvsAstOption(newSeedOption(), "run testcase with specific seed")
+	jvsOptions.IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
 }
 
 //global
