@@ -71,3 +71,14 @@ groups:
           - -repeat 10
     groups:
       - group1
+
+  group3:
+    build: build2
+    args:
+      - -vh
+      - -repeat 20
+    tests:
+      test1:
+    groups:
+      - group2
+      - group1

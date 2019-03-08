@@ -628,7 +628,21 @@ func (t *astTest) init(name string) {
 	t.OptionArgs = utils.NewStringMapSet()
 }
 
+func (t *astTest) Copy(i *astTest) {
+	t.Name = i.Name
+	t.buildName = i.buildName
+	t.Build = i.Build
+	//shared
+	t.OptionArgs = i.OptionArgs
+	//shared
+	t.args = t.args
+	t.parent = i.parent
+}
+
 func (t *astTest) GetName() string {
+	if t.parent != nil {
+		return t.parent.GetName() + "__" + t.Name
+	}
 	return t.Name
 }
 
@@ -737,6 +751,18 @@ func newAstTestCase(name string) *AstTestCase {
 	return inst
 }
 
+func (t *AstTestCase) Clone() *AstTestCase {
+	inst := new(AstTestCase)
+	inst.astTest.Copy(&t.astTest)
+	inst.simItems = newAstItems("sim")
+	inst.simItems.Cat(t.simItems)
+	if t.seeds != nil {
+		inst.seeds = make([]int, len(t.seeds))
+		copy(inst.seeds, t.seeds)
+	}
+	return inst
+}
+
 func (t *AstTestCase) ParseArgs() {
 	t.Build = t.GetBuild().Clone()
 	//get options sim_options in order
@@ -754,7 +780,7 @@ func (t *AstTestCase) ParseArgs() {
 func (t *AstTestCase) GetTestCases() []*AstTestCase {
 	testcases := make([]*AstTestCase, len(t.seeds))
 	for i := range testcases {
-		testcases[i] = newAstTestCase(t.Name + "__" + strconv.Itoa(t.seeds[i]))
+		testcases[i] = newAstTestCase(t.GetName() + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
 		testcases[i].simItems.Cat(t.GetBuild().simItems)
 		testcases[i].simItems.Cat(t.simItems)
@@ -773,16 +799,12 @@ func (t *AstTestCase) Link() error {
 			"valid tests:\n" + strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
 	}
 
-	//link name
-	if t.parent != nil {
-		t.Name = t.parent.GetName() + "__" + t.Name
-	}
 	return nil
 }
 
 func (t *AstTestCase) GetHierString(space int) string {
 	nextSpace := space + 1
-	return astHierFmt(t.Name+":", space, func() string {
+	return astHierFmt(t.GetName()+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
 			t.simItems.GetHierString(nextSpace) +
 			astHierFmt("seeds:", nextSpace, func() string {
@@ -793,19 +815,13 @@ func (t *AstTestCase) GetHierString(space int) string {
 					return fmt.Sprintln(strings.Repeat(" ", nextSpace) + b.Name)
 				}
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + fmt.Sprint(nil))
-			}) +
-			astHierFmt("Flatten Tests:", nextSpace, func() string {
-				s := ""
-				for _, test := range t.GetTestCases() {
-					s += test.GetHierString(nextSpace + 1)
-				}
-				return s
 			})
 	})
 }
 
 type astGroup struct {
 	astTest
+	linked bool
 	Tests  map[string]*AstTestCase
 	Groups map[string]*astGroup
 }
@@ -813,7 +829,28 @@ type astGroup struct {
 func newAstGroup(name string) *astGroup {
 	inst := new(astGroup)
 	inst.init(name)
-	inst.buildName = ""
+	return inst
+}
+
+func (t *astGroup) Clone() *astGroup {
+	inst := new(astGroup)
+	inst.astTest.Copy(&t.astTest)
+	inst.linked = t.linked
+	if t.Tests != nil {
+		inst.Tests = make(map[string]*AstTestCase)
+		for k, v := range t.Tests {
+			inst.Tests[k] = v.Clone()
+			inst.Tests[k].parent = inst
+		}
+	}
+	if t.Groups != nil {
+		inst.Groups = make(map[string]*astGroup)
+		for k, v := range t.Groups {
+			inst.Groups[k] = v.Clone()
+			inst.Groups[k].parent = inst
+		}
+	}
+
 	return inst
 }
 
@@ -896,14 +933,19 @@ func (t *astGroup) Link() error {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
-	//link groups
+	//dfs link groups
 	for name, _ := range t.Groups {
 		group := jvsAstRoot.GetGroup(name)
-		group.SetParent(t)
-		if group == nil {
-			return errors.New("sub group " + name + "of group " + t.Name + " is undef!")
+		if !group.linked {
+			if group == nil {
+				return errors.New("sub group " + name + "of group " + t.Name + " is undef!")
+			}
+			if err := group.Link(); err != nil {
+				return err
+			}
 		}
-		t.Groups[name] = group
+		t.Groups[name] = group.Clone()
+		t.Groups[name].SetParent(t)
 	}
 	//check loop
 	if t.parent != nil {
@@ -921,12 +963,13 @@ func (t *astGroup) Link() error {
 			return err
 		}
 	}
+	t.linked = true
 	return nil
 }
 
 func (t *astGroup) GetHierString(space int) string {
 	nextSpace := space + 1
-	return astHierFmt(t.Name+":", space, func() string {
+	return astHierFmt(t.GetName()+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
 			astHierFmt("Builds:", nextSpace, func() string {
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.GetBuild().Name)
@@ -949,23 +992,8 @@ func (t *astGroup) GetHierString(space int) string {
 					keys = append(keys, k)
 				}
 				utils.ForeachStringKeysInOrder(keys, func(i string) {
-					s += fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + t.Groups[i].Name)
+					s += t.Groups[i].GetHierString(nextSpace + 1)
 				})
-				return s
-			}) +
-			astHierFmt("Flatten Tests:", nextSpace, func() string {
-				s := ""
-				allTests := make([]*AstTestCase, 0)
-				tests := t.GetTestCases()
-				for _, test := range tests {
-					allTests = append(allTests, test.GetTestCases()...)
-				}
-				sort.Slice(allTests, func(i, j int) bool {
-					return allTests[i].Name < allTests[j].Name
-				})
-				for _, test := range allTests {
-					s += test.GetHierString(nextSpace + 1)
-				}
 				return s
 			})
 	})
@@ -1073,10 +1101,12 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 }
 
 func (t *astRoot) Link() error {
-	//link groups
+	//dfs link groups
 	for _, group := range t.Groups {
-		if err := group.Link(); err != nil {
-			return err
+		if !group.linked {
+			if err := group.Link(); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -47,6 +47,9 @@ func TestGroupTest(t *testing.T) {
 	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"), []string{}); err != nil {
 		t.Error(err)
 	}
+	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group3"), []string{}); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSingleTest(t *testing.T) {
