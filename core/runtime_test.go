@@ -38,17 +38,20 @@ func (r *testRunner) RunTest(testCase *core.AstTestCase, cmdStdout *io.Writer) e
 	return cmd.Run()
 }
 
-func TestGroupTest(t *testing.T) {
+func TestGroup(t *testing.T) {
 	core.SetRunner(new(testRunner))
 	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group1"), nil); err != nil {
 		t.Error(err)
-		return
+		t.FailNow()
 	}
+
 	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group2"), []string{}); err != nil {
 		t.Error(err)
+		t.FailNow()
 	}
 	if err := core.RunGroup(core.GetJvsAstRoot().GetGroup("group3"), []string{}); err != nil {
 		t.Error(err)
+		t.FailNow()
 	}
 }
 
@@ -56,6 +59,7 @@ func TestSingleTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
 	if err := core.RunTest("test1", "build1", []string{"-seed 1"}); err != nil {
 		t.Error(err)
+		t.FailNow()
 	}
 }
 
@@ -63,6 +67,7 @@ func TestSingleRepeatTest(t *testing.T) {
 	core.SetRunner(new(testRunner))
 	if err := core.RunTest("test1", "build1", []string{"-repeat 10"}); err != nil {
 		t.Error(err)
+		t.FailNow()
 	}
 }
 
@@ -70,5 +75,6 @@ func TestRunOnlyBuild(t *testing.T) {
 	core.SetRunner(new(testRunner))
 	if err := core.RunOnlyBuild("build1", []string{"-test_phase jarvis"}); err != nil {
 		t.Error(err)
+		t.FailNow()
 	}
 }

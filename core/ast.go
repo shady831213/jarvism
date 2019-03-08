@@ -102,15 +102,14 @@ func (item *astItem) Cat(i *astItem) {
 	item.content.Merge(i.content)
 }
 
-func (item *astItem) Replace(old, new string, cnt int) {
-	newS := set.New(set.NonThreadSafe).(*set.SetNonTS)
+func (item *astItem) Replace(old, new string, cnt int) *astItem {
+	inst := newAstItem("")
 	item.content.Each(func(i interface{}) bool {
 		s := strings.Replace(i.(string), old, new, cnt)
-		newS.Add(s)
+		inst.content.Add(s)
 		return true
 	})
-	item.content.Clear()
-	item.content = newS
+	return inst
 }
 
 func (item *astItem) GetString() string {
@@ -154,10 +153,12 @@ func (items *astItems) Cat(i *astItems) {
 	items.option.Cat(i.option)
 }
 
-func (items *astItems) Replace(old, new string, cnt int) {
-	strings.Replace(items.preAction, old, new, cnt)
-	strings.Replace(items.postAction, old, new, cnt)
-	items.option.Replace(old, new, cnt)
+func (items *astItems) Replace(old, new string, cnt int) *astItems {
+	inst := newAstItems(items.name)
+	inst.preAction = strings.Replace(items.preAction, old, new, cnt)
+	inst.postAction = strings.Replace(items.postAction, old, new, cnt)
+	inst.option = items.option.Replace(old, new, cnt)
+	return inst
 }
 
 func (items *astItems) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -328,8 +329,7 @@ func (t *AstOption) TestHandler(test *AstTestCase) {
 		test.simItems.option.Cat(t.On.simOption)
 		return
 	}
-	t.WithValue.simOption.Replace("$"+t.Name, t.Value, -1)
-	test.simItems.option.Cat(t.WithValue.simOption)
+	test.simItems.option.Cat(t.WithValue.simOption.Replace("$"+t.Name, t.Value, -1))
 }
 
 func (t *AstOption) BuildHandler(build *AstBuild) {
@@ -337,8 +337,7 @@ func (t *AstOption) BuildHandler(build *AstBuild) {
 		build.compileItems.option.Cat(t.On.compileOption)
 		return
 	}
-	t.WithValue.compileOption.Replace("$"+t.Name, t.Value, -1)
-	build.compileItems.option.Cat(t.WithValue.compileOption)
+	build.compileItems.option.Cat(t.WithValue.compileOption.Replace("$"+t.Name, t.Value, -1))
 }
 
 func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -377,15 +376,12 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
 func (t *AstOption) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
-		return astHierFmt("Value:", nextSpace, func() string {
-			return fmt.Sprintln(strings.Repeat(" ", nextSpace) + t.Value)
+		return astHierFmt("On:", nextSpace, func() string {
+			if t.On != nil {
+				return t.On.GetHierString(nextSpace + 1)
+			}
+			return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
 		}) +
-			astHierFmt("On:", nextSpace, func() string {
-				if t.On != nil {
-					return t.On.GetHierString(nextSpace + 1)
-				}
-				return fmt.Sprintln(strings.Repeat(" ", nextSpace+1) + "null")
-			}) +
 			astHierFmt("WithValue:", nextSpace, func() string {
 				if t.WithValue != nil {
 					return t.WithValue.GetHierString(nextSpace + 1)
