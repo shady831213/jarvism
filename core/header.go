@@ -38,27 +38,39 @@ func (e *JVSTestResult) Error() string {
 func JVSTestResultPass(msg string) *JVSTestResult {
 	inst := new(JVSTestResult)
 	inst.status = JVSTestPass
-	inst.msg = "!\n" + msg
+	inst.msg = "!"
+	if msg != "" {
+		inst.msg += "\n" + msg
+	}
 	return inst
 }
 
 func JVSTestResultFail(msg string) *JVSTestResult {
 	inst := new(JVSTestResult)
 	inst.status = JVSTestFail
-	inst.msg = "!\n" + "Error:" + msg
+	inst.msg = "!"
+	if msg != "" {
+		inst.msg += "\n" + "Error:" + msg
+	}
 	return inst
 }
 
 func JVSTestResultWarning(msg string) *JVSTestResult {
 	inst := new(JVSTestResult)
 	inst.status = JVSTestWarning
-	inst.msg = "!\n" + "Warning:" + msg
+	inst.msg = "!"
+	if msg != "" {
+		inst.msg += "\n" + "Warning:" + msg
+	}
 	return inst
 }
 
 func JVSTestResultUnknown(msg string) *JVSTestResult {
 	inst := new(JVSTestResult)
 	inst.status = JVSTestUnknown
-	inst.msg = "!\n" + "UnKnown:" + msg
+	inst.msg = "!"
+	if msg != "" {
+		inst.msg += "\n" + "UnKnown:" + msg
+	}
 	return inst
 }

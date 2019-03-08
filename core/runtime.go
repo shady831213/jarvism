@@ -167,7 +167,7 @@ func newRunTime(name string, group *astGroup) *runTime {
 }
 
 func (r *runTime) createFlow(build *AstBuild) *runFlow {
-	hash := hash(build.Name + build.compileItems.preAction + build.compileItems.option.GetString() + build.compileItems.postAction + r.runtimeId)
+	hash := hash(build.Name + build.compileItems.preAction + build.compileItems.option.GetString() + build.compileItems.postAction)
 	if _, ok := r.runFlow[hash]; !ok {
 		newBuild := build.Clone()
 		newBuild.Name = r.runtimeId + "__" + build.Name + "_" + hash
@@ -189,7 +189,7 @@ func (r *runTime) initSubTest(test *AstTestCase) int {
 
 func (r *runTime) run() {
 	var status string
-	go PrintProccessing(utils.Brown)(r.Name+" is running", &status, r.processingDone)
+	go PrintProccessing(utils.Brown)("Jarvism is running", &status, r.processingDone)
 	defer func() {
 		r.processingDone <- true
 		close(r.processingDone)
