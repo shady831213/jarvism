@@ -43,18 +43,12 @@ func (s *stdout) Write(p []byte) (int, error) {
 					//" "
 					blank[j] = 32
 				}
-				padding = append(padding, append(append(p[n:i], blank...), v)...)
+				padding = append(padding, blank...)
 				paddingCnt += len(blank)
-			} else {
-				padding = append(padding, p[n:i+1]...)
 			}
 			n = i
 		}
-		//last one
-		if i == len(p)-1 && n != i {
-			padding = append(padding, p[n:i+1]...)
-		}
-
+		padding = append(padding, v)
 	}
 	n, err := os.Stdout.Write([]byte(padding))
 	return n - paddingCnt, err
