@@ -42,7 +42,7 @@ func (s *StringMapSet) List() []interface{} {
 
 func (s *StringMapSet) Keys() []string {
 	l := make([]string, 0)
-	for k, _ := range s.m {
+	for k := range s.m {
 		l = append(l, k)
 	}
 	return l

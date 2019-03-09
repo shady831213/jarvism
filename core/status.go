@@ -79,13 +79,13 @@ func JVSTestResultUnknown(msg string) *JVSTestResult {
 }
 
 func statusString(buildPass,
-buildFail,
-totalBuild,
-testPass,
-testFail,
-testWarning,
-testUnknown,
-totalTest int) string {
+	buildFail,
+	totalBuild,
+	testPass,
+	testFail,
+	testWarning,
+	testUnknown,
+	totalTest int) string {
 	return utils.Brown("[B:(") + utils.Green("P:"+strconv.Itoa(buildPass)) + utils.Brown("/") + utils.Red("F:"+strconv.Itoa(buildFail)) + utils.Brown("/") +
 		utils.Brown("D:"+strconv.Itoa(buildPass+buildFail)+"/T"+strconv.Itoa(totalBuild)+")][T:(") + utils.Green("P:"+strconv.Itoa(testPass)) + utils.Brown("/") +
 		utils.Red("F:"+strconv.Itoa(testFail)) + utils.Brown("/") + utils.Yellow("W:"+strconv.Itoa(testWarning)) + utils.Brown("/") + utils.LightRed("U:"+strconv.Itoa(testUnknown)) +
@@ -93,13 +93,13 @@ totalTest int) string {
 }
 
 func finishStatusString(buildPass,
-buildFail,
-totalBuild,
-testPass,
-testFail,
-testWarning,
-testUnknown,
-totalTest int) string {
+	buildFail,
+	totalBuild,
+	testPass,
+	testFail,
+	testWarning,
+	testUnknown,
+	totalTest int) string {
 	return utils.Brown("[Builds:(") + utils.Green("PASS:"+strconv.Itoa(buildPass)) + utils.Brown("/") + utils.Red("FAIL:"+strconv.Itoa(buildFail)) + utils.Brown("/") +
 		utils.Brown("DONE:"+strconv.Itoa(buildPass+buildFail)+"/TOTAL:"+strconv.Itoa(totalBuild)+")][Tests:(") + utils.Green("PASS:"+strconv.Itoa(testPass)) + utils.Brown("/") +
 		utils.Red("FAIL:"+strconv.Itoa(testFail)) + utils.Brown("/") + utils.Yellow("WARNING:"+strconv.Itoa(testWarning)) + utils.Brown("/") + utils.LightRed("UNKNOWN:"+strconv.Itoa(testUnknown)) +

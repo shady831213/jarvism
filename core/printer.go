@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const printerPadding = 80
+const printerPadding = 90
 
 func PrintProccessing(color func(str string, modifier ...interface{}) string) func(string, *string, chan bool) {
 	return func(processingString string, status *string, done chan bool) {

@@ -54,4 +54,3 @@ func CheckEnv() error {
 func GetPrjHome() string {
 	return prjHome
 }
-

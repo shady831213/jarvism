@@ -191,4 +191,5 @@ func init() {
 //global
 var jvsOptions = flag.NewFlagSet("jvsOptions", flag.ExitOnError)
 var jvsRand *rand.Rand
+
 //------------------------

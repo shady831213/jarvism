@@ -42,7 +42,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 }
 
 func AstParse(parser astParser, cfg map[interface{}]interface{}) error {
-	for name, _ := range cfg {
+	for name := range cfg {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
 			return errors.New(tag + "syntax error of " + name.(string) + "! expect " + fmt.Sprint(keywords))
 		}
@@ -80,7 +80,7 @@ func newAstItem(content interface{}) *astItem {
 		return inst
 	}
 	if value, ok := content.([]interface{}); ok {
-		for _, i := range (value) {
+		for _, i := range value {
 			s, ok := i.(string)
 			if !ok {
 				panic(fmt.Sprintf("content must be string or []interface{}, but it is %T !", content))
@@ -412,7 +412,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 		simulator, ok := validSimulators[item.(string)]
 		if !ok {
 			errMsg := "Error in Env: simulator " + item.(string) + " is invalid! valid simulator are [ "
-			for k, _ := range validSimulators {
+			for k := range validSimulators {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
@@ -485,7 +485,7 @@ func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
 	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) error {
 		if t.discoverer = GetTestDiscoverer(item.(string)); t.discoverer == nil {
 			errMsg := "Error in test_discoverer: type " + item.(string) + " is invalid! valid test_discoverer are [ "
-			for k, _ := range validTestDiscoverers {
+			for k := range validTestDiscoverers {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
@@ -680,7 +680,7 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
 		return AstError(t.Name, err)
 	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) error {
-		for _, arg := range (item.([]interface{})) {
+		for _, arg := range item.([]interface{}) {
 			t.args = append(t.args, arg.(string))
 		}
 		return nil
@@ -930,7 +930,7 @@ func (t *astGroup) Link() error {
 		return err
 	}
 	//dfs link groups
-	for name, _ := range t.Groups {
+	for name := range t.Groups {
 		group := jvsAstRoot.GetGroup(name)
 		if !group.linked {
 			if group == nil {

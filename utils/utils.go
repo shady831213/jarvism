@@ -8,7 +8,7 @@ import (
 
 func KeyOfStringMap(m map[string]interface{}) []string {
 	keys := make([]string, 0)
-	for k, _ := range m {
+	for k := range m {
 		keys = append(keys, k)
 	}
 	return keys
@@ -43,5 +43,3 @@ func WriteNewFile(path string, content string) {
 		panic("write file " + path + " uncompleted!")
 	}
 }
-
-
