@@ -2,10 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"github.com/fatih/set"
+	"os"
 	"reflect"
 	"strings"
 )
-
 
 func Green(str string, modifier ...interface{}) string {
 	return printer(str, 32, 0, modifier...)
@@ -78,6 +79,9 @@ func Blink(colorFunc func(str string, modifier ...interface{}) string) func(str 
 }
 
 func printer(str string, color int, weight int, extraArgs ...interface{}) string {
+	if unANSITermSet.Has(os.Getenv("TERM")) {
+		return str
+	}
 	var isBlink int64 = 0
 	if len(extraArgs) > 0 {
 		isBlink = reflect.ValueOf(extraArgs[0]).Int()
@@ -100,4 +104,10 @@ func printer(str string, color int, weight int, extraArgs ...interface{}) string
 		mo = append(mo, "0")
 	}
 	return fmt.Sprintf("\033[%s;%dm"+str+"\033[0m", strings.Join(mo, ";"), color)
+}
+
+var unANSITermSet = set.New(set.NonThreadSafe)
+
+func init() {
+	unANSITermSet.Add("dumb")
 }

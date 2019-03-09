@@ -18,7 +18,7 @@ func (r *testRunner) Name() string {
 }
 
 func (r *testRunner) PrepareBuild(build *core.AstBuild, cmdStdout *io.Writer) error {
-	cmd := exec.Command("echo", " prepare build ", build.Name)
+	cmd := exec.Command("echo", " ")
 	cmd.Stdout = *cmdStdout
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmd.Run()
@@ -32,7 +32,7 @@ func (r *testRunner) Build(build *core.AstBuild, cmdStdout *io.Writer) error {
 }
 
 func (r *testRunner) PrepareTest(testCase *core.AstTestCase, cmdStdout *io.Writer) *core.JVSTestResult {
-	cmd := exec.Command("echo", " prepare test ", testCase.Name)
+	cmd := exec.Command("echo", "")
 	cmd.Stdout = *cmdStdout
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	if err := cmd.Run(); err != nil {

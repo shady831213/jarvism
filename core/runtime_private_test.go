@@ -1,7 +1,6 @@
 package core
 
 import (
-	"os"
 	"strconv"
 	"testing"
 )
@@ -82,7 +81,7 @@ func TestSingleTestSetup(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if r.cmdStdout != os.Stdout {
+	if r.cmdStdout == nil {
 		t.Error("when running single test, expect stdout is open but closed")
 		t.FailNow()
 	}
@@ -99,7 +98,7 @@ func TestRunOnlyBuildSetup(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if r.cmdStdout != os.Stdout {
+	if r.cmdStdout == nil {
 		t.Error("when running only build, expect stdout is open but closed")
 		t.FailNow()
 	}

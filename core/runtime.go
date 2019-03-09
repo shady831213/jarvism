@@ -9,7 +9,6 @@ import (
 	"io"
 	"math"
 	"math/big"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -148,8 +147,8 @@ func (f *runFlow) run() {
 
 	//run tests
 	for e := f.Front(); e != nil; e = e.Next() {
-		runTimeLimiter.put()
 		f.testWg.Add(1)
+		runTimeLimiter.put()
 		go func(testCase *AstTestCase) {
 			defer f.testWg.Add(-1)
 			defer runTimeLimiter.get()
@@ -204,7 +203,7 @@ func newRunTime(name string, group *astGroup) *runTime {
 		r.createFlow(group.GetBuild())
 	}
 	if r.totalTest <= 1 {
-		r.cmdStdout = os.Stdout
+		r.cmdStdout = &stdout{}
 	}
 	return r
 }
@@ -246,8 +245,8 @@ func (r *runTime) run() {
 		close(r.testDone)
 	}()
 	for _, f := range r.runFlow {
-		runTimeLimiter.put()
 		r.flowWg.Add(1)
+		runTimeLimiter.put()
 		go func(flow *runFlow) {
 			defer r.flowWg.Add(-1)
 			flow.run()
