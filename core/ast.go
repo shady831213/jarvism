@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/fatih/set"
@@ -15,18 +14,40 @@ import (
 
 type astParser interface {
 	//pass1:top-down AstParse
-	Parse(map[interface{}]interface{}) error
+	Parse(map[interface{}]interface{}) *AstError
 	KeywordsChecker(string) (bool, *utils.StringMapSet, string)
 }
 
 type astLinker interface {
 	astParser
 	//pass2:top-down link
-	Link() error
+	Link() *AstError
 }
 
-func AstError(item string, err error) error {
-	return errors.New("Error in " + item + ": " + err.Error())
+type AstError struct {
+	msg   string
+	item  string
+	phase string
+}
+
+func (e *AstError) Error() string {
+	return utils.Red(e.phase + " Error in " + e.item + ": " + e.msg)
+}
+
+func NewAstParseError(item, msg string) *AstError {
+	inst := new(AstError)
+	inst.msg = msg
+	inst.item = item
+	inst.phase = "Parse"
+	return inst
+}
+
+func NewAstLinkError(item, msg string) *AstError {
+	inst := new(AstError)
+	inst.msg = msg
+	inst.item = item
+	inst.phase = "Link"
+	return inst
 }
 
 func CheckKeyWord(s string, keyWords *utils.StringMapSet) bool {
@@ -41,10 +62,10 @@ func astHierFmt(title string, space int, handler func() string) string {
 		"\n"
 }
 
-func AstParse(parser astParser, cfg map[interface{}]interface{}) error {
+func AstParse(parser astParser, cfg map[interface{}]interface{}) *AstError {
 	for name := range cfg {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
-			return errors.New(tag + "syntax error of " + name.(string) + "! expect " + fmt.Sprint(keywords))
+			return NewAstParseError("", tag+"syntax error of "+name.(string)+"! expect "+fmt.Sprint(keywords))
 		}
 	}
 	if err := parser.Parse(cfg); err != nil {
@@ -53,15 +74,15 @@ func AstParse(parser astParser, cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
+func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) *AstError) *AstError {
 	if item, ok := cfg[key]; ok {
 		flag.Args()
 		return handler(item)
 	}
-	return errors.New("not define " + key + "!")
+	return NewAstParseError("", "not define "+key+"!")
 }
 
-func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) error) error {
+func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) *AstError) *AstError {
 	if item, ok := cfg[key]; ok {
 		return handler(item)
 	}
@@ -172,8 +193,8 @@ func (items *astItems) KeywordsChecker(s string) (bool, *utils.StringMapSet, str
 	return true, nil, ""
 }
 
-func (items *astItems) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, items.preActionName(), func(i interface{}) error {
+func (items *astItems) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, items.preActionName(), func(i interface{}) *AstError {
 		if l, ok := i.([]interface{}); ok {
 			for _, s := range l {
 				items.preAction += s.(string)
@@ -183,13 +204,13 @@ func (items *astItems) Parse(cfg map[interface{}]interface{}) error {
 	}); err != nil {
 		return err
 	}
-	if err := CfgToAstItemOptional(cfg, items.optionName(), func(i interface{}) error {
+	if err := CfgToAstItemOptional(cfg, items.optionName(), func(i interface{}) *AstError {
 		items.option.Cat(newAstItem(i))
 		return nil
 	}); err != nil {
 		return err
 	}
-	if err := CfgToAstItemOptional(cfg, items.postActionName(), func(i interface{}) error {
+	if err := CfgToAstItemOptional(cfg, items.postActionName(), func(i interface{}) *AstError {
 		if l, ok := i.([]interface{}); ok {
 			for _, s := range l {
 				items.postAction += s.(string)
@@ -236,15 +257,15 @@ func (a *AstOptionAction) KeywordsChecker(s string) (bool, *utils.StringMapSet, 
 	return true, nil, ""
 }
 
-func (a *AstOptionAction) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, "compile_option", func(i interface{}) error {
+func (a *AstOptionAction) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, "compile_option", func(i interface{}) *AstError {
 		a.compileOption.Cat(newAstItem(i))
 		return nil
 	}); err != nil {
 		return err
 	}
 
-	if err := CfgToAstItemOptional(cfg, "sim_option", func(i interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "sim_option", func(i interface{}) *AstError {
 		a.simOption.Cat(newAstItem(i))
 		return nil
 	}); err != nil {
@@ -341,30 +362,30 @@ func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string
 	return true, nil, ""
 }
 
-func (t *AstOption) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, "usage", func(item interface{}) error {
+func (t *AstOption) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, "usage", func(item interface{}) *AstError {
 		t.usage = item.(string)
 		return nil
 	}); err != nil {
-		return AstError("on_action of "+t.Name, err)
+		return NewAstParseError("usage of "+t.Name, err.msg)
 	}
-	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) *AstError {
 		if t.WithValue != nil {
-			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
+			return NewAstParseError(t.Name, "on_action and with_value_action are both defined")
 		}
 		t.On = NewAstOptionAction()
 		return AstParse(t.On, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return AstError("on_action of "+t.Name, err)
+		return NewAstParseError("on_action of "+t.Name, err.msg)
 	}
-	if err := CfgToAstItemOptional(cfg, "with_value_action", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "with_value_action", func(item interface{}) *AstError {
 		if t.On != nil {
-			return errors.New("Error in " + t.Name + ": on_action and with_value_action are both defined!")
+			return NewAstParseError(t.Name, "on_action and with_value_action are both defined")
 		}
 		t.WithValue = NewAstOptionAction()
 		return AstParse(t.WithValue, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return AstError("with_value_action of "+t.Name, err)
+		return NewAstParseError("with_value_action of "+t.Name, err.msg)
 	}
 	//add to flagSet
 	RegisterJvsAstOption(t)
@@ -407,16 +428,16 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	return true, nil, ""
 }
 
-func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) error {
+func (t *astEnv) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) *AstError {
 		simulator, ok := validSimulators[item.(string)]
 		if !ok {
-			errMsg := "Error in Env: simulator " + item.(string) + " is invalid! valid simulator are [ "
+			errMsg := "simulator " + item.(string) + " is invalid! valid simulator are [ "
 			for k := range validSimulators {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
-			return errors.New(errMsg)
+			return NewAstParseError("simulator of Env", errMsg)
 		}
 		if err := LoadBuildInOptions(simulator.BuildInOptionFile()); err != nil {
 			panic("Error in loading " + simulator.BuildInOptionFile() + ":" + err.Error())
@@ -424,7 +445,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 		setSimulator(simulator)
 		return nil
 	}); err != nil {
-		return AstError("simulator in Env", err)
+		return NewAstParseError("simulator of Env", err.msg)
 	}
 	//use default
 	if GetSimulator() == nil {
@@ -432,15 +453,18 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) error {
 		setSimulator(simulator)
 	}
 
-	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) error {
-		return SetWorkDir(item.(string))
+	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *AstError {
+		if err := SetWorkDir(item.(string)); err != nil {
+			return NewAstParseError("work_dir in Env", err.Error())
+		}
+		return nil
 	}); err != nil {
-		return AstError("work_dir in Env", err)
+		return NewAstParseError("work_dir of Env", err.msg)
 	}
 	//use default
 	if GetWorkDir() == "" {
 		if err := SetWorkDir(path.Join(jarivsm.GetPrjHome(), "work")); err != nil {
-			return AstError("work_dir in Env", err)
+			return NewAstParseError("work_dir in Env", err.Error())
 		}
 	}
 	return nil
@@ -481,25 +505,25 @@ func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet
 	return true, nil, ""
 }
 
-func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) error {
+func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) *AstError {
 		if t.discoverer = GetTestDiscoverer(item.(string)); t.discoverer == nil {
-			errMsg := "Error in test_discoverer: type " + item.(string) + " is invalid! valid test_discoverer are [ "
+			errMsg := "type " + item.(string) + " is invalid! valid test_discoverer are [ "
 			for k := range validTestDiscoverers {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
-			return errors.New(errMsg)
+			return NewAstParseError("test_discoverer", errMsg)
 		}
 		return nil
 	}); err != nil {
-		return AstError("test_discoverer", err)
+		return NewAstParseError("test_discoverer", err.msg)
 	}
-	if err := CfgToAstItemOptional(cfg, "attr", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "attr", func(item interface{}) *AstError {
 		t.attr = item.(map[interface{}]interface{})
 		return nil
 	}); err != nil {
-		return AstError("test_discoverer", err)
+		return NewAstParseError("test_discoverer", err.msg)
 	}
 	//parse discoverer
 	return AstParse(t.discoverer, t.attr)
@@ -565,26 +589,26 @@ func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 	return true, nil, ""
 }
 
-func (t *AstBuild) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, "test_discoverer", func(item interface{}) error {
+func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, "test_discoverer", func(item interface{}) *AstError {
 		t.testDiscoverer = new(astTestDiscoverer)
 		return AstParse(t.testDiscoverer, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return AstError("group "+t.Name, err)
+		return NewAstParseError(err.item+" of group "+t.Name, err.msg)
 	}
 	//use default
 	if t.testDiscoverer == nil {
 		t.testDiscoverer = newAstTestDiscoverer()
 		if err := AstParse(t.testDiscoverer, map[interface{}]interface{}{"type": "uvm_test"}); err != nil {
-			return AstError("group "+t.Name, err)
+			return NewAstParseError(err.item+" of group "+t.Name, err.msg)
 		}
 	}
 	//options
 	if err := t.compileItems.Parse(cfg); err != nil {
-		return err
+		return NewAstParseError("group "+t.Name, err.msg)
 	}
 	if err := t.simItems.Parse(cfg); err != nil {
-		return err
+		return NewAstParseError("group "+t.Name, err.msg)
 	}
 	return nil
 }
@@ -672,32 +696,32 @@ func (t *astTest) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 	return true, nil, ""
 }
 
-func (t *astTest) Parse(cfg map[interface{}]interface{}) error {
-	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) error {
+func (t *astTest) Parse(cfg map[interface{}]interface{}) *AstError {
+	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) *AstError {
 		t.buildName = item.(string)
 		return nil
 	}); err != nil {
-		return AstError(t.Name, err)
+		return NewAstParseError(t.Name, err.msg)
 	}
-	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) *AstError {
 		for _, arg := range item.([]interface{}) {
 			t.args = append(t.args, arg.(string))
 		}
 		return nil
 	}); err != nil {
-		return AstError(t.Name, err)
+		return NewAstParseError(t.Name, err.msg)
 	}
 	return nil
 }
 
 //because Link is top-down, the last repeated args take effect
-func (t *astTest) Link() error {
+func (t *astTest) Link() *AstError {
 	//link build
 	//builds have been all parsed
 	if t.buildName != "" {
 		build := jvsAstRoot.GetBuild(t.buildName)
 		if build == nil {
-			return errors.New("build " + t.buildName + " of " + t.Name + "is undef!")
+			return NewAstLinkError(t.Name, "build "+t.buildName+" of "+t.Name+"is undef!")
 		}
 		t.Build = build
 	}
@@ -705,7 +729,7 @@ func (t *astTest) Link() error {
 		//Options have been all parsed
 		opt, err := getJvsAstOption(arg)
 		if err != nil {
-			return AstError("args of "+t.Name, err)
+			return NewAstLinkError("args of "+t.Name, err.Error())
 		}
 		t.OptionArgs.Add(opt.GetName(), opt.Clone())
 
@@ -785,14 +809,14 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 	return testcases
 }
 
-func (t *AstTestCase) Link() error {
+func (t *AstTestCase) Link() *AstError {
 	if err := t.astTest.Link(); err != nil {
 		return err
 	}
 	//set build and check test
 	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
-		return errors.New(utils.Red("Link Error: "+t.Name+" is not valid test of build"+t.Build.Name) + "\n" +
-			"valid tests:\n" + strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
+		return NewAstLinkError(t.Name, t.Name+" is not valid test of build"+t.Build.Name+"\n"+
+			"valid tests:\n"+strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
 	}
 
 	return nil
@@ -883,13 +907,13 @@ func (t *astGroup) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 	return true, nil, ""
 }
 
-func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
+func (t *astGroup) Parse(cfg map[interface{}]interface{}) *AstError {
 	if err := t.astTest.Parse(cfg); err != nil {
-		return err
+		return NewAstParseError("group "+t.Name, err.msg)
 	}
 
 	//AstParse tests
-	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) *AstError {
 		t.Tests = make(map[string]*AstTestCase)
 		for name, test := range item.(map[interface{}]interface{}) {
 			t.Tests[name.(string)] = newAstTestCase(name.(string))
@@ -905,26 +929,26 @@ func (t *astGroup) Parse(cfg map[interface{}]interface{}) error {
 		}
 		return nil
 	}); err != nil {
-		return AstError("group "+t.Name, err)
+		return NewAstParseError(err.item+"of group "+t.Name, err.msg)
 	}
 
 	//AstParse groups
-	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *AstError {
 		t.Groups = make(map[string]*astGroup)
 		for _, name := range item.([]interface{}) {
 			if _, ok := t.Groups[name.(string)]; ok {
-				return errors.New("sub group " + name.(string) + " is redefined in group " + t.Name + "!")
+				return NewAstParseError("group "+t.Name, "sub group "+name.(string)+" is redefined in group "+t.Name+"!")
 			}
 			t.Groups[name.(string)] = nil
 		}
 		return nil
 	}); err != nil {
-		return AstError("group "+t.Name, err)
+		return NewAstParseError("group "+t.Name, err.msg)
 	}
 	return nil
 }
 
-func (t *astGroup) Link() error {
+func (t *astGroup) Link() *AstError {
 
 	if err := t.astTest.Link(); err != nil {
 		return err
@@ -934,7 +958,7 @@ func (t *astGroup) Link() error {
 		group := jvsAstRoot.GetGroup(name)
 		if !group.linked {
 			if group == nil {
-				return errors.New("sub group " + name + "of group " + t.Name + " is undef!")
+				return NewAstLinkError("group "+t.Name, "sub group " + name + "of group " + t.Name + " is undef!")
 			}
 			if err := group.Link(); err != nil {
 				return err
@@ -947,7 +971,7 @@ func (t *astGroup) Link() error {
 	if t.parent != nil {
 		for g := t.parent.(*astGroup); g.parent != nil; g = g.parent.(*astGroup) {
 			if g.Name == t.Name {
-				return errors.New("Loop include: group " + t.Name + " and group " + g.Name)
+				return NewAstLinkError("group "+t.Name, "Loop include: group " + t.Name + " and group " + g.Name)
 			}
 		}
 	}
@@ -1032,9 +1056,9 @@ func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 	return true, nil, ""
 }
 
-func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
+func (t *astRoot) Parse(cfg map[interface{}]interface{}) *AstError {
 	//parsing Env
-	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) *AstError {
 		t.Env = new(astEnv)
 		if item != nil {
 			return AstParse(t.Env, item.(map[interface{}]interface{}))
@@ -1051,7 +1075,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 		}
 	}
 	//parsing builds
-	if err := CfgToAstItemRequired(cfg, "builds", func(item interface{}) error {
+	if err := CfgToAstItemRequired(cfg, "builds", func(item interface{}) *AstError {
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
 			if build != nil {
@@ -1069,7 +1093,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 		return err
 	}
 	//parsing options
-	if err := CfgToAstItemOptional(cfg, "options", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "options", func(item interface{}) *AstError {
 		for name, option := range item.(map[interface{}]interface{}) {
 			t.Options[name.(string)] = newAstOption(name.(string))
 			if err := AstParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
@@ -1082,7 +1106,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	}
 
 	//parsing groups
-	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) error {
+	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *AstError {
 		for name, group := range item.(map[interface{}]interface{}) {
 			t.Groups[name.(string)] = newAstGroup(name.(string))
 			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
@@ -1096,7 +1120,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) error {
 	return nil
 }
 
-func (t *astRoot) Link() error {
+func (t *astRoot) Link() *AstError {
 	//dfs link groups
 	for _, group := range t.Groups {
 		if !group.linked {

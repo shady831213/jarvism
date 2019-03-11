@@ -15,21 +15,21 @@ type uvmDiscoverer struct {
 	tests   map[string]interface{}
 }
 
-func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) error {
+func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *core.AstError {
 	//AstParse tests
-	if err := core.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) error {
+	if err := core.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *core.AstError {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
-			return err
+			return core.NewAstParseError(d.Name(), err.Error())
 		}
 		//check path
 		if _, err := os.Stat(testDir); err != nil {
-			return err
+			return core.NewAstParseError(d.Name(), err.Error())
 		}
 		d.testDir = testDir
 		return nil
 	}); err != nil {
-		return core.AstError("test_dir of "+d.Name(), err)
+		return core.NewAstParseError("test_dir of "+d.Name(), err.Error())
 	}
 	//use default
 	if d.testDir == "" {
