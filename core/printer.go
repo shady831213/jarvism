@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const printerPadding = 90
+const printerPadding = 100
 
 func PrintProccessing(color func(str string, modifier ...interface{}) string) func(string, *string, chan bool) {
 	return func(processingString string, status *string, done chan bool) {
@@ -54,20 +54,22 @@ func (s *stdout) Write(p []byte) (int, error) {
 	return n - paddingCnt, err
 }
 
-func Print(s string) {
-	if len(s) < printerPadding {
-		fmt.Print(s + strings.Repeat(" ", printerPadding-len(s)))
-		return
+func paddingString(s string) string {
+	lines := strings.Split(s, "\n")
+	for i := range lines {
+		if len(lines[i]) < printerPadding {
+			lines[i] += strings.Repeat(" ", printerPadding-len(lines[i]))
+		}
 	}
-	fmt.Print(s)
+	return strings.Join(lines, "\n")
+}
+
+func Print(s string) {
+	fmt.Print(paddingString(s))
 }
 
 func Println(s string) {
-	if len(s) < printerPadding {
-		fmt.Println(s + strings.Repeat(" ", printerPadding-len(s)))
-		return
-	}
-	fmt.Println(s)
+	fmt.Println(paddingString(s))
 }
 
 func PrintStatus(s, status string) {

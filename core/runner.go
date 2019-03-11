@@ -1,13 +1,11 @@
 package core
 
-import "io"
-
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, *io.Writer) error
-	Build(*AstBuild, *io.Writer) error
-	PrepareTest(*AstTestCase, *io.Writer) *JVSTestResult
-	RunTest(*AstTestCase, *io.Writer) *JVSTestResult
+	PrepareBuild(*AstBuild, func(string, ...string) error) *JVSTestResult
+	Build(*AstBuild, func(string, ...string) error) *JVSTestResult
+	PrepareTest(*AstTestCase, func(string, ...string) error) *JVSTestResult
+	RunTest(*AstTestCase, func(string, ...string) error) *JVSTestResult
 }
 
 var runner Runner
