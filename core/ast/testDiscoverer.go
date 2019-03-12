@@ -1,4 +1,4 @@
-package core
+package ast
 
 type TestDiscoverer interface {
 	astParser

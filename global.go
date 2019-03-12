@@ -14,6 +14,10 @@ func PkgPath() string {
 	return getPkgPath()
 }
 
+func CorePath() string {
+	return path.Join(getPkgPath(), "core")
+}
+
 func BuildInOptionPath() string {
 	return path.Join(getPkgPath(), "buildInOptions")
 }

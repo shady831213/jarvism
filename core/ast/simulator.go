@@ -1,4 +1,4 @@
-package core
+package ast
 
 type Simulator interface {
 	Name() string

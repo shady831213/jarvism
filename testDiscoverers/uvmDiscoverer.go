@@ -2,7 +2,8 @@ package testDiscoverers
 
 import (
 	"github.com/shady831213/jarvism"
-	"github.com/shady831213/jarvism/core"
+	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/utils"
 	"os"
 	"path"
@@ -15,21 +16,21 @@ type uvmDiscoverer struct {
 	tests   map[string]interface{}
 }
 
-func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *core.AstError {
+func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.AstError {
 	//AstParse tests
-	if err := core.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *core.AstError {
+	if err := ast.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *errors.AstError {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
-			return core.NewAstParseError(d.Name(), err.Error())
+			return errors.NewAstParseError(d.Name(), err.Error())
 		}
 		//check path
 		if _, err := os.Stat(testDir); err != nil {
-			return core.NewAstParseError(d.Name(), err.Error())
+			return errors.NewAstParseError(d.Name(), err.Error())
 		}
 		d.testDir = testDir
 		return nil
 	}); err != nil {
-		return core.NewAstParseError("test_dir of "+d.Name(), err.Error())
+		return errors.NewAstParseError("test_dir of "+d.Name(), err.Error())
 	}
 	//use default
 	if d.testDir == "" {
@@ -41,7 +42,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *core.AstError {
 func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("test_dir")
-	if !core.CheckKeyWord(s, keywords) {
+	if !ast.CheckKeyWord(s, keywords) {
 		return false, keywords, "Error in " + d.Name() + ":"
 	}
 	return true, nil, ""
@@ -95,11 +96,11 @@ func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	return ok
 }
 
-func newUvmDiscoverer() core.TestDiscoverer {
+func newUvmDiscoverer() ast.TestDiscoverer {
 	inst := new(uvmDiscoverer)
 	return inst
 }
 
 func init() {
-	core.RegisterTestDiscoverer(newUvmDiscoverer)
+	ast.RegisterTestDiscoverer(newUvmDiscoverer)
 }

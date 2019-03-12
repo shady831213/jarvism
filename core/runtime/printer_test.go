@@ -1,7 +1,7 @@
-package core_test
+package runtime_test
 
 import (
-	"github.com/shady831213/jarvism/core"
+	"github.com/shady831213/jarvism/core/runtime"
 	"github.com/shady831213/jarvism/utils"
 	"strconv"
 	"testing"
@@ -12,7 +12,7 @@ func TestPrinter(t *testing.T) {
 	status := "(cnt:0/total:10)"
 	done1 := make(chan bool, 1)
 	job := make(chan bool)
-	go core.PrintProccessing(utils.Green)("test1", &status, done1)
+	go runtime.PrintProccessing(utils.Green)("test1", &status, done1)
 	go func() {
 		i := 0
 		for {
@@ -24,7 +24,7 @@ func TestPrinter(t *testing.T) {
 	go func() {
 		for i := 0; i < 10; i++ {
 			time.Sleep(50 * time.Millisecond)
-			core.PrintStatus(strconv.Itoa(i), utils.Green("done"))
+			runtime.PrintStatus(strconv.Itoa(i), utils.Green("done"))
 			job <- true
 		}
 	}()

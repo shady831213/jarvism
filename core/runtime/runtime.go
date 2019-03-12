@@ -1,10 +1,12 @@
-package core
+package runtime
 
 import (
 	"container/list"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/utils"
 	"io"
@@ -56,26 +58,17 @@ func runTimeFinish() {
 	runTimeSimOnly = false
 }
 
-type runTimeOpts interface {
-	GetName() string
-	//bottom-up search
-	GetBuild() *AstBuild
-	//top-down search
-	GetTestCases() []*AstTestCase
-	ParseArgs()
-}
-
 type runFlow struct {
-	build *AstBuild
+	build *ast.AstBuild
 	list.List
 	testWg    sync.WaitGroup
 	cmdStdout *io.Writer
-	buildDone chan *JVSTestResult
-	testDone  chan *JVSTestResult
+	buildDone chan *errors.JVSTestResult
+	testDone  chan *errors.JVSTestResult
 	ctx       context.Context
 }
 
-func newRunFlow(build *AstBuild, cmdStdout *io.Writer, buildDone chan *JVSTestResult, testDone chan *JVSTestResult, ctx context.Context) *runFlow {
+func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *errors.JVSTestResult, testDone chan *errors.JVSTestResult, ctx context.Context) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
@@ -101,24 +94,24 @@ func (f *runFlow) cmdRunner(name string, arg ...string) error {
 	return cmd.Wait()
 }
 
-func (f *runFlow) preparePhase(phaseName string, phase func() *JVSTestResult) *JVSTestResult {
+func (f *runFlow) preparePhase(phaseName string, phase func() *errors.JVSTestResult) *errors.JVSTestResult {
 	PrintStatus(phaseName, utils.Blue("BEGIN"))
 	result := phase()
 	if result == nil {
-		result = JVSTestResultUnknown("No Result!")
+		result = errors.JVSTestResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
 		return result
 	}
-	if result.status != JVSTestPass {
+	if result.Status != errors.JVSTestPass {
 		PrintStatus(phaseName, result.Error())
 	}
 	return result
 }
 
-func (f *runFlow) runPhase(phaseName string, phase func() *JVSTestResult) *JVSTestResult {
+func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSTestResult) *errors.JVSTestResult {
 	result := phase()
 	if result == nil {
-		result = JVSTestResultUnknown("No Result!")
+		result = errors.JVSTestResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
 		return result
 	}
@@ -126,31 +119,31 @@ func (f *runFlow) runPhase(phaseName string, phase func() *JVSTestResult) *JVSTe
 	return result
 }
 
-func (f *runFlow) prepareBuildPhase(build *AstBuild) *JVSTestResult {
-	return f.preparePhase(build.Name, func() *JVSTestResult {
-		return GetRunner().PrepareBuild(build, f.cmdRunner)
+func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSTestResult {
+	return f.preparePhase(build.Name, func() *errors.JVSTestResult {
+		return ast.GetRunner().PrepareBuild(build, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) buildPhase(build *AstBuild) *JVSTestResult {
-	return f.runPhase(build.Name, func() *JVSTestResult {
-		return GetRunner().Build(build, f.cmdRunner)
+func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSTestResult {
+	return f.runPhase(build.Name, func() *errors.JVSTestResult {
+		return ast.GetRunner().Build(build, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) prepareTestPhase(testCase *AstTestCase) *JVSTestResult {
-	return f.preparePhase(testCase.Name, func() *JVSTestResult {
-		return GetRunner().PrepareTest(testCase, f.cmdRunner)
+func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSTestResult {
+	return f.preparePhase(testCase.Name, func() *errors.JVSTestResult {
+		return ast.GetRunner().PrepareTest(testCase, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) runTestPhase(testCase *AstTestCase) *JVSTestResult {
-	return f.runPhase(testCase.Name, func() *JVSTestResult {
-		return GetRunner().RunTest(testCase, f.cmdRunner)
+func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSTestResult {
+	return f.runPhase(testCase.Name, func() *errors.JVSTestResult {
+		return ast.GetRunner().RunTest(testCase, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) AddTest(test *AstTestCase) {
+func (f *runFlow) AddTest(test *ast.AstTestCase) {
 	test.Name = f.build.Name + "__" + test.Name
 	test.Build = f.build
 	f.PushBack(test)
@@ -160,13 +153,13 @@ func (f *runFlow) run() {
 	//run compile
 	if !runTimeSimOnly {
 		result := f.prepareBuildPhase(f.build)
-		if result.status != JVSTestPass {
+		if result.Status != errors.JVSTestPass {
 			f.buildDone <- result
 			runTimeLimiter.get()
 			return
 		}
 		result = f.buildPhase(f.build)
-		if result.status != JVSTestPass {
+		if result.Status != errors.JVSTestPass {
 			f.buildDone <- result
 			runTimeLimiter.get()
 			return
@@ -179,17 +172,17 @@ func (f *runFlow) run() {
 	for e := f.Front(); e != nil; e = e.Next() {
 		f.testWg.Add(1)
 		runTimeLimiter.put()
-		go func(testCase *AstTestCase) {
+		go func(testCase *ast.AstTestCase) {
 			defer f.testWg.Add(-1)
 			defer runTimeLimiter.get()
 			result := f.prepareTestPhase(testCase)
-			if result.status != JVSTestPass {
+			if result.Status != errors.JVSTestPass {
 				f.testDone <- result
 				return
 			}
 			result = f.runTestPhase(testCase)
 			f.testDone <- result
-		}(e.Value.(*AstTestCase))
+		}(e.Value.(*ast.AstTestCase))
 	}
 	f.testWg.Wait()
 }
@@ -202,13 +195,13 @@ type runTime struct {
 	runFlow                     map[string]*runFlow
 	flowWg                      sync.WaitGroup
 	processingDone, monitorDone chan bool
-	buildDone                   chan *JVSTestResult
-	testDone                    chan *JVSTestResult
+	buildDone                   chan *errors.JVSTestResult
+	testDone                    chan *errors.JVSTestResult
 	ctx                         context.Context
 	cancel                      func()
 }
 
-func newRunTime(name string, group *astGroup) *runTime {
+func newRunTime(name string, group *ast.AstGroup) *runTime {
 	r := new(runTime)
 	r.Name = name
 	r.runFlow = make(map[string]*runFlow)
@@ -216,8 +209,8 @@ func newRunTime(name string, group *astGroup) *runTime {
 	r.flowWg = sync.WaitGroup{}
 	r.processingDone = make(chan bool)
 	r.monitorDone = make(chan bool)
-	r.buildDone = make(chan *JVSTestResult, 100)
-	r.testDone = make(chan *JVSTestResult, 100)
+	r.buildDone = make(chan *errors.JVSTestResult, 100)
+	r.testDone = make(chan *errors.JVSTestResult, 100)
 	ctx := context.Background()
 	r.ctx, r.cancel = context.WithCancel(ctx)
 	if runTimeMaxJob > 0 {
@@ -242,8 +235,8 @@ func newRunTime(name string, group *astGroup) *runTime {
 	return r
 }
 
-func (r *runTime) createFlow(build *AstBuild) *runFlow {
-	hash := hash(build.Name + build.compileItems.preAction + build.compileItems.option.GetString() + build.compileItems.postAction)
+func (r *runTime) createFlow(build *ast.AstBuild) *runFlow {
+	hash := hash(build.GetRawSign())
 	if _, ok := r.runFlow[hash]; !ok {
 		newBuild := build.Clone()
 		newBuild.Name = r.runtimeId + "__" + build.Name + "_" + hash
@@ -253,7 +246,7 @@ func (r *runTime) createFlow(build *AstBuild) *runFlow {
 	return r.runFlow[hash]
 }
 
-func (r *runTime) initSubTest(test *AstTestCase) int {
+func (r *runTime) initSubTest(test *ast.AstTestCase) int {
 	test.ParseArgs()
 	flow := r.createFlow(test.GetBuild())
 	testcases := test.GetTestCases()
@@ -323,7 +316,7 @@ func filterAstArgs(args []string) []interface{} {
 	if args != nil {
 		for _, arg := range args {
 			//Parse all args and only pass the jvsAstOption to Ast
-			if a, _ := getJvsAstOption(arg); a != nil {
+			if a, _ := ast.GetJvsAstOption(arg); a != nil {
 				_args = append(_args, arg)
 			}
 		}
@@ -332,7 +325,7 @@ func filterAstArgs(args []string) []interface{} {
 }
 
 func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error {
-	group := newAstGroup("Jarvis")
+	group := ast.NewAstGroup("Jarvis")
 	if err := group.Parse(cfg); err != nil {
 		return err
 	}
@@ -343,7 +336,7 @@ func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error 
 	return nil
 }
 
-func RunGroup(group *astGroup, args []string, sc chan os.Signal) error {
+func RunGroup(group *ast.AstGroup, args []string, sc chan os.Signal) error {
 	return run(group.Name, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{group.Name}}, sc)
 }
 

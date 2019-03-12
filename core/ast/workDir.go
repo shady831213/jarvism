@@ -1,4 +1,4 @@
-package core
+package ast
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 
 var workDir string
 
-func SetWorkDir(path string) error {
+func setWorkDir(path string) error {
 	_workDir, err := filepath.Abs(os.ExpandEnv(path))
 	if err != nil {
 		return err

@@ -2,7 +2,7 @@ package mulators
 
 import (
 	"github.com/shady831213/jarvism"
-	"github.com/shady831213/jarvism/core"
+	"github.com/shady831213/jarvism/core/ast"
 	"path"
 )
 
@@ -29,11 +29,11 @@ func (s *vcs) SeedOption() string {
 	return "+ntb_random_seed="
 }
 
-func newVcs() core.Simulator {
+func newVcs() ast.Simulator {
 	inst := new(vcs)
 	return inst
 }
 
 func init() {
-	core.RegisterSimulator(newVcs())
+	ast.RegisterSimulator(newVcs())
 }
