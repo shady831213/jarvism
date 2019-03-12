@@ -106,7 +106,7 @@ func TestInterrupt(t *testing.T) {
 		signal.Notify(stopChan, os.Interrupt, syscall.SIGINT)
 		sc <- <-stopChan
 	}()
-	for i := 0; i < 10; i ++ {
+	for i := 0; i < 10; i++ {
 		go func() {
 			time.Sleep(time.Duration(rand.Int63n(400)) * time.Millisecond)
 			syscall.Kill(syscall.Getpid(), syscall.SIGINT)

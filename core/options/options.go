@@ -24,7 +24,6 @@ func ArgToOption(s string) (string, error) {
 	return name, nil
 }
 
-
 //global
 var jvsOptions = flag.NewFlagSet("jvsOptions", flag.ExitOnError)
 
