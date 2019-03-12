@@ -396,7 +396,7 @@ type astEnv struct {
 
 func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
-	keywords.AddKey("simulator", "work_dir")
+	keywords.AddKey("simulator", "work_dir", "runner")
 	if !CheckKeyWord(s, keywords) {
 		return false, keywords, "Error in Env:"
 	}
@@ -426,6 +426,27 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.AstError {
 	if GetSimulator() == nil {
 		simulator, _ := validSimulators["vcs"]
 		setSimulator(simulator)
+	}
+
+	if err := CfgToAstItemOptional(cfg, "runner", func(item interface{}) *errors.AstError {
+		runner, ok := validRunners[item.(string)]
+		if !ok {
+			errMsg := "runner " + item.(string) + " is invalid! valid runner are [ "
+			for k := range validRunners {
+				errMsg += k + " "
+			}
+			errMsg += "]!"
+			return errors.NewAstParseError("runner of Env", errMsg)
+		}
+		setRunner(runner)
+		return nil
+	}); err != nil {
+		return errors.NewAstParseError("runner of Env", err.Msg)
+	}
+	//use default
+	if GetRunner() == nil {
+		runner, _ := validRunners["host"]
+		setRunner(runner)
 	}
 
 	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *errors.AstError {

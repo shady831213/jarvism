@@ -13,8 +13,7 @@ type Runner interface {
 var runner Runner
 var validRunners = make(map[string]Runner)
 
-//Fix Me: export for test
-func SetRunner(r Runner) {
+func setRunner(r Runner) {
 	runner = r
 }
 

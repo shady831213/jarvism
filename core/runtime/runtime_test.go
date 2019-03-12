@@ -1,7 +1,6 @@
 package runtime_test
 
 import (
-	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/runtime"
@@ -10,7 +9,6 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
-	"path"
 	"strconv"
 	"syscall"
 	"testing"
@@ -21,7 +19,7 @@ type testRunner struct {
 }
 
 func (r *testRunner) Name() string {
-	return "testRunner"
+	return "test"
 }
 
 func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(string, ...string) error) *errors.JVSTestResult {
@@ -57,7 +55,6 @@ func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(string, .
 }
 
 func TestGroup(t *testing.T) {
-	ast.SetRunner(new(testRunner))
 	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group1"), []string{"-sim_only"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -74,7 +71,6 @@ func TestGroup(t *testing.T) {
 }
 
 func TestSingleTest(t *testing.T) {
-	ast.SetRunner(new(testRunner))
 	if err := runtime.RunTest("test1", "build1", []string{"-seed 1"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -82,7 +78,6 @@ func TestSingleTest(t *testing.T) {
 }
 
 func TestSingleRepeatTest(t *testing.T) {
-	ast.SetRunner(new(testRunner))
 	if err := runtime.RunTest("test1", "build1", []string{"-repeat 10", "-max_job " + strconv.Itoa(rand.Intn(15)+1)}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -90,7 +85,6 @@ func TestSingleRepeatTest(t *testing.T) {
 }
 
 func TestRunOnlyBuild(t *testing.T) {
-	ast.SetRunner(new(testRunner))
 	if err := runtime.RunOnlyBuild("build1", []string{"-test_phase jarvis"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -98,7 +92,6 @@ func TestRunOnlyBuild(t *testing.T) {
 }
 
 func TestInterrupt(t *testing.T) {
-	ast.SetRunner(new(testRunner))
 	sc := make(chan os.Signal)
 	defer close(sc)
 	go func() {
@@ -120,8 +113,9 @@ func TestInterrupt(t *testing.T) {
 }
 
 func init() {
-	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.CorePath(), "testFiles"))
-	cfg, err := ast.Lex(path.Join(jarivsm.CorePath(), "testFiles/build.yaml"))
+	ast.RegisterRunner(new(testRunner))
+	os.Setenv("JVS_PRJ_HOME", "testFiles")
+	cfg, err := ast.Lex("testFiles/build.yaml")
 	if err != nil {
 		panic(err)
 	}

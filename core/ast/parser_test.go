@@ -1,10 +1,8 @@
 package ast_test
 
 import (
-	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/utils"
-	"path"
 	"regexp"
 	"strings"
 	"syscall"
@@ -12,7 +10,7 @@ import (
 )
 
 func TestLex(t *testing.T) {
-	cfg, err := ast.Lex(path.Join(jarivsm.CorePath(), "testFiles/build.yaml"))
+	cfg, err := ast.Lex("testFiles/build.yaml")
 	if err != nil {
 		t.Error(err)
 	}
@@ -20,17 +18,17 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	expect := utils.ReadFile(path.Join(jarivsm.CorePath(), "testFiles/build.ast"))
+	expect := utils.ReadFile("testFiles/build.ast")
 	result := ast.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
 
 	if result != expect {
 		t.Log(ast.GetJvsAstRoot().GetHierString(0))
-		utils.WriteNewFile(path.Join(jarivsm.CorePath(), "testFiles/build.ast.result"), result)
+		utils.WriteNewFile("testFiles/build.ast.result", result)
 		t.Error("not equal! please diff testFiles/build.ast and estFiles/build.ast.result")
 		return
 	}
-	syscall.Unlink(path.Join(jarivsm.CorePath(), "testFiles/build.ast.result"))
+	syscall.Unlink("testFiles/build.ast.result")
 }
 
 func dealAstResult(result string) string {
