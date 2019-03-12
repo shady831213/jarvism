@@ -80,10 +80,19 @@ func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *error
 	return inst
 }
 
-func (f *runFlow) cmdRunner(setCmdAttr func(cmd *exec.Cmd) error, name string, arg ...string) error {
+func (f *runFlow) cmdRunner(setCmdAttr func(cmd *exec.Cmd) error, logFile *os.File, name string, arg ...string) error {
+	writers := make([]io.Writer, 0)
+	if *f.cmdStdout != nil {
+		writers = append(writers, *f.cmdStdout)
+	}
+	if logFile != nil {
+		writers = append(writers, logFile)
+	}
+	fileAndStdoutWriter := io.MultiWriter(writers...)
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, name, arg...)
-	cmd.Stdout = *f.cmdStdout
+
+	cmd.Stdout = fileAndStdoutWriter
 	if setCmdAttr != nil {
 		if err := setCmdAttr(cmd); err != nil {
 			return err
@@ -339,7 +348,10 @@ func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error 
 	}
 	r := newRunTime(name, group)
 	logFile, err := setLog(r.runtimeId + ".log")
-	defer logFile.Close()
+	defer func() {
+		Println("logFile:" + logFile.Name())
+		logFile.Close()
+	}()
 	if err != nil {
 		return err
 	}

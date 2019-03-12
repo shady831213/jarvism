@@ -24,33 +24,33 @@ func (r *testRunner) Name() string {
 	return "test"
 }
 
-func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " "); err != nil {
+	if err := cmdRunner(nil, nil, "echo", " "); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *testRunner) Build(build *ast.AstBuild, cmdRunner func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) Build(build *ast.AstBuild, cmdRunner func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " build build ", build.Name); err != nil {
+	if err := cmdRunner(nil, nil, "echo", " build build ", build.Name); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", ""); err != nil {
+	if err := cmdRunner(nil, nil, "echo", ""); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " run test ", testCase.Name); err != nil {
+	if err := cmdRunner(nil, nil, "echo", " run test ", testCase.Name); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	return errors.JVSRuntimeResultPass("")

@@ -82,6 +82,7 @@ func GetTestStatus() *StatusCnt {
 func statusMonitor(status *string, totalBuild, totalTest int, buildDone, testDone chan *errors.JVSRuntimeResult, done chan bool) {
 	buildStatus = newStatusCnt("BUILDS", totalBuild)
 	testStatus = newStatusCnt("TESTS", totalTest)
+	*status = buildStatus.StatusString() + testStatus.StatusString()
 
 LableFor:
 	for {

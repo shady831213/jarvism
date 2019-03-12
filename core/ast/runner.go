@@ -2,15 +2,16 @@ package ast
 
 import (
 	"github.com/shady831213/jarvism/core/errors"
+	"os"
 	"os/exec"
 )
 
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
-	Build(*AstBuild, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
-	PrepareTest(*AstTestCase, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
-	RunTest(*AstTestCase, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareBuild(*AstBuild, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
+	Build(*AstBuild, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareTest(*AstTestCase, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
+	RunTest(*AstTestCase, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
 }
 
 var runner Runner

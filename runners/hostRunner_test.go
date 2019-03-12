@@ -1,6 +1,7 @@
 package runners_test
 
 import (
+	"flag"
 	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
@@ -11,6 +12,8 @@ import (
 	"path"
 	"testing"
 )
+
+var keepResult bool
 
 func TestHostRunnerBuildFail(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
@@ -31,7 +34,9 @@ func TestHostRunnerBuildFail(t *testing.T) {
 			t.FailNow()
 			return
 		}
-		os.RemoveAll(ast.GetWorkDir())
+		if !keepResult {
+			os.RemoveAll(ast.GetWorkDir())
+		}
 	}
 }
 
@@ -54,7 +59,9 @@ func TestHostRunnerBuild(t *testing.T) {
 			t.FailNow()
 			return
 		}
-		os.RemoveAll(ast.GetWorkDir())
+		if !keepResult {
+			os.RemoveAll(ast.GetWorkDir())
+		}
 	}
 }
 
@@ -98,10 +105,14 @@ func TestHostRunnerSim(t *testing.T) {
 			t.FailNow()
 			return
 		}
-		os.RemoveAll(ast.GetWorkDir())
+		if !keepResult {
+			os.RemoveAll(ast.GetWorkDir())
+		}
 	}
 }
 
 func init() {
 	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.RunnersPath(), "testFiles"))
+	flag.BoolVar(&keepResult, "keep", false, "keep test result")
+	flag.Parse()
 }
