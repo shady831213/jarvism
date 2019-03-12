@@ -77,16 +77,16 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(func(
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	//create pre_sim, sim and post_sim script
-	if err := utils.WriteNewFile(path.Join(buildDir, "pre_sim.sh"), testCase.PreSimAction()); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "pre_sim.sh"), testCase.PreSimAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "sim.sh"), path.Join(buildName, ast.GetSimulator().SimCmd())+" "+testCase.SimOption()); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.Build.GetTestDiscoverer().TestCmd()+testName); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "post_sim.sh"), testCase.PostSimAction()); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "post_sim.sh"), testCase.PostSimAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "run_sim.sh"), strings.Join([]string{"./pre_sim.sh", bashExitGlue(), "./sim.sh", bashExitGlue(), "./post_sim.sh"}, "\n")); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "run_sim.sh"), strings.Join([]string{"./pre_sim.sh", bashExitGlue(), "./sim.sh", bashExitGlue(), "./post_sim.sh"}, "\n")); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	return errors.JVSRuntimeResultPass("")

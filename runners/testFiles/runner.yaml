@@ -1,6 +1,6 @@
 common_compile_option: &common_compile >-
   -sverilog
-  -ntb_opts uvm-1.2
+  -ntb_opts uvm-1.1
 
 common_sim_option: &common_sim >-
   +UVM_VERBOSITY=UVM_LOW
@@ -11,6 +11,7 @@ builds:
       - *common_compile
       - -timescale=1ns/10ps
       - $JVS_PRJ_HOME/test.sv -top test
+      - -f $JVS_PRJ_HOME/testcases/test.f
     pre_compile_action:
       - echo "pre_compile_build1"
       - echo "pre_compile_build1 again"

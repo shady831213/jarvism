@@ -7,6 +7,7 @@ import (
 	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/utils"
+	"math"
 	"path"
 	"sort"
 	"strconv"
@@ -827,6 +828,10 @@ func (t *AstTestCase) ParseArgs() {
 }
 
 func (t *AstTestCase) GetTestCases() []*AstTestCase {
+	if t.seeds == nil {
+		t.seeds = make([]int, 1)
+		t.seeds[0] = jvsRand.Intn(math.MaxInt32)
+	}
 	testcases := make([]*AstTestCase, len(t.seeds))
 	for i := range testcases {
 		testcases[i] = newAstTestCase(t.GetName() + "__" + strconv.Itoa(t.seeds[i]))
