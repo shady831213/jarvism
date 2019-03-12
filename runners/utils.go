@@ -16,3 +16,7 @@ func parseTestName(name string) (jobId, buildName, testName, seed string, groups
 	seed = s[len(s)-1]
 	return
 }
+
+func bashExitGlue() string {
+	return "EXCODE=$?\nif [ $EXCODE != 0 ]\nthen\nexit $EXCODE\nfi"
+}

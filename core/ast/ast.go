@@ -291,13 +291,8 @@ func (t *AstOption) Clone() JvsAstOption {
 }
 
 func (t *AstOption) Set(s string) error {
-	if !t.IsBoolFlag() {
-		t.Value = s
-		return nil
-	}
-	b, err := strconv.ParseBool(s)
-	t.Value = strconv.FormatBool(b)
-	return err
+	t.Value = s
+	return nil
 }
 
 func (t *AstOption) String() string {
@@ -305,7 +300,7 @@ func (t *AstOption) String() string {
 }
 
 func (t *AstOption) IsBoolFlag() bool {
-	return t.WithValue == nil
+	return t.On != nil
 }
 
 func (t *AstOption) Usage() string {
@@ -313,7 +308,7 @@ func (t *AstOption) Usage() string {
 }
 
 func (t *AstOption) TestHandler(test *AstTestCase) {
-	if t.IsBoolFlag() {
+	if t.Value == "true" && t.IsBoolFlag() {
 		test.simItems.option.Cat(t.On.simOption)
 		return
 	}
@@ -321,7 +316,7 @@ func (t *AstOption) TestHandler(test *AstTestCase) {
 }
 
 func (t *AstOption) BuildHandler(build *AstBuild) {
-	if t.IsBoolFlag() {
+	if t.Value == "true" && t.IsBoolFlag() {
 		build.compileItems.option.Cat(t.On.compileOption)
 		return
 	}
@@ -345,22 +340,19 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		return errors.NewJVSAstParseError("usage of "+t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) *errors.JVSAstError {
-		if t.WithValue != nil {
-			return errors.NewJVSAstParseError(t.Name, "on_action and with_value_action are both defined")
-		}
 		t.On = NewAstOptionAction()
 		return AstParse(t.On, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return errors.NewJVSAstParseError("on_action of "+t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "with_value_action", func(item interface{}) *errors.JVSAstError {
-		if t.On != nil {
-			return errors.NewJVSAstParseError(t.Name, "on_action and with_value_action are both defined")
-		}
 		t.WithValue = NewAstOptionAction()
 		return AstParse(t.WithValue, item.(map[interface{}]interface{}))
 	}); err != nil {
 		return errors.NewJVSAstParseError("with_value_action of "+t.Name, err.Msg)
+	}
+	if t.WithValue == nil && t.On == nil {
+		return errors.NewJVSAstParseError(t.Name, "on_action and with_value_action are both nil!")
 	}
 	//add to flagSet
 	RegisterJvsAstOption(t)
@@ -796,6 +788,18 @@ func newAstTestCase(name string) *AstTestCase {
 	return inst
 }
 
+func (t *AstTestCase) PreSimAction() string {
+	return t.simItems.preAction
+}
+
+func (t *AstTestCase) SimOption() string {
+	return t.simItems.option.GetString()
+}
+
+func (t *AstTestCase) PostSimAction() string {
+	return t.simItems.postAction
+}
+
 func (t *AstTestCase) Clone() *AstTestCase {
 	inst := new(AstTestCase)
 	inst.astTest.Copy(&t.astTest)
@@ -849,6 +853,18 @@ func (t *AstTestCase) Link() *errors.JVSAstError {
 
 func (t *AstTestCase) GetHierString(space int) string {
 	nextSpace := space + 1
+	//not sub test
+	flattenTest := ""
+	if t.GetBuild() != nil {
+		t.ParseArgs()
+		flattenTest = astHierFmt("Flatten Tests:", nextSpace, func() string {
+			s := ""
+			for _, test := range t.GetTestCases() {
+				s += test.GetHierString(nextSpace)
+			}
+			return s
+		})
+	}
 	return astHierFmt(t.GetName()+":", space, func() string {
 		return t.astTest.GetHierString(nextSpace) +
 			t.simItems.GetHierString(nextSpace) +
@@ -857,10 +873,10 @@ func (t *AstTestCase) GetHierString(space int) string {
 			}) +
 			astHierFmt("Builds:", nextSpace, func() string {
 				if b := t.GetBuild(); b != nil {
-					return fmt.Sprintln(strings.Repeat(" ", nextSpace) + b.Name)
+					return b.GetHierString(nextSpace)
 				}
 				return fmt.Sprintln(strings.Repeat(" ", nextSpace) + fmt.Sprint(nil))
-			})
+			}) + flattenTest
 	})
 }
 

@@ -34,11 +34,12 @@ func RegisterJvsAstOption(v JvsAstOption) {
 }
 
 func GetJvsAstOption(arg string) (JvsAstOption, error) {
-	args := strings.Split(arg, " ")
-	if err := options.GetJvsOptions().Parse(args); err != nil {
+	args := strings.Join(strings.Split(arg, " "), "=")
+	if err := options.GetJvsOptions().Parse([]string{args}); err != nil {
 		return nil, err
 	}
-	optName, err := options.ArgToOption(args[0])
+	_args := strings.Split(args, "=")
+	optName, err := options.ArgToOption(_args[0])
 	if err != nil {
 		return nil, err
 	}

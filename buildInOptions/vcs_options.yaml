@@ -6,3 +6,15 @@ options:
       compile_option:
         - -q
         - +lint=none
+
+  wave:
+    usage:
+      dump waveform, vaule is format[FSDB, VPD], use macro[DUMP_FSDB, DUMP_VPD] in your testbench, default is VPD
+    on_action:
+      compile_option:
+        - -debug_access+pp
+        - +define+DUMP_VPD
+    with_value_action:
+      compile_option:
+        - -debug_access+pp
+        - +define+DUMP$wave

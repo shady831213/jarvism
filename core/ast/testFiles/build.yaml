@@ -39,6 +39,9 @@ options:
     on_action:
       sim_option:
         - +UVM_VERBOSITY=UVM_FULL
+    with_value_action:
+      sim_option:
+        - +UVM_VERBOSITY=$vh
 
   test_phase:
     with_value_action:
@@ -57,9 +60,12 @@ groups:
       test1:
         args:
           - -repeat 10
+          - -wave
+          - -vh UVM_MIDIUM
       test2:
         args:
           - -seed 1
+          - -wave fsdb
 
   group2:
     build: build2
