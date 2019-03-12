@@ -471,6 +471,9 @@ func (t *astEnv) GetHierString(space int) string {
 	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
 			fmt.Sprintln(GetSimulator().Name())
+	}) + astHierFmt("Runner:", nextSpace, func() string {
+		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
+			fmt.Sprintln(GetRunner().Name())
 	}) + astHierFmt("WorkDir:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
 			fmt.Sprintln(GetWorkDir())

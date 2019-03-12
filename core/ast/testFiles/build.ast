@@ -6,6 +6,10 @@ Simulator:
 vcs
 
 -----------------
+Runner:
+host
+
+-----------------
 WorkDir:
 /home/yli/work/jarivsm/core/ast/testFiles/work
 
