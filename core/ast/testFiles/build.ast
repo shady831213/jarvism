@@ -133,12 +133,14 @@ post_compile_action:
 -----------------
 pre_sim_action:
 echo"pre_sim_build1"
+
 -----------------
 sim_option:
 +UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE
 -----------------
 post_sim_action:
 echo"post_sim_build1"
+
 -----------------
 test_discoverer:
 uvm_test
@@ -152,12 +154,14 @@ build2:
 -----------------
 pre_compile_action:
 echo"pre_compile_build2"
+
 -----------------
 compile_option:
 -debug_access+pp-sverilog-ntb_optsuvm-1.2
 -----------------
 post_compile_action:
 echo"post_compile_build2"
+
 -----------------
 pre_sim_action:
 

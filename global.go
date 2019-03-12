@@ -26,8 +26,12 @@ func TestDiscoverersPath() string {
 	return path.Join(getPkgPath(), "testDiscoverers")
 }
 
-func simulatorsPath() string {
+func SimulatorsPath() string {
 	return path.Join(getPkgPath(), "simulators")
+}
+
+func RunnersPath() string {
+	return path.Join(getPkgPath(), "runners")
 }
 
 func getPkgPath() string {

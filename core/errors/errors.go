@@ -2,70 +2,70 @@ package errors
 
 import "github.com/shady831213/jarvism/utils"
 
-type JVSTestStatus int
+type JVSRuntimeStatus int
 
 const (
-	_ JVSTestStatus = iota
-	JVSTestPass
-	JVSTestWarning
-	JVSTestFail
-	JVSTestUnknown
+	_ JVSRuntimeStatus = iota
+	JVSRuntimePass
+	JVSRuntimeWarning
+	JVSRuntimeFail
+	JVSRuntimeUnknown
 )
 
-func StatusColor(status JVSTestStatus) func(str string, modifier ...interface{}) string {
+func StatusColor(status JVSRuntimeStatus) func(str string, modifier ...interface{}) string {
 	switch status {
-	case JVSTestPass:
+	case JVSRuntimePass:
 		return utils.Green
-	case JVSTestWarning:
+	case JVSRuntimeWarning:
 		return utils.Yellow
-	case JVSTestFail:
+	case JVSRuntimeFail:
 		return utils.Red
-	case JVSTestUnknown:
+	case JVSRuntimeUnknown:
 		return utils.LightRed
 	}
 	return utils.LightRed
 }
 
-func StatusString(status JVSTestStatus) string {
+func StatusString(status JVSRuntimeStatus) string {
 	switch status {
-	case JVSTestPass:
+	case JVSRuntimePass:
 		return "PASS"
-	case JVSTestWarning:
+	case JVSRuntimeWarning:
 		return "WARNING"
-	case JVSTestFail:
+	case JVSRuntimeFail:
 		return "FAIL"
-	case JVSTestUnknown:
+	case JVSRuntimeUnknown:
 		return "UNKNOWN"
 	}
 	return "UNKNOWN"
 }
 
-func StatusShortString(status JVSTestStatus) string {
+func StatusShortString(status JVSRuntimeStatus) string {
 	switch status {
-	case JVSTestPass:
+	case JVSRuntimePass:
 		return "P"
-	case JVSTestWarning:
+	case JVSRuntimeWarning:
 		return "W"
-	case JVSTestFail:
+	case JVSRuntimeFail:
 		return "F"
-	case JVSTestUnknown:
+	case JVSRuntimeUnknown:
 		return "U"
 	}
 	return "U"
 }
 
-type JVSTestResult struct {
-	Status JVSTestStatus
+type JVSRuntimeResult struct {
+	Status JVSRuntimeStatus
 	Msg    string
 }
 
-func (e *JVSTestResult) Error() string {
+func (e *JVSRuntimeResult) Error() string {
 	return StatusColor(e.Status)(StatusString(e.Status) + e.Msg)
 }
 
-func JVSTestResultPass(msg string) *JVSTestResult {
-	inst := new(JVSTestResult)
-	inst.Status = JVSTestPass
+func JVSRuntimeResultPass(msg string) *JVSRuntimeResult {
+	inst := new(JVSRuntimeResult)
+	inst.Status = JVSRuntimePass
 	inst.Msg = "!"
 	if msg != "" {
 		inst.Msg += "\n" + msg
@@ -73,9 +73,9 @@ func JVSTestResultPass(msg string) *JVSTestResult {
 	return inst
 }
 
-func JVSTestResultFail(msg string) *JVSTestResult {
-	inst := new(JVSTestResult)
-	inst.Status = JVSTestFail
+func JVSRuntimeResultFail(msg string) *JVSRuntimeResult {
+	inst := new(JVSRuntimeResult)
+	inst.Status = JVSRuntimeFail
 	inst.Msg = "!"
 	if msg != "" {
 		inst.Msg += "\n" + "Error:" + msg
@@ -83,9 +83,9 @@ func JVSTestResultFail(msg string) *JVSTestResult {
 	return inst
 }
 
-func JVSTestResultWarning(msg string) *JVSTestResult {
-	inst := new(JVSTestResult)
-	inst.Status = JVSTestWarning
+func JVSRuntimeResultWarning(msg string) *JVSRuntimeResult {
+	inst := new(JVSRuntimeResult)
+	inst.Status = JVSRuntimeWarning
 	inst.Msg = "!"
 	if msg != "" {
 		inst.Msg += "\n" + "Warning:" + msg
@@ -93,9 +93,9 @@ func JVSTestResultWarning(msg string) *JVSTestResult {
 	return inst
 }
 
-func JVSTestResultUnknown(msg string) *JVSTestResult {
-	inst := new(JVSTestResult)
-	inst.Status = JVSTestUnknown
+func JVSRuntimeResultUnknown(msg string) *JVSRuntimeResult {
+	inst := new(JVSRuntimeResult)
+	inst.Status = JVSRuntimeUnknown
 	inst.Msg = "!"
 	if msg != "" {
 		inst.Msg += "\n" + "UnKnown:" + msg
@@ -103,26 +103,26 @@ func JVSTestResultUnknown(msg string) *JVSTestResult {
 	return inst
 }
 
-type AstError struct {
+type JVSAstError struct {
 	Msg   string
 	Item  string
 	phase string
 }
 
-func (e *AstError) Error() string {
+func (e *JVSAstError) Error() string {
 	return utils.Red(e.phase + " Error in " + e.Item + ": " + e.Msg)
 }
 
-func NewAstParseError(item, msg string) *AstError {
-	inst := new(AstError)
+func NewJVSAstParseError(item, msg string) *JVSAstError {
+	inst := new(JVSAstError)
 	inst.Msg = msg
 	inst.Item = item
 	inst.phase = "Parse"
 	return inst
 }
 
-func NewAstLinkError(item, msg string) *AstError {
-	inst := new(AstError)
+func NewJVSAstLinkError(item, msg string) *JVSAstError {
+	inst := new(JVSAstError)
 	inst.Msg = msg
 	inst.Item = item
 	inst.phase = "Link"

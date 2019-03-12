@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"sort"
@@ -21,25 +22,26 @@ func ForeachStringKeysInOrder(keys []string, handler func(string)) {
 	}
 }
 
-func ReadFile(path string) string {
+func ReadFile(path string) (string, error) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
-	return string(bytes)
+	return string(bytes), nil
 }
 
-func WriteNewFile(path string, content string) {
-	f, err := os.Create(path)
+func WriteNewFile(path string, content string) error {
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	defer f.Close()
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	n, err := f.WriteString(content)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	if n < len(content) {
-		panic("write file " + path + " uncompleted!")
+		return errors.New("write file " + path + " uncompleted!")
 	}
+	return nil
 }

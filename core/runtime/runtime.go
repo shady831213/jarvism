@@ -63,12 +63,12 @@ type runFlow struct {
 	list.List
 	testWg    sync.WaitGroup
 	cmdStdout *io.Writer
-	buildDone chan *errors.JVSTestResult
-	testDone  chan *errors.JVSTestResult
+	buildDone chan *errors.JVSRuntimeResult
+	testDone  chan *errors.JVSRuntimeResult
 	ctx       context.Context
 }
 
-func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *errors.JVSTestResult, testDone chan *errors.JVSTestResult, ctx context.Context) *runFlow {
+func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *errors.JVSRuntimeResult, testDone chan *errors.JVSRuntimeResult, ctx context.Context) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
@@ -80,10 +80,15 @@ func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *error
 	return inst
 }
 
-func (f *runFlow) cmdRunner(name string, arg ...string) error {
+func (f *runFlow) cmdRunner(setCmdAttr func(cmd *exec.Cmd) error, name string, arg ...string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, name, arg...)
 	cmd.Stdout = *f.cmdStdout
+	if setCmdAttr != nil {
+		if err := setCmdAttr(cmd); err != nil {
+			return err
+		}
+	}
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -94,24 +99,24 @@ func (f *runFlow) cmdRunner(name string, arg ...string) error {
 	return cmd.Wait()
 }
 
-func (f *runFlow) preparePhase(phaseName string, phase func() *errors.JVSTestResult) *errors.JVSTestResult {
+func (f *runFlow) preparePhase(phaseName string, phase func() *errors.JVSRuntimeResult) *errors.JVSRuntimeResult {
 	PrintStatus(phaseName, utils.Blue("BEGIN"))
 	result := phase()
 	if result == nil {
-		result = errors.JVSTestResultUnknown("No Result!")
+		result = errors.JVSRuntimeResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
 		return result
 	}
-	if result.Status != errors.JVSTestPass {
+	if result.Status != errors.JVSRuntimePass {
 		PrintStatus(phaseName, result.Error())
 	}
 	return result
 }
 
-func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSTestResult) *errors.JVSTestResult {
+func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSRuntimeResult) *errors.JVSRuntimeResult {
 	result := phase()
 	if result == nil {
-		result = errors.JVSTestResultUnknown("No Result!")
+		result = errors.JVSRuntimeResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
 		return result
 	}
@@ -119,26 +124,26 @@ func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSTestResult)
 	return result
 }
 
-func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSTestResult {
-	return f.preparePhase(build.Name, func() *errors.JVSTestResult {
+func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
+	return f.preparePhase(build.Name, func() *errors.JVSRuntimeResult {
 		return ast.GetRunner().PrepareBuild(build, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSTestResult {
-	return f.runPhase(build.Name, func() *errors.JVSTestResult {
+func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
+	return f.runPhase(build.Name, func() *errors.JVSRuntimeResult {
 		return ast.GetRunner().Build(build, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSTestResult {
-	return f.preparePhase(testCase.Name, func() *errors.JVSTestResult {
+func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
+	return f.preparePhase(testCase.Name, func() *errors.JVSRuntimeResult {
 		return ast.GetRunner().PrepareTest(testCase, f.cmdRunner)
 	})
 }
 
-func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSTestResult {
-	return f.runPhase(testCase.Name, func() *errors.JVSTestResult {
+func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
+	return f.runPhase(testCase.Name, func() *errors.JVSRuntimeResult {
 		return ast.GetRunner().RunTest(testCase, f.cmdRunner)
 	})
 }
@@ -153,13 +158,13 @@ func (f *runFlow) run() {
 	//run compile
 	if !runTimeSimOnly {
 		result := f.prepareBuildPhase(f.build)
-		if result.Status != errors.JVSTestPass {
+		if result.Status != errors.JVSRuntimePass {
 			f.buildDone <- result
 			runTimeLimiter.get()
 			return
 		}
 		result = f.buildPhase(f.build)
-		if result.Status != errors.JVSTestPass {
+		if result.Status != errors.JVSRuntimePass {
 			f.buildDone <- result
 			runTimeLimiter.get()
 			return
@@ -176,7 +181,7 @@ func (f *runFlow) run() {
 			defer f.testWg.Add(-1)
 			defer runTimeLimiter.get()
 			result := f.prepareTestPhase(testCase)
-			if result.Status != errors.JVSTestPass {
+			if result.Status != errors.JVSRuntimePass {
 				f.testDone <- result
 				return
 			}
@@ -195,8 +200,8 @@ type runTime struct {
 	runFlow                     map[string]*runFlow
 	flowWg                      sync.WaitGroup
 	processingDone, monitorDone chan bool
-	buildDone                   chan *errors.JVSTestResult
-	testDone                    chan *errors.JVSTestResult
+	buildDone                   chan *errors.JVSRuntimeResult
+	testDone                    chan *errors.JVSRuntimeResult
 	ctx                         context.Context
 	cancel                      func()
 }
@@ -209,8 +214,8 @@ func newRunTime(name string, group *ast.AstGroup) *runTime {
 	r.flowWg = sync.WaitGroup{}
 	r.processingDone = make(chan bool)
 	r.monitorDone = make(chan bool)
-	r.buildDone = make(chan *errors.JVSTestResult, 100)
-	r.testDone = make(chan *errors.JVSTestResult, 100)
+	r.buildDone = make(chan *errors.JVSRuntimeResult, 100)
+	r.testDone = make(chan *errors.JVSRuntimeResult, 100)
 	ctx := context.Background()
 	r.ctx, r.cancel = context.WithCancel(ctx)
 	if runTimeMaxJob > 0 {

@@ -18,7 +18,7 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	expect := utils.ReadFile("testFiles/build.ast")
+	expect, _ := utils.ReadFile("testFiles/build.ast")
 	result := ast.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
 

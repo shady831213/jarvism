@@ -1,13 +1,16 @@
 package ast
 
-import "github.com/shady831213/jarvism/core/errors"
+import (
+	"github.com/shady831213/jarvism/core/errors"
+	"os/exec"
+)
 
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, func(string, ...string) error) *errors.JVSTestResult
-	Build(*AstBuild, func(string, ...string) error) *errors.JVSTestResult
-	PrepareTest(*AstTestCase, func(string, ...string) error) *errors.JVSTestResult
-	RunTest(*AstTestCase, func(string, ...string) error) *errors.JVSTestResult
+	PrepareBuild(*AstBuild, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
+	Build(*AstBuild, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareTest(*AstTestCase, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
+	RunTest(*AstTestCase, func(func(cmd *exec.Cmd) error, string, ...string) error) *errors.JVSRuntimeResult
 }
 
 var runner Runner
