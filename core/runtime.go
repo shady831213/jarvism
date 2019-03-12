@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/utils"
 	"io"
 	"math"
@@ -355,4 +356,12 @@ func RunTest(testName, buildName string, args []string, sc chan os.Signal) error
 func RunOnlyBuild(buildName string, args []string, sc chan os.Signal) error {
 	return run(buildName, map[interface{}]interface{}{"build": buildName,
 		"args": filterAstArgs(args)}, sc)
+}
+
+var runTimeMaxJob int
+var runTimeSimOnly bool
+
+func init() {
+	options.GetJvsOptions().IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
+	options.GetJvsOptions().BoolVar(&runTimeSimOnly, "sim_only", false, "bypass compile and only run simulation, default is false.")
 }
