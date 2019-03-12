@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path"
 	"strconv"
 	"syscall"
 	"testing"
@@ -69,6 +70,7 @@ func TestGroup(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
 }
 
 func TestSingleTest(t *testing.T) {
@@ -76,6 +78,8 @@ func TestSingleTest(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+
 }
 
 func TestSingleRepeatTest(t *testing.T) {
@@ -83,6 +87,8 @@ func TestSingleRepeatTest(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+
 }
 
 func TestRunOnlyBuild(t *testing.T) {
@@ -90,6 +96,8 @@ func TestRunOnlyBuild(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+
 }
 
 func TestInterrupt(t *testing.T) {
@@ -111,6 +119,7 @@ func TestInterrupt(t *testing.T) {
 			t.FailNow()
 		}
 	}
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
 }
 
 func init() {

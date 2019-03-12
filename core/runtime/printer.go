@@ -2,12 +2,29 @@ package runtime
 
 import (
 	"fmt"
+	"github.com/shady831213/jarvism/core/ast"
+	"log"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
 
+var runtimeLog *log.Logger
+
 const printerPadding = 100
+
+func setLog(logFileName string) (*os.File, error) {
+	if err := os.MkdirAll(path.Join(ast.GetWorkDir(), "JarvismLog"), os.ModePerm); err != nil {
+		return nil, err
+	}
+	logFile, err := os.Create(path.Join(ast.GetWorkDir(), "JarvismLog", logFileName))
+	if err != nil {
+		return logFile, err
+	}
+	runtimeLog = log.New(logFile, "Jarvism_", log.LstdFlags)
+	return logFile, nil
+}
 
 func PrintProccessing(color func(str string, modifier ...interface{}) string) func(string, *string, chan bool) {
 	return func(processingString string, status *string, done chan bool) {
@@ -23,7 +40,9 @@ func PrintProccessing(color func(str string, modifier ...interface{}) string) fu
 				}
 			}
 		}
-		fmt.Println(color(processingString+"...") + (*status) + color("done!"))
+		result := color(processingString+"...") + (*status) + color("done!")
+		fmt.Println(result)
+		runtimeLog.Println(result)
 	}
 }
 
@@ -65,11 +84,15 @@ func paddingString(s string) string {
 }
 
 func Print(s string) {
-	fmt.Print(paddingString(s))
+	ps := paddingString(s)
+	fmt.Print(ps)
+	runtimeLog.Println(ps)
 }
 
 func Println(s string) {
-	fmt.Println(paddingString(s))
+	ps := paddingString(s)
+	fmt.Println(ps)
+	runtimeLog.Println(ps)
 }
 
 func PrintStatus(s, status string) {

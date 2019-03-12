@@ -337,7 +337,13 @@ func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error 
 	if err := group.Link(); err != nil {
 		return err
 	}
-	newRunTime(name, group).daemon(sc)
+	r := newRunTime(name, group)
+	logFile, err := setLog(r.runtimeId + ".log")
+	defer logFile.Close()
+	if err != nil {
+		return err
+	}
+	r.daemon(sc)
 	return nil
 }
 
