@@ -7,6 +7,7 @@ type TestDiscoverer interface {
 	TestCmd() string
 	TestList() []string
 	IsValidTest(string) bool
+	TestFileList() []string
 }
 
 var validTestDiscoverers = make(map[string]func() TestDiscoverer)

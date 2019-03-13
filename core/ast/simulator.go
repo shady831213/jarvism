@@ -6,6 +6,7 @@ type Simulator interface {
 	SimCmd() string
 	CompileCmd() string
 	SeedOption() string
+	GetFileList(...string) (string, error)
 }
 
 var simulator Simulator

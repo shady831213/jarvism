@@ -11,7 +11,6 @@ builds:
       - *common_compile
       - -timescale=1ns/10ps
       - $JVS_PRJ_HOME/test.sv -top test
-      - -f $JVS_PRJ_HOME/testcases/test.f
     pre_compile_action:
       - echo "pre_compile_build1"
       - echo "pre_compile_build1 again"

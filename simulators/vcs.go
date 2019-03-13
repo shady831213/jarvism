@@ -3,7 +3,9 @@ package mulators
 import (
 	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/ast"
+	"os"
 	"path"
+	"path/filepath"
 )
 
 type vcs struct {
@@ -27,6 +29,27 @@ func (s *vcs) SimCmd() string {
 
 func (s *vcs) SeedOption() string {
 	return "+ntb_random_seed="
+}
+
+func (s *vcs) GetFileList(paths ...string) (string, error) {
+	fileList := ""
+	for _, p := range paths {
+		item, err := filepath.Abs(os.ExpandEnv(p))
+		if err != nil {
+			return "", err
+		}
+		//check stat
+		stat, err := os.Stat(item)
+		if err != nil {
+			return "", err
+		}
+		if stat.IsDir() {
+			fileList += "+incdir+" + item + "\n"
+		} else {
+			fileList += item + "\n"
+		}
+	}
+	return fileList, nil
 }
 
 func newVcs() ast.Simulator {

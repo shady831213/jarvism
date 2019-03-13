@@ -61,16 +61,28 @@ func (d *uvmDiscoverer) TestCmd() string {
 }
 
 func (d *uvmDiscoverer) TestList() []string {
+	d.discoverTest()
+	return utils.KeyOfStringMap(d.tests)
+}
+
+func (d *uvmDiscoverer) TestFileList() []string {
+	d.discoverTest()
+	values := utils.ValueOfStringMap(d.tests)
+	paths := make([]string, len(values))
+	for i, v := range values {
+		paths[i] = v.(string)
+	}
+	return paths
+}
+
+func (d *uvmDiscoverer) discoverTest() {
 	if d.tests == nil {
 		d.tests = make(map[string]interface{})
+		err := filepath.Walk(d.testDir, d.filter)
+		if err != nil {
+			panic("Error in test discover :" + err.Error())
+		}
 	}
-
-	err := filepath.Walk(d.testDir, d.filter)
-	if err != nil {
-		panic("Error in test discover :" + err.Error())
-	}
-
-	return utils.KeyOfStringMap(d.tests)
 }
 
 func (d *uvmDiscoverer) filter(path string, f os.FileInfo, err error) error {
@@ -85,13 +97,13 @@ func (d *uvmDiscoverer) filter(path string, f os.FileInfo, err error) error {
 	}
 	fileName := strings.TrimSuffix(filepath.Base(path), ".sv")
 	if fileName == filepath.Base(filepath.Dir(path)) {
-		d.tests[fileName] = nil
+		d.tests[fileName] = path
 	}
 	return nil
 }
 
 func (d *uvmDiscoverer) IsValidTest(test string) bool {
-	d.TestList()
+	d.discoverTest()
 	_, ok := d.tests[test]
 	return ok
 }

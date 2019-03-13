@@ -37,11 +37,22 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(*ast.CmdAt
 	if err := os.MkdirAll(buildDir, os.ModePerm); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
+	//create test.f
+	filelistItem := build.GetTestDiscoverer().TestFileList()
+	filelistItem = append(filelistItem, build.GetTestDiscoverer().TestDir())
+	fileListContent, err := ast.GetSimulator().GetFileList(filelistItem...)
+	if err != nil {
+		return errors.JVSRuntimeResultFail(err.Error())
+	}
+	if err := utils.WriteNewFile(path.Join(buildDir, "test.f"), fileListContent); err != nil {
+		return errors.JVSRuntimeResultFail(err.Error())
+	}
+
 	//create pre_compile,compile, and post_compile script
 	if err := utils.WriteNewFile(path.Join(buildDir, "pre_compile.sh"), build.PreCompileAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), ast.GetSimulator().CompileCmd()+" "+build.CompileOption()); err != nil {
+	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), ast.GetSimulator().CompileCmd()+" "+build.CompileOption()+" -f test.f"); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(buildDir, "post_compile.sh"), build.PostCompileAction()); err != nil {

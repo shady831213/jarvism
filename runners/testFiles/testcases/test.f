@@ -1,1 +1,0 @@
-$JVS_PRJ_HOME/testcases/test1/test1.sv
