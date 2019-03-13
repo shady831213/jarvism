@@ -7,6 +7,7 @@ import (
 	"github.com/shady831213/jarvism/core/options"
 	"math"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -34,8 +35,7 @@ func RegisterJvsAstOption(v JvsAstOption) {
 }
 
 func GetJvsAstOption(arg string) (JvsAstOption, error) {
-	//args := strings.Join(strings.Split(arg, " "), "=")
-	args := strings.Split(arg, " ")
+	args := strings.Split(regexp.MustCompile(`^\s+`).ReplaceAllString(arg, ""), " ")
 	optName, err := options.ArgToOption(args[0])
 	if err != nil {
 		return nil, err

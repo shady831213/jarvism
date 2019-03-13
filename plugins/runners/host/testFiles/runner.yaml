@@ -18,3 +18,12 @@ builds:
       - *common_sim
     post_sim_action:
       - echo "post_sim_build1"
+
+groups:
+  group1:
+    tests:
+      test1:
+        build:
+          build1
+        args:
+          - -repeat 10, -wave

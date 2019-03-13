@@ -26,16 +26,16 @@ func tearDonw() {
 
 func TestGroup(t *testing.T) {
 	setup()
-	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group1"), []string{"-sim_only"}, nil); err != nil {
+	if err := runtime.RunGroup("group1", []string{"-sim_only"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group2"), []string{"-max_job " + strconv.Itoa(rand.Intn(2)+1)}, nil); err != nil {
+	if err := runtime.RunGroup("group2", []string{"-max_job " + strconv.Itoa(rand.Intn(2)+1)}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group3"), []string{"-max_job " + strconv.Itoa(rand.Intn(50)+1)}, nil); err != nil {
+	if err := runtime.RunGroup("group3", []string{"-max_job " + strconv.Itoa(rand.Intn(50)+1)}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}

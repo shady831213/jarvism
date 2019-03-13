@@ -360,8 +360,8 @@ func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error 
 	return nil
 }
 
-func RunGroup(group *ast.AstGroup, args []string, sc chan os.Signal) error {
-	return run(group.Name, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{group.Name}}, sc)
+func RunGroup(groupName string, args []string, sc chan os.Signal) error {
+	return run(groupName, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{groupName}}, sc)
 }
 
 func RunTest(testName, buildName string, args []string, sc chan os.Signal) error {

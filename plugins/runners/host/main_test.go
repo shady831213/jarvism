@@ -109,6 +109,37 @@ func TestHostRunnerSim(t *testing.T) {
 	}
 }
 
+func TestHostRunnerGroupSim(t *testing.T) {
+	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
+		cfg, err := ast.Lex("testFiles/runner.yaml")
+		if err != nil {
+			t.Error(err)
+		}
+		err = ast.Parse(cfg)
+		if err != nil {
+			t.Error(err)
+		}
+		//repeat test
+		if err := runtime.RunGroup("group1", []string{"-repeat 10"}, nil); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 1 {
+			t.Error("expect build pass but it is not!")
+			t.FailNow()
+			return
+		}
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 10 {
+			t.Error("expect test pass 10 but it is not!")
+			t.FailNow()
+			return
+		}
+		if !keepResult {
+			os.RemoveAll(ast.GetWorkDir())
+		}
+	}
+}
+
 func init() {
 	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.RunnersPath(), "host", "testFiles"))
 	flag.BoolVar(&keepResult, "keep", false, "keep test result")
