@@ -6,12 +6,17 @@ import (
 	"os/exec"
 )
 
+type CmdAttr struct {
+	LogFile *os.File
+	SetAttr func(*exec.Cmd) error
+}
+
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
-	Build(*AstBuild, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
-	PrepareTest(*AstTestCase, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
-	RunTest(*AstTestCase, func(func(cmd *exec.Cmd) error, *os.File, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareBuild(*AstBuild, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
+	Build(*AstBuild, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareTest(*AstTestCase, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
+	RunTest(*AstTestCase, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
 }
 
 var runner Runner

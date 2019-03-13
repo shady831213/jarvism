@@ -80,21 +80,22 @@ func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *error
 	return inst
 }
 
-func (f *runFlow) cmdRunner(setCmdAttr func(cmd *exec.Cmd) error, logFile *os.File, name string, arg ...string) error {
+func (f *runFlow) cmdRunner(attr *ast.CmdAttr, name string, arg ...string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, name, arg...)
+	//set stdout
 	writers := make([]io.Writer, 0)
 	if *f.cmdStdout != nil {
 		writers = append(writers, *f.cmdStdout)
 	}
-	if logFile != nil {
-		writers = append(writers, logFile)
+	if attr != nil && attr.LogFile != nil {
+		writers = append(writers, attr.LogFile)
 	}
 	fileAndStdoutWriter := io.MultiWriter(writers...)
-	ctx, cancel := context.WithCancel(context.Background())
-	cmd := exec.CommandContext(ctx, name, arg...)
-
 	cmd.Stdout = fileAndStdoutWriter
-	if setCmdAttr != nil {
-		if err := setCmdAttr(cmd); err != nil {
+	//set other attr
+	if attr != nil && attr.SetAttr != nil {
+		if err := attr.SetAttr(cmd); err != nil {
 			return err
 		}
 	}
