@@ -2,58 +2,21 @@ package runtime_test
 
 import (
 	"github.com/shady831213/jarvism/core/ast"
-	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/runtime"
 	_ "github.com/shady831213/jarvism/simulators"
 	_ "github.com/shady831213/jarvism/testDiscoverers"
+	"log"
 	"math/rand"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
+	"plugin"
 	"strconv"
 	"syscall"
 	"testing"
 	"time"
 )
-
-type testRunner struct {
-}
-
-func (r *testRunner) Name() string {
-	return "test"
-}
-
-func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
-	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " "); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
-}
-
-func (r *testRunner) Build(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
-	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " build build ", build.Name); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
-}
-
-func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
-	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", ""); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
-}
-
-func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
-	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " run test ", testCase.Name); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
-}
 
 func TestGroup(t *testing.T) {
 	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group1"), []string{"-sim_only"}, nil); err != nil {
@@ -122,7 +85,21 @@ func TestInterrupt(t *testing.T) {
 }
 
 func init() {
-	ast.RegisterRunner(new(testRunner))
+	//build and load plugin
+	cmd := exec.Command("go", "build", "-o", "testRunner.so", "-buildmode", "plugin", "./testRunner")
+	cmd.Dir = "testFiles/plugins/runners"
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Println("build plugin fail:", err)
+		return
+	}
+	_, err := plugin.Open("testFiles/plugins/runners/testRunner.so")
+	if err != nil {
+		log.Println("open plugin err:", err, "testFiles/plugins/runners/testRunner.so")
+		return
+	}
+
 	os.Setenv("JVS_PRJ_HOME", "testFiles")
 	cfg, err := ast.Lex("testFiles/build.yaml")
 	if err != nil {
