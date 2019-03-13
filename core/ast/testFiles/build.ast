@@ -131,7 +131,7 @@ dumpwaveform,vauleisformat[FSDB,VPD],usemacro[DUMP_FSDB,DUMP_VPD]inyourtestbench
 On:
 ----------------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 ----------------
 sim_option:
 
@@ -140,7 +140,7 @@ sim_option:
 WithValue:
 ----------------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 ----------------
 sim_option:
 
@@ -297,7 +297,7 @@ user-definedflag
 On:
 -----------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 -----------
 sim_option:
 
@@ -306,7 +306,7 @@ sim_option:
 WithValue:
 -----------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 -----------
 sim_option:
 
@@ -335,7 +335,7 @@ pre_compile_action:
 
 --------------
 compile_option:
-+define+DUMP_VPD-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 --------------
 post_compile_action:
 
@@ -698,7 +698,7 @@ user-definedflag
 On:
 -----------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 -----------
 sim_option:
 
@@ -707,7 +707,7 @@ sim_option:
 WithValue:
 -----------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 -----------
 sim_option:
 
@@ -736,7 +736,7 @@ pre_compile_action:
 
 --------------
 compile_option:
-+define+DUMPfsdb-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 --------------
 post_compile_action:
 
@@ -1282,7 +1282,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -1291,7 +1291,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -1320,7 +1320,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMP_VPD-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ------------
 post_compile_action:
 
@@ -1683,7 +1683,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -1692,7 +1692,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -1721,7 +1721,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMPfsdb-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ------------
 post_compile_action:
 
@@ -2539,7 +2539,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -2548,7 +2548,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -2577,7 +2577,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMP_VPD-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ------------
 post_compile_action:
 
@@ -2940,7 +2940,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -2949,7 +2949,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 ---------
 sim_option:
 
@@ -2978,7 +2978,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMPfsdb-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ------------
 post_compile_action:
 
@@ -3524,7 +3524,7 @@ user-definedflag
 On:
 -------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 -------
 sim_option:
 
@@ -3533,7 +3533,7 @@ sim_option:
 WithValue:
 -------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 -------
 sim_option:
 
@@ -3562,7 +3562,7 @@ pre_compile_action:
 
 ----------
 compile_option:
-+define+DUMP_VPD-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ----------
 post_compile_action:
 
@@ -3925,7 +3925,7 @@ user-definedflag
 On:
 -------
 compile_option:
-+define+DUMP_VPD-debug_access+pp
++define+DUMP_VPD-lca-debug_access+pp
 -------
 sim_option:
 
@@ -3934,7 +3934,7 @@ sim_option:
 WithValue:
 -------
 compile_option:
-+define+DUMP$wave-debug_access+pp
++define+DUMP$wave-lca-debug_access+pp
 -------
 sim_option:
 
@@ -3963,7 +3963,7 @@ pre_compile_action:
 
 ----------
 compile_option:
-+define+DUMPfsdb-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
++define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
 ----------
 post_compile_action:
 
