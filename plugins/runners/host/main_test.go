@@ -6,8 +6,6 @@ import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/runtime"
-	_ "github.com/shady831213/jarvism/plugins/simulators/vcs"
-	_ "github.com/shady831213/jarvism/plugins/testDiscoverers/uvm_test"
 	"os"
 	"path"
 	"testing"
@@ -112,7 +110,7 @@ func TestHostRunnerSim(t *testing.T) {
 }
 
 func init() {
-	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.RunnersPath(), "testFiles"))
+	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.RunnersPath(), "host", "testFiles"))
 	flag.BoolVar(&keepResult, "keep", false, "keep test result")
 	flag.Parse()
 }

@@ -12,15 +12,13 @@ func setWorkDir(path string) error {
 	if err != nil {
 		return err
 	}
+	//create work dir
+	if err := os.MkdirAll(_workDir, os.ModePerm); err != nil {
+		return err
+	}
 	//check path
 	if _, err := os.Stat(_workDir); err != nil {
-		if !os.IsNotExist(err) {
-			return err
-		}
-		//create work dir
-		if err := os.Mkdir(_workDir, os.ModePerm); err != nil {
-			return err
-		}
+		return err
 	}
 
 	workDir = _workDir
