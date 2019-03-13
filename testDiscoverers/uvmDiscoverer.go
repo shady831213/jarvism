@@ -21,16 +21,16 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAstErr
 	if err := ast.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *errors.JVSAstError {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
-			return errors.NewJVSAstParseError(d.Name(), err.Error())
+			return errors.JVSAstParseError(d.Name(), err.Error())
 		}
 		//check path
 		if _, err := os.Stat(testDir); err != nil {
-			return errors.NewJVSAstParseError(d.Name(), err.Error())
+			return errors.JVSAstParseError(d.Name(), err.Error())
 		}
 		d.testDir = testDir
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("test_dir of "+d.Name(), err.Error())
+		return errors.JVSAstParseError("test_dir of "+d.Name(), err.Error())
 	}
 	//use default
 	if d.testDir == "" {

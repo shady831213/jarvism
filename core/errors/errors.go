@@ -113,7 +113,7 @@ func (e *JVSAstError) Error() string {
 	return utils.Red(e.phase + " Error in " + e.Item + ": " + e.Msg)
 }
 
-func NewJVSAstParseError(item, msg string) *JVSAstError {
+func JVSAstParseError(item, msg string) *JVSAstError {
 	inst := new(JVSAstError)
 	inst.Msg = msg
 	inst.Item = item
@@ -121,10 +121,18 @@ func NewJVSAstParseError(item, msg string) *JVSAstError {
 	return inst
 }
 
-func NewJVSAstLinkError(item, msg string) *JVSAstError {
+func JVSAstLinkError(item, msg string) *JVSAstError {
 	inst := new(JVSAstError)
 	inst.Msg = msg
 	inst.Item = item
 	inst.phase = "Link"
+	return inst
+}
+
+func JVSAstLexError(item, msg string) *JVSAstError {
+	inst := new(JVSAstError)
+	inst.Msg = msg
+	inst.Item = item
+	inst.phase = "Lex"
 	return inst
 }

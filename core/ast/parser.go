@@ -12,11 +12,13 @@ func Lex(configFile string) (map[interface{}]interface{}, error) {
 	reader, err := os.Open(configFile)
 	defer reader.Close()
 	if err != nil {
-		return nil, err
+		return nil, errors.JVSAstLexError("", err.Error())
 	}
 	cfg := make(map[interface{}]interface{})
-	err = yaml.NewDecoder(reader).Decode(&cfg)
-	return cfg, err
+	if err := yaml.NewDecoder(reader).Decode(&cfg); err != nil {
+		return nil, errors.JVSAstLexError("", err.Error())
+	}
+	return cfg, nil
 }
 
 func Parse(cfg map[interface{}]interface{}) error {

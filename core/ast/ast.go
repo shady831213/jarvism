@@ -41,7 +41,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 func AstParse(parser astParser, cfg map[interface{}]interface{}) *errors.JVSAstError {
 	for name := range cfg {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
-			return errors.NewJVSAstParseError("", tag+"syntax error of "+name.(string)+"! expect "+fmt.Sprint(keywords))
+			return errors.JVSAstParseError("", tag+"syntax error of "+name.(string)+"! expect "+fmt.Sprint(keywords))
 		}
 	}
 	if err := parser.Parse(cfg); err != nil {
@@ -55,7 +55,7 @@ func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler f
 		flag.Args()
 		return handler(item)
 	}
-	return errors.NewJVSAstParseError("", "not define "+key+"!")
+	return errors.JVSAstParseError("", "not define "+key+"!")
 }
 
 func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) *errors.JVSAstError) *errors.JVSAstError {
@@ -338,22 +338,22 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.usage = item.(string)
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("usage of "+t.Name, err.Msg)
+		return errors.JVSAstParseError("usage of "+t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "on_action", func(item interface{}) *errors.JVSAstError {
 		t.On = NewAstOptionAction()
 		return AstParse(t.On, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return errors.NewJVSAstParseError("on_action of "+t.Name, err.Msg)
+		return errors.JVSAstParseError("on_action of "+t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "with_value_action", func(item interface{}) *errors.JVSAstError {
 		t.WithValue = NewAstOptionAction()
 		return AstParse(t.WithValue, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return errors.NewJVSAstParseError("with_value_action of "+t.Name, err.Msg)
+		return errors.JVSAstParseError("with_value_action of "+t.Name, err.Msg)
 	}
 	if t.WithValue == nil && t.On == nil {
-		return errors.NewJVSAstParseError(t.Name, "on_action and with_value_action are both nil!")
+		return errors.JVSAstParseError(t.Name, "on_action and with_value_action are both nil!")
 	}
 	//add to flagSet
 	RegisterJvsAstOption(t)
@@ -405,7 +405,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
-			return errors.NewJVSAstParseError("simulator of Env", errMsg)
+			return errors.JVSAstParseError("simulator of Env", errMsg)
 		}
 		if err := LoadBuildInOptions(simulator.BuildInOptionFile()); err != nil {
 			panic("Error in loading " + simulator.BuildInOptionFile() + ":" + err.Error())
@@ -413,7 +413,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		setSimulator(simulator)
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("simulator of Env", err.Msg)
+		return errors.JVSAstParseError("simulator of Env", err.Msg)
 	}
 	//use default
 	if GetSimulator() == nil {
@@ -429,12 +429,12 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 				errMsg += k + " "
 			}
 			errMsg += "]!"
-			return errors.NewJVSAstParseError("runner of Env", errMsg)
+			return errors.JVSAstParseError("runner of Env", errMsg)
 		}
 		setRunner(runner)
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("runner of Env", err.Msg)
+		return errors.JVSAstParseError("runner of Env", err.Msg)
 	}
 	//use default
 	if GetRunner() == nil {
@@ -444,16 +444,16 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *errors.JVSAstError {
 		if err := setWorkDir(item.(string)); err != nil {
-			return errors.NewJVSAstParseError("work_dir in Env", err.Error())
+			return errors.JVSAstParseError("work_dir in Env", err.Error())
 		}
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("work_dir of Env", err.Msg)
+		return errors.JVSAstParseError("work_dir of Env", err.Msg)
 	}
 	//use default
 	if GetWorkDir() == "" {
 		if err := setWorkDir(path.Join(jarivsm.GetPrjHome(), "work")); err != nil {
-			return errors.NewJVSAstParseError("work_dir in Env", err.Error())
+			return errors.JVSAstParseError("work_dir in Env", err.Error())
 		}
 	}
 	return nil
@@ -505,17 +505,17 @@ func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAs
 				errMsg += k + " "
 			}
 			errMsg += "]!"
-			return errors.NewJVSAstParseError("test_discoverer", errMsg)
+			return errors.JVSAstParseError("test_discoverer", errMsg)
 		}
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("test_discoverer", err.Msg)
+		return errors.JVSAstParseError("test_discoverer", err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "attr", func(item interface{}) *errors.JVSAstError {
 		t.attr = item.(map[interface{}]interface{})
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("test_discoverer", err.Msg)
+		return errors.JVSAstParseError("test_discoverer", err.Msg)
 	}
 	//parse discoverer
 	return AstParse(t.discoverer, t.attr)
@@ -602,21 +602,21 @@ func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.testDiscoverer = new(astTestDiscoverer)
 		return AstParse(t.testDiscoverer, item.(map[interface{}]interface{}))
 	}); err != nil {
-		return errors.NewJVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
 	//use default
 	if t.testDiscoverer == nil {
 		t.testDiscoverer = newAstTestDiscoverer()
 		if err := AstParse(t.testDiscoverer, map[interface{}]interface{}{"type": "uvm_test"}); err != nil {
-			return errors.NewJVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+			return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 		}
 	}
 	//options
 	if err := t.compileItems.Parse(cfg); err != nil {
-		return errors.NewJVSAstParseError("build "+t.Name, err.Msg)
+		return errors.JVSAstParseError("build "+t.Name, err.Msg)
 	}
 	if err := t.simItems.Parse(cfg); err != nil {
-		return errors.NewJVSAstParseError("build "+t.Name, err.Msg)
+		return errors.JVSAstParseError("build "+t.Name, err.Msg)
 	}
 	return nil
 }
@@ -719,7 +719,7 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.buildName = item.(string)
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError(t.Name, err.Msg)
+		return errors.JVSAstParseError(t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) *errors.JVSAstError {
 		for _, arg := range item.([]interface{}) {
@@ -727,7 +727,7 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError(t.Name, err.Msg)
+		return errors.JVSAstParseError(t.Name, err.Msg)
 	}
 	return nil
 }
@@ -739,7 +739,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 	if t.buildName != "" {
 		build := jvsAstRoot.GetBuild(t.buildName)
 		if build == nil {
-			return errors.NewJVSAstLinkError(t.Name, "build "+t.buildName+" of "+t.Name+"is undef!")
+			return errors.JVSAstLinkError(t.Name, "build "+t.buildName+" of "+t.Name+"is undef!")
 		}
 		t.Build = build
 	}
@@ -747,7 +747,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 		//Options have been all parsed
 		opt, err := GetJvsAstOption(arg)
 		if err != nil {
-			return errors.NewJVSAstLinkError("args of "+t.Name, err.Error())
+			return errors.JVSAstLinkError("args of "+t.Name, err.Error())
 		}
 		t.OptionArgs.Add(opt.GetName(), opt.Clone())
 
@@ -849,7 +849,7 @@ func (t *AstTestCase) Link() *errors.JVSAstError {
 	}
 	//set build and check test
 	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
-		return errors.NewJVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.Build.Name+"\n"+
+		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.Build.Name+"\n"+
 			"valid tests:\n"+strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
 	}
 
@@ -955,7 +955,7 @@ func (t *AstGroup) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 
 func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := t.astTest.Parse(cfg); err != nil {
-		return errors.NewJVSAstParseError("group "+t.Name, err.Msg)
+		return errors.JVSAstParseError("group "+t.Name, err.Msg)
 	}
 
 	//AstParse tests
@@ -975,7 +975,7 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError(err.Item+"of group "+t.Name, err.Msg)
+		return errors.JVSAstParseError(err.Item+"of group "+t.Name, err.Msg)
 	}
 
 	//AstParse groups
@@ -983,13 +983,13 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.Groups = make(map[string]*AstGroup)
 		for _, name := range item.([]interface{}) {
 			if _, ok := t.Groups[name.(string)]; ok {
-				return errors.NewJVSAstParseError("group "+t.Name, "sub group "+name.(string)+" is redefined in group "+t.Name+"!")
+				return errors.JVSAstParseError("group "+t.Name, "sub group "+name.(string)+" is redefined in group "+t.Name+"!")
 			}
 			t.Groups[name.(string)] = nil
 		}
 		return nil
 	}); err != nil {
-		return errors.NewJVSAstParseError("group "+t.Name, err.Msg)
+		return errors.JVSAstParseError("group "+t.Name, err.Msg)
 	}
 	return nil
 }
@@ -1004,7 +1004,7 @@ func (t *AstGroup) Link() *errors.JVSAstError {
 		group := jvsAstRoot.GetGroup(name)
 		if !group.linked {
 			if group == nil {
-				return errors.NewJVSAstLinkError("group "+t.Name, "sub group "+name+"of group "+t.Name+" is undef!")
+				return errors.JVSAstLinkError("group "+t.Name, "sub group "+name+"of group "+t.Name+" is undef!")
 			}
 			if err := group.Link(); err != nil {
 				return err
@@ -1017,7 +1017,7 @@ func (t *AstGroup) Link() *errors.JVSAstError {
 	if t.parent != nil {
 		for g := t.parent.(*AstGroup); g.parent != nil; g = g.parent.(*AstGroup) {
 			if g.Name == t.Name {
-				return errors.NewJVSAstLinkError("group "+t.Name, "Loop include: group "+t.Name+" and group "+g.Name)
+				return errors.JVSAstLinkError("group "+t.Name, "Loop include: group "+t.Name+" and group "+g.Name)
 			}
 		}
 	}
