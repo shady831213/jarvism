@@ -723,7 +723,7 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) *errors.JVSAstError {
 		for _, arg := range item.([]interface{}) {
-			t.args = append(t.args, arg.(string))
+			t.args = append(t.args, strings.Split(arg.(string), ",")...)
 		}
 		return nil
 	}); err != nil {

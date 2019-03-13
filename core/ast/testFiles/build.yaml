@@ -59,9 +59,7 @@ groups:
     tests:
       test1:
         args:
-          - -repeat 10
-          - -wave
-          - -vh UVM_MIDIUM
+          - -repeat 10,-wave,-vh UVM_MIDIUM
       test2:
         args:
           - -seed 1
