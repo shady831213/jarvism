@@ -38,7 +38,7 @@ func TestHostRunnerBuildFail(t *testing.T) {
 	}
 }
 
-func TestHostRunnerBuild(t *testing.T) {
+func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		cfg, err := ast.Lex("testFiles/runner.yaml")
 		if err != nil {
@@ -54,6 +54,21 @@ func TestHostRunnerBuild(t *testing.T) {
 		}
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 1 {
 			t.Error("expect build pass but it is not!")
+			t.FailNow()
+			return
+		}
+		//single test
+		if err := runtime.RunTest("test1", "build1", []string{"-sim_only"}, nil); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 0 {
+			t.Error("expect no build!")
+			t.FailNow()
+			return
+		}
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 1 {
+			t.Error("expect test pass 1 but it is not!")
 			t.FailNow()
 			return
 		}

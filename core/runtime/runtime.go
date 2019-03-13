@@ -294,7 +294,6 @@ func (r *runTime) exit() {
 	r.processingDone <- true
 	close(r.processingDone)
 	runTimeFinish()
-	Println("exit!")
 }
 
 func (r *runTime) signalHandler(sc chan os.Signal) {
