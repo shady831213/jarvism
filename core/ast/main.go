@@ -53,7 +53,6 @@ func LoadBuildInOptions(configFile string) error {
 	return nil
 }
 
-
 func init() {
 	if err := LoadBuildInOptions(path.Join(jarivsm.BuildInOptionPath(), "global_options.yaml")); err != nil {
 		panic("Error in loading " + path.Join(jarivsm.BuildInOptionPath(), "global_options.yaml") + ":" + err.Error())
