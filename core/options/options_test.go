@@ -3,9 +3,9 @@ package options_test
 import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/options"
-	_ "github.com/shady831213/jarvism/runners"
-	_ "github.com/shady831213/jarvism/simulators"
-	_ "github.com/shady831213/jarvism/testDiscoverers"
+	_ "github.com/shady831213/jarvism/plugins/runners"
+	_ "github.com/shady831213/jarvism/plugins/simulators"
+	_ "github.com/shady831213/jarvism/plugins/testDiscoverers"
 	"os"
 	"testing"
 )

@@ -2,9 +2,6 @@ package ast_test
 
 import (
 	"github.com/shady831213/jarvism/core/ast"
-	_ "github.com/shady831213/jarvism/runners"
-	_ "github.com/shady831213/jarvism/simulators"
-	_ "github.com/shady831213/jarvism/testDiscoverers"
 	"os"
 )
 

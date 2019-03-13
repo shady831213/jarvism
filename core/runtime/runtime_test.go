@@ -1,24 +1,31 @@
 package runtime_test
 
 import (
+	"github.com/shady831213/jarvism"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/runtime"
-	_ "github.com/shady831213/jarvism/simulators"
-	_ "github.com/shady831213/jarvism/testDiscoverers"
-	"log"
 	"math/rand"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path"
-	"plugin"
+	"path/filepath"
 	"strconv"
 	"syscall"
 	"testing"
 	"time"
 )
 
+func setup() {
+	os.Symlink(path.Join(jarivsm.CorePath(), "runtime", "testFiles", "jarvism_plugins"), "/tmp/jarvism_plugins")
+}
+
+func tearDonw() {
+	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	os.RemoveAll("/tmp/jarvism_plugins")
+}
+
 func TestGroup(t *testing.T) {
+	setup()
 	if err := runtime.RunGroup(ast.GetJvsAstRoot().GetGroup("group1"), []string{"-sim_only"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -32,37 +39,41 @@ func TestGroup(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	tearDonw()
 }
 
 func TestSingleTest(t *testing.T) {
+	setup()
 	if err := runtime.RunTest("test1", "build1", []string{"-seed 1"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	tearDonw()
 
 }
 
 func TestSingleRepeatTest(t *testing.T) {
+	setup()
 	if err := runtime.RunTest("test1", "build1", []string{"-repeat 10", "-max_job " + strconv.Itoa(rand.Intn(15)+1)}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	tearDonw()
 
 }
 
 func TestRunOnlyBuild(t *testing.T) {
+	setup()
 	if err := runtime.RunOnlyBuild("build1", []string{"-test_phase jarvis"}, nil); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	tearDonw()
 
 }
 
 func TestInterrupt(t *testing.T) {
+	setup()
 	sc := make(chan os.Signal)
 	defer close(sc)
 	go func() {
@@ -81,27 +92,16 @@ func TestInterrupt(t *testing.T) {
 			t.FailNow()
 		}
 	}
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	tearDonw()
 }
 
 func init() {
 	//build and load plugin
-	cmd := exec.Command("go", "build", "-o", "testRunner.so", "-buildmode", "plugin", "./testRunner")
-	cmd.Dir = "testFiles/plugins/runners"
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Println("build plugin fail:", err)
-		return
-	}
-	_, err := plugin.Open("testFiles/plugins/runners/testRunner.so")
-	if err != nil {
-		log.Println("open plugin err:", err, "testFiles/plugins/runners/testRunner.so")
-		return
-	}
-
-	os.Setenv("JVS_PRJ_HOME", "testFiles")
-	cfg, err := ast.Lex("testFiles/build.yaml")
+	abs, _ := filepath.Abs("testFiles")
+	os.Setenv("JVS_PRJ_HOME", abs)
+	os.Setenv("JVS_PLUGINS_HOME", "/tmp/jarvism_plugins")
+	os.Symlink(path.Join(jarivsm.CorePath(), "runtime", "testFiles", "jarvism_plugins"), "/tmp/jarvism_plugins")
+	cfg, err := ast.Lex(path.Join(abs, "build.yaml"))
 	if err != nil {
 		panic(err)
 	}

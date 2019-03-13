@@ -14,6 +14,10 @@ func PkgPath() string {
 	return getPkgPath()
 }
 
+func BuildInPluginsHome() string {
+	return path.Join(getPkgPath(), "plugins")
+}
+
 func CorePath() string {
 	return path.Join(getPkgPath(), "core")
 }
@@ -23,15 +27,15 @@ func BuildInOptionPath() string {
 }
 
 func TestDiscoverersPath() string {
-	return path.Join(getPkgPath(), "testDiscoverers")
+	return path.Join(BuildInPluginsHome(), "testDiscoverers")
 }
 
 func SimulatorsPath() string {
-	return path.Join(getPkgPath(), "simulators")
+	return path.Join(BuildInPluginsHome(), "simulators")
 }
 
 func RunnersPath() string {
-	return path.Join(getPkgPath(), "runners")
+	return path.Join(BuildInPluginsHome(), "runners")
 }
 
 func getPkgPath() string {
@@ -50,15 +54,25 @@ func getPkgPath() string {
 }
 
 var prjHome string
+var pluginsHome string
 
 func CheckEnv() error {
 	if os.Getenv("JVS_PRJ_HOME") == "" {
 		return errors.New("Env $JVS_PRJ_HOME is not set!")
 	}
-	prjHome = os.Getenv("JVS_PRJ_HOME")
+	prjHome = os.ExpandEnv(os.Getenv("JVS_PRJ_HOME"))
+	if os.Getenv("JVS_PLUGINS_HOME") == "" {
+		pluginsHome = path.Join(prjHome, "jarvism_plugins")
+		return nil
+	}
+	pluginsHome = os.ExpandEnv(os.Getenv("JVS_PLUGINS_HOME"))
 	return nil
 }
 
 func GetPrjHome() string {
 	return prjHome
+}
+
+func GetPluginsHome() string {
+	return pluginsHome
 }

@@ -136,3 +136,11 @@ func JVSAstLexError(item, msg string) *JVSAstError {
 	inst.phase = "Lex"
 	return inst
 }
+
+func JVSPluginLoadError(pluginName, msg, filePath string) *JVSAstError {
+	inst := new(JVSAstError)
+	inst.Msg = msg
+	inst.Item = pluginName + "(" + filePath + ")"
+	inst.phase = "Load Plugin"
+	return inst
+}

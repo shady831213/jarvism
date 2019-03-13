@@ -65,6 +65,18 @@ func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler f
 	return nil
 }
 
+func astLoadPlugin(pluginType JVSPluginType, pluginName string) *errors.JVSAstError {
+	if err := loadPlugin(pluginType, pluginName); err != nil {
+		errMsg := string(pluginType) + " " + pluginName + " is invalid! valid " + string(pluginType) + "s are [ "
+		for _, k := range validPlugins(pluginType) {
+			errMsg += k + " "
+		}
+		errMsg += "]!"
+		return errors.JVSAstParseError("", errMsg+"\n"+err.Error())
+	}
+	return nil
+}
+
 type astItem struct {
 	content *set.SetNonTS
 }
@@ -397,51 +409,7 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 }
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) *errors.JVSAstError {
-		simulator, ok := validSimulators[item.(string)]
-		if !ok {
-			errMsg := "simulator " + item.(string) + " is invalid! valid simulator are [ "
-			for k := range validSimulators {
-				errMsg += k + " "
-			}
-			errMsg += "]!"
-			return errors.JVSAstParseError("simulator of Env", errMsg)
-		}
-		if err := LoadBuildInOptions(simulator.BuildInOptionFile()); err != nil {
-			panic("Error in loading " + simulator.BuildInOptionFile() + ":" + err.Error())
-		}
-		setSimulator(simulator)
-		return nil
-	}); err != nil {
-		return errors.JVSAstParseError("simulator of Env", err.Msg)
-	}
-	//use default
-	if GetSimulator() == nil {
-		simulator, _ := validSimulators["vcs"]
-		setSimulator(simulator)
-	}
-
-	if err := CfgToAstItemOptional(cfg, "runner", func(item interface{}) *errors.JVSAstError {
-		runner, ok := validRunners[item.(string)]
-		if !ok {
-			errMsg := "runner " + item.(string) + " is invalid! valid runner are [ "
-			for k := range validRunners {
-				errMsg += k + " "
-			}
-			errMsg += "]!"
-			return errors.JVSAstParseError("runner of Env", errMsg)
-		}
-		setRunner(runner)
-		return nil
-	}); err != nil {
-		return errors.JVSAstParseError("runner of Env", err.Msg)
-	}
-	//use default
-	if GetRunner() == nil {
-		runner, _ := validRunners["host"]
-		setRunner(runner)
-	}
-
+	//must parse work_dir first!
 	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *errors.JVSAstError {
 		if err := setWorkDir(item.(string)); err != nil {
 			return errors.JVSAstParseError("work_dir in Env", err.Error())
@@ -456,6 +424,54 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 			return errors.JVSAstParseError("work_dir in Env", err.Error())
 		}
 	}
+
+	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) *errors.JVSAstError {
+		simulator, ok := validSimulators[item.(string)]
+		if !ok {
+			if err := astLoadPlugin(JVSSimulatorPlugin, item.(string)); err != nil {
+				return errors.JVSAstParseError("simulator of Env", err.Error())
+			}
+			simulator, _ = validSimulators[item.(string)]
+		}
+		setSimulator(simulator)
+		return nil
+	}); err != nil {
+		return errors.JVSAstParseError("simulator of Env", err.Msg)
+	}
+	//use default
+	if GetSimulator() == nil {
+		if err := astLoadPlugin(JVSSimulatorPlugin, "vcs"); err != nil {
+			return errors.JVSAstParseError("simulator of Env", err.Error())
+		}
+		simulator, _ := validSimulators["vcs"]
+		setSimulator(simulator)
+	}
+	if err := LoadBuildInOptions(GetSimulator().BuildInOptionFile()); err != nil {
+		panic("Error in loading " + GetSimulator().BuildInOptionFile() + ":" + err.Error())
+	}
+
+	if err := CfgToAstItemOptional(cfg, "runner", func(item interface{}) *errors.JVSAstError {
+		runner, ok := validRunners[item.(string)]
+		if !ok {
+			if err := astLoadPlugin(JVSRunnerPlugin, item.(string)); err != nil {
+				return errors.JVSAstParseError("runner of Env", err.Error())
+			}
+			runner, _ = validRunners[item.(string)]
+		}
+		setRunner(runner)
+		return nil
+	}); err != nil {
+		return errors.JVSAstParseError("runner of Env", err.Msg)
+	}
+	//use default
+	if GetRunner() == nil {
+		if err := astLoadPlugin(JVSRunnerPlugin, "host"); err != nil {
+			return errors.JVSAstParseError("runner of Env", err.Error())
+		}
+		runner, _ := validRunners["host"]
+		setRunner(runner)
+	}
+
 	return nil
 }
 
@@ -500,12 +516,10 @@ func (t *astTestDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet
 func (t *astTestDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) *errors.JVSAstError {
 		if t.discoverer = GetTestDiscoverer(item.(string)); t.discoverer == nil {
-			errMsg := "type " + item.(string) + " is invalid! valid test_discoverer are [ "
-			for k := range validTestDiscoverers {
-				errMsg += k + " "
+			if err := astLoadPlugin(JVSTestDiscovererPlugin, item.(string)); err != nil {
+				return errors.JVSAstParseError("test_discoverer", err.Error())
 			}
-			errMsg += "]!"
-			return errors.JVSAstParseError("test_discoverer", errMsg)
+			t.discoverer = GetTestDiscoverer(item.(string))
 		}
 		return nil
 	}); err != nil {
