@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func hash(s string) string {
+func hashFunc(s string) string {
 	h := new(big.Int).SetBytes(sha256.New().Sum(([]byte)(s)))
 	mb := big.NewInt(math.MaxInt64)
 	h.Mod(h, mb)
@@ -55,6 +55,7 @@ func runTimeFinish() {
 	runTimeLimiter.close()
 	runTimeMaxJob = -1
 	runTimeSimOnly = false
+	runTimeUnique = false
 }
 
 type runFlow struct {
@@ -254,7 +255,12 @@ func newRunTime(name string, group *ast.AstGroup) *runTime {
 }
 
 func (r *runTime) createFlow(build *ast.AstBuild) *runFlow {
-	hash := hash(build.GetRawSign())
+	var hash string
+	if runTimeUnique {
+		hash = hashFunc(r.runtimeId + build.GetRawSign())
+	} else {
+		hash = hashFunc(build.GetRawSign())
+	}
 	if _, ok := r.runFlow[hash]; !ok {
 		newBuild := build.Clone()
 		newBuild.Name = r.runtimeId + "__" + build.Name + "_" + hash
@@ -379,8 +385,11 @@ func RunOnlyBuild(buildName string, args []string, sc chan os.Signal) error {
 
 var runTimeMaxJob int
 var runTimeSimOnly bool
+var runTimeUnique bool
 
 func init() {
 	options.GetJvsOptions().IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
 	options.GetJvsOptions().BoolVar(&runTimeSimOnly, "sim_only", false, "bypass compile and only run simulation, default is false.")
+	options.GetJvsOptions().BoolVar(&runTimeUnique, "unique", false, "if set jobId(timestamp) will be included in hash, then builds and testcases will have unique name and be in unique dir.default is false.")
+
 }

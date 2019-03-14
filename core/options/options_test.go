@@ -3,6 +3,7 @@ package options_test
 import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/options"
+	_ "github.com/shady831213/jarvism/core/runtime"
 	"os"
 	"testing"
 )

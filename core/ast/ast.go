@@ -570,7 +570,7 @@ func newAstBuild(name string) *AstBuild {
 }
 
 func (t *AstBuild) GetRawSign() string {
-	return t.Name + t.PreCompileAction() + t.CompileOption() + t.PostCompileAction()
+	return strings.Replace(t.Name+t.PreCompileAction()+t.CompileOption()+t.PostCompileAction(), " ", "", -1)
 }
 
 func (t *AstBuild) PreCompileAction() string {

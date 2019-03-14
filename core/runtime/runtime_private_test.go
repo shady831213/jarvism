@@ -3,6 +3,7 @@ package runtime
 import (
 	"github.com/shady831213/jarvism/core/ast"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -108,4 +109,39 @@ func TestRunOnlyBuildSetup(t *testing.T) {
 		t.FailNow()
 	}
 
+}
+
+func TestUnique(t *testing.T) {
+	defer runTimeFinish()
+	r, err := setUpTest("test1", "build1", []string{"-seed 1", "-unique"})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	for k, v := range r.runFlow {
+		expHash := hashFunc(strings.Replace(r.runtimeId+"build1"+v.build.PreCompileAction()+v.build.CompileOption()+v.build.PostCompileAction(), " ", "", -1))
+		if k != expHash {
+			t.Error("expect", expHash, "but get", k)
+			t.FailNow()
+		}
+	}
+
+}
+
+func TestNotUnique(t *testing.T) {
+	defer runTimeFinish()
+	r, err := setUpTest("test1", "build1", []string{"-seed 1"})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	for k, v := range r.runFlow {
+		expHash := hashFunc(strings.Replace("build1"+v.build.PreCompileAction()+v.build.CompileOption()+v.build.PostCompileAction(), " ", "", -1))
+		if k != expHash {
+			t.Error("expect", expHash, "but get", k)
+			t.FailNow()
+		}
+	}
 }
