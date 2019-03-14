@@ -54,12 +54,12 @@ groups:
       - -vh
       - -repeat 1
     tests:
-      test1:
-        args:
-          - -repeat 10
-      test2:
-        args:
-          - -seed 1
+      - test1:
+          args:
+            - -repeat 10
+      - test2:
+          args:
+            - -seed 1
 
   group2:
     build: build2
@@ -67,9 +67,9 @@ groups:
       - -vh
       - -repeat 1
     tests:
-      test3:
-        args:
-          - -repeat 10
+      - test3:
+          args:
+            - -repeat 10
     groups:
       - group1
 
@@ -79,7 +79,7 @@ groups:
       - -vh
       - -repeat 20
     tests:
-      test1:
+      - test1:
     groups:
       - group2
       - group1

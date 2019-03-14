@@ -24,7 +24,7 @@ func setUpGroup(group *ast.AstGroup, args []string) (*runTime, error) {
 func setUpTest(testName, buildName string, args []string) (*runTime, error) {
 	return setUp(testName, map[interface{}]interface{}{"build": buildName,
 		"args":  filterAstArgs(args),
-		"tests": map[interface{}]interface{}{testName: nil}})
+		"tests": []interface{}{map[interface{}]interface{}{testName: nil}}})
 }
 
 func setUpOnlyBuild(buildName string, args []string) (*runTime, error) {

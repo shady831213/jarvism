@@ -902,7 +902,7 @@ func (t *AstTestCase) GetHierString(space int) string {
 type AstGroup struct {
 	astTest
 	linked bool
-	Tests  map[string]*AstTestCase
+	Tests  []*AstTestCase
 	Groups map[string]*AstGroup
 }
 
@@ -917,10 +917,10 @@ func (t *AstGroup) Clone() *AstGroup {
 	inst.astTest.Copy(&t.astTest)
 	inst.linked = t.linked
 	if t.Tests != nil {
-		inst.Tests = make(map[string]*AstTestCase)
-		for k, v := range t.Tests {
-			inst.Tests[k] = v.Clone()
-			inst.Tests[k].parent = inst
+		inst.Tests = make([]*AstTestCase, len(t.Tests))
+		for i, v := range t.Tests {
+			inst.Tests[i] = v.Clone()
+			inst.Tests[i].parent = inst
 		}
 	}
 	if t.Groups != nil {
@@ -947,9 +947,7 @@ func (t *AstGroup) ParseArgs() {
 
 func (t *AstGroup) GetTestCases() []*AstTestCase {
 	testcases := make([]*AstTestCase, 0)
-	for _, test := range t.Tests {
-		testcases = append(testcases, test)
-	}
+	testcases = append(testcases, t.Tests...)
 	for _, group := range t.Groups {
 		testcases = append(testcases, group.GetTestCases()...)
 	}
@@ -974,17 +972,29 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 	//AstParse tests
 	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) *errors.JVSAstError {
-		t.Tests = make(map[string]*AstTestCase)
-		for name, test := range item.(map[interface{}]interface{}) {
-			t.Tests[name.(string)] = newAstTestCase(name.(string))
-			if v, ok := test.(map[interface{}]interface{}); ok {
-				if err := AstParse(t.Tests[name.(string)], v); err != nil {
+		t.Tests = make([]*AstTestCase, 0)
+		tests, ok := item.([]interface{})
+		if !ok {
+			return errors.JVSAstParseError("tests", fmt.Sprintf("tests must be a list of maps! but it is %T", item))
+		}
+		for _, test := range tests {
+			_test, ok := test.(map[interface{}]interface{})
+			if !ok || len(_test) > 1 {
+				return errors.JVSAstParseError("tests", fmt.Sprintf("tests must be a list of maps! but it is %T", item))
+			}
+			for name, attr := range _test {
+				testCase := newAstTestCase(name.(string))
+				if v, ok := attr.(map[interface{}]interface{}); ok {
+					if err := AstParse(testCase, v); err != nil {
+						return err
+					}
+					t.Tests = append(t.Tests, testCase)
+					break
+				}
+				if err := AstParse(testCase, make(map[interface{}]interface{})); err != nil {
 					return err
 				}
-				continue
-			}
-			if err := AstParse(t.Tests[name.(string)], make(map[interface{}]interface{})); err != nil {
-				return err
+				t.Tests = append(t.Tests, testCase)
 			}
 		}
 		return nil
@@ -994,8 +1004,12 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 	//AstParse groups
 	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *errors.JVSAstError {
+		groups, ok := item.([]interface{})
+		if !ok {
+			return errors.JVSAstParseError("groups", fmt.Sprintf("groups must be a list of string! but it is %T", item))
+		}
 		t.Groups = make(map[string]*AstGroup)
-		for _, name := range item.([]interface{}) {
+		for _, name := range groups {
 			if _, ok := t.Groups[name.(string)]; ok {
 				return errors.JVSAstParseError("group "+t.Name, "sub group "+name.(string)+" is redefined in group "+t.Name+"!")
 			}
@@ -1056,13 +1070,9 @@ func (t *AstGroup) GetHierString(space int) string {
 			}) +
 			astHierFmt("Tests:", nextSpace, func() string {
 				s := ""
-				keys := make([]string, 0)
-				for k := range t.Tests {
-					keys = append(keys, k)
-				}
-				utils.ForeachStringKeysInOrder(keys, func(i string) {
+				for i := range t.Tests {
 					s += t.Tests[i].GetHierString(nextSpace + 1)
-				})
+				}
 				return s
 			}) +
 			astHierFmt("Groups:", nextSpace, func() string {

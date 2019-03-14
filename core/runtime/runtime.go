@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"container/list"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -59,8 +58,8 @@ func runTimeFinish() {
 }
 
 type runFlow struct {
-	build *ast.AstBuild
-	list.List
+	build     *ast.AstBuild
+	testCases map[string]*ast.AstTestCase
 	testWg    sync.WaitGroup
 	cmdStdout *io.Writer
 	buildDone chan *errors.JVSRuntimeResult
@@ -73,7 +72,7 @@ func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *error
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
 	inst.cmdStdout = cmdStdout
-	inst.List.Init()
+	inst.testCases = make(map[string]*ast.AstTestCase)
 	inst.buildDone = buildDone
 	inst.testDone = testDone
 	inst.ctx = ctx
@@ -158,10 +157,14 @@ func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResu
 	})
 }
 
-func (f *runFlow) AddTest(test *ast.AstTestCase) {
+func (f *runFlow) AddTest(test *ast.AstTestCase) int {
 	test.Name = f.build.Name + "__" + test.Name
 	test.Build = f.build
-	f.PushBack(test)
+	if _, ok := f.testCases[test.Name]; !ok {
+		f.testCases[test.Name] = test
+		return 1
+	}
+	return 0
 }
 
 func (f *runFlow) run() {
@@ -184,7 +187,7 @@ func (f *runFlow) run() {
 	runTimeLimiter.get()
 
 	//run tests
-	for e := f.Front(); e != nil; e = e.Next() {
+	for _, test := range f.testCases {
 		f.testWg.Add(1)
 		runTimeLimiter.put()
 		go func(testCase *ast.AstTestCase) {
@@ -197,7 +200,7 @@ func (f *runFlow) run() {
 			}
 			result = f.runTestPhase(testCase)
 			f.testDone <- result
-		}(e.Value.(*ast.AstTestCase))
+		}(test)
 	}
 	f.testWg.Wait()
 }
@@ -264,11 +267,11 @@ func (r *runTime) createFlow(build *ast.AstBuild) *runFlow {
 func (r *runTime) initSubTest(test *ast.AstTestCase) int {
 	test.ParseArgs()
 	flow := r.createFlow(test.GetBuild())
-	testcases := test.GetTestCases()
+	cnt := 0
 	for _, t := range test.GetTestCases() {
-		flow.AddTest(t)
+		cnt += flow.AddTest(t)
 	}
-	return len(testcases)
+	return cnt
 }
 
 func (r *runTime) run() {
@@ -366,7 +369,7 @@ func RunGroup(groupName string, args []string, sc chan os.Signal) error {
 func RunTest(testName, buildName string, args []string, sc chan os.Signal) error {
 	return run(testName, map[interface{}]interface{}{"build": buildName,
 		"args":  filterAstArgs(args),
-		"tests": map[interface{}]interface{}{testName: nil}}, sc)
+		"tests": []interface{}{map[interface{}]interface{}{testName: nil}}}, sc)
 }
 
 func RunOnlyBuild(buildName string, args []string, sc chan os.Signal) error {

@@ -22,8 +22,23 @@ builds:
 groups:
   group1:
     tests:
-      test1:
-        build:
-          build1
-        args:
-          - -repeat 10, -wave
+      - test1:
+          build:
+            build1
+          args:
+            - -seed 1, -wave
+      - test1:
+          build:
+            build1
+          args:
+            - -seed 1, -wave
+      - test1:
+          build:
+            build1
+          args:
+            - -repeat 4, -wave
+      - test1:
+          build:
+            build1
+          args:
+            - -repeat 5
