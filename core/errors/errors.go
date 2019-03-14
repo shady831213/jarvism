@@ -7,9 +7,9 @@ type JVSRuntimeStatus int
 const (
 	_ JVSRuntimeStatus = iota
 	JVSRuntimePass
+	JVSRuntimeUnknown
 	JVSRuntimeWarning
 	JVSRuntimeFail
-	JVSRuntimeUnknown
 )
 
 func StatusColor(status JVSRuntimeStatus) func(str string, modifier ...interface{}) string {
@@ -61,6 +61,20 @@ type JVSRuntimeResult struct {
 
 func (e *JVSRuntimeResult) Error() string {
 	return StatusColor(e.Status)(StatusString(e.Status) + e.Msg)
+}
+
+func NewJVSRuntimeResult(status JVSRuntimeStatus, msg string) *JVSRuntimeResult {
+	switch status {
+	case JVSRuntimePass:
+		return JVSRuntimeResultPass(msg)
+	case JVSRuntimeWarning:
+		return JVSRuntimeResultWarning(msg)
+	case JVSRuntimeFail:
+		return JVSRuntimeResultFail(msg)
+	case JVSRuntimeUnknown:
+		return JVSRuntimeResultUnknown(msg)
+	}
+	return JVSRuntimeResultUnknown(msg)
 }
 
 func JVSRuntimeResultPass(msg string) *JVSRuntimeResult {

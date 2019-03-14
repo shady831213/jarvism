@@ -555,10 +555,73 @@ func (t *astTestDiscoverer) GetHierString(space int) string {
 	})
 }
 
+type astChecker struct {
+	checker Checker
+	attr    map[interface{}]interface{}
+}
+
+func newAstChecker() *astChecker {
+	inst := new(astChecker)
+	inst.attr = make(map[interface{}]interface{})
+	return inst
+}
+
+func (t *astChecker) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+	keywords := utils.NewStringMapSet()
+	keywords.AddKey("type", "attr")
+	if !CheckKeyWord(s, keywords) {
+		return false, keywords, "Error in checker:"
+	}
+	return true, nil, ""
+}
+
+func (t *astChecker) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+	if err := CfgToAstItemRequired(cfg, "type", func(item interface{}) *errors.JVSAstError {
+		if t.checker = GetChecker(item.(string)); t.checker == nil {
+			if err := astLoadPlugin(JVSCheckerPlugin, item.(string)); err != nil {
+				return errors.JVSAstParseError("checker", err.Error())
+			}
+			t.checker = GetChecker(item.(string))
+		}
+		return nil
+	}); err != nil {
+		return errors.JVSAstParseError("checker", err.Msg)
+	}
+	if err := CfgToAstItemOptional(cfg, "attr", func(item interface{}) *errors.JVSAstError {
+		t.attr = item.(map[interface{}]interface{})
+		return nil
+	}); err != nil {
+		return errors.JVSAstParseError("checker", err.Msg)
+	}
+	//parse discoverer
+	return AstParse(t.checker, t.attr)
+}
+
+func (t *astChecker) GetHierString(space int) string {
+	nextSpace := space + 1
+	return astHierFmt("checker:", space, func() string {
+		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
+			fmt.Sprintln(t.checker.Name())
+	}) + astHierFmt("checker_attr:", nextSpace, func() string {
+		s := ""
+		keys := make([]string, 0)
+		for k := range t.attr {
+			keys = append(keys, k.(string))
+		}
+		utils.ForeachStringKeysInOrder(keys, func(i string) {
+			if v, ok := t.attr[i]; ok {
+				s += fmt.Sprint(strings.Repeat(" ", nextSpace) + fmt.Sprint(i) + ": " + fmt.Sprintln(v))
+			}
+		})
+		return s
+	})
+}
+
 type AstBuild struct {
-	Name                   string
-	compileItems, simItems *astItems
-	testDiscoverer         *astTestDiscoverer
+	Name                        string
+	compileItems, simItems      *astItems
+	testDiscoverer              *astTestDiscoverer
+	compileChecker, testChecker *astChecker
 }
 
 func newAstBuild(name string) *AstBuild {
@@ -588,6 +651,8 @@ func (t *AstBuild) PostCompileAction() string {
 func (t *AstBuild) Clone() *AstBuild {
 	inst := newAstBuild(t.Name)
 	inst.testDiscoverer = t.testDiscoverer
+	inst.compileChecker = t.compileChecker
+	inst.testChecker = t.testChecker
 	inst.simItems.Cat(t.simItems)
 	inst.compileItems.Cat(t.compileItems)
 	return inst
@@ -597,11 +662,21 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 	return t.testDiscoverer.discoverer
 }
 
+func (t *AstBuild) GetTestChecker() Checker {
+	return t.testChecker.checker
+}
+
+func (t *AstBuild) GetCompileChecker() Checker {
+	return t.compileChecker.checker
+}
+
 func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	if ok, compileKeywors, _ := t.compileItems.KeywordsChecker(s); !ok {
 		if ok, simKeywors, _ := t.simItems.KeywordsChecker(s); !ok {
 			keywords := utils.NewStringMapSet()
 			keywords.AddKey("test_discoverer")
+			keywords.AddKey("compile_checker")
+			keywords.AddKey("test_checker")
 			if CheckKeyWord(s, keywords) {
 				return true, nil, ""
 			}
@@ -625,6 +700,34 @@ func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 			return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 		}
 	}
+	if err := CfgToAstItemOptional(cfg, "test_checker", func(item interface{}) *errors.JVSAstError {
+		t.testChecker = new(astChecker)
+		return AstParse(t.testChecker, item.(map[interface{}]interface{}))
+	}); err != nil {
+		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+	}
+	//use default
+	if t.testChecker == nil {
+		t.testChecker = newAstChecker()
+		if err := AstParse(t.testChecker, map[interface{}]interface{}{"type": "testChecker"}); err != nil {
+			return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+		}
+	}
+
+	if err := CfgToAstItemOptional(cfg, "compile_checker", func(item interface{}) *errors.JVSAstError {
+		t.compileChecker = new(astChecker)
+		return AstParse(t.compileChecker, item.(map[interface{}]interface{}))
+	}); err != nil {
+		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+	}
+	//use default
+	if t.compileChecker == nil {
+		t.compileChecker = newAstChecker()
+		if err := AstParse(t.compileChecker, map[interface{}]interface{}{"type": "compileChecker"}); err != nil {
+			return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
+		}
+	}
+
 	//options
 	if err := t.compileItems.Parse(cfg); err != nil {
 		return errors.JVSAstParseError("build "+t.Name, err.Msg)
@@ -640,7 +743,9 @@ func (t *AstBuild) GetHierString(space int) string {
 	return astHierFmt(t.Name+":", nextSpace, func() string {
 		return t.compileItems.GetHierString(nextSpace) +
 			t.simItems.GetHierString(nextSpace) +
-			t.testDiscoverer.GetHierString(nextSpace)
+			t.testDiscoverer.GetHierString(nextSpace) +
+			t.testChecker.GetHierString(nextSpace) +
+			t.compileChecker.GetHierString(nextSpace)
 	})
 }
 

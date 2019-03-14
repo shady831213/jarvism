@@ -178,6 +178,20 @@ uvm_test
 ----------------
 discover_attr:
 
+-----------------
+checker:
+testChecker
+
+----------------
+checker_attr:
+
+-----------------
+checker:
+compileChecker
+
+----------------
+checker_attr:
+
 
 -----------------
 build2:
@@ -207,6 +221,20 @@ uvm_test
 
 ----------------
 discover_attr:
+
+-----------------
+checker:
+testChecker
+
+----------------
+checker_attr:
+
+-----------------
+checker:
+compileChecker
+
+----------------
+checker_attr:
 
 
 
@@ -356,6 +384,20 @@ uvm_test
 
 -------------
 discover_attr:
+
+--------------
+checker:
+testChecker
+
+-------------
+checker_attr:
+
+--------------
+checker:
+compileChecker
+
+-------------
+checker_attr:
 
 
 
@@ -758,6 +800,20 @@ uvm_test
 -------------
 discover_attr:
 
+--------------
+checker:
+testChecker
+
+-------------
+checker_attr:
+
+--------------
+checker:
+compileChecker
+
+-------------
+checker_attr:
+
 
 
 ---------------
@@ -917,6 +973,20 @@ uvm_test
 
 -------------
 discover_attr:
+
+--------------
+checker:
+testChecker
+
+-------------
+checker_attr:
+
+--------------
+checker:
+compileChecker
+
+-------------
+checker_attr:
 
 
 
@@ -1342,6 +1412,20 @@ uvm_test
 -----------
 discover_attr:
 
+------------
+checker:
+testChecker
+
+-----------
+checker_attr:
+
+------------
+checker:
+compileChecker
+
+-----------
+checker_attr:
+
 
 
 -------------
@@ -1743,6 +1827,20 @@ uvm_test
 -----------
 discover_attr:
 
+------------
+checker:
+testChecker
+
+-----------
+checker_attr:
+
+------------
+checker:
+compileChecker
+
+-----------
+checker_attr:
+
 
 
 -------------
@@ -1904,6 +2002,20 @@ uvm_test
 
 -------------
 discover_attr:
+
+--------------
+checker:
+testChecker
+
+-------------
+checker_attr:
+
+--------------
+checker:
+compileChecker
+
+-------------
+checker_attr:
 
 
 
@@ -2599,6 +2711,20 @@ uvm_test
 -----------
 discover_attr:
 
+------------
+checker:
+testChecker
+
+-----------
+checker_attr:
+
+------------
+checker:
+compileChecker
+
+-----------
+checker_attr:
+
 
 
 -------------
@@ -3000,6 +3126,20 @@ uvm_test
 -----------
 discover_attr:
 
+------------
+checker:
+testChecker
+
+-----------
+checker_attr:
+
+------------
+checker:
+compileChecker
+
+-----------
+checker_attr:
+
 
 
 -------------
@@ -3159,6 +3299,20 @@ uvm_test
 
 -----------
 discover_attr:
+
+------------
+checker:
+testChecker
+
+-----------
+checker_attr:
+
+------------
+checker:
+compileChecker
+
+-----------
+checker_attr:
 
 
 
@@ -3584,6 +3738,20 @@ uvm_test
 ---------
 discover_attr:
 
+----------
+checker:
+testChecker
+
+---------
+checker_attr:
+
+----------
+checker:
+compileChecker
+
+---------
+checker_attr:
+
 
 
 -----------
@@ -3984,6 +4152,20 @@ uvm_test
 
 ---------
 discover_attr:
+
+----------
+checker:
+testChecker
+
+---------
+checker_attr:
+
+----------
+checker:
+compileChecker
+
+---------
+checker_attr:
 
 
 
