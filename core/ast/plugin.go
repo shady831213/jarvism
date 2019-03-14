@@ -79,7 +79,14 @@ func loadPlugin(pluginType JVSPluginType, pluginName string) *jvserrors.JVSAstEr
 	//check plugin path, check customized first, then buildin
 	pluginPath := path.Join(jarivsm.GetPluginsHome(), string(pluginType)+"s", pluginName)
 	pluginState, err := os.Stat(pluginPath)
-	if err != nil {
+	if err == nil {
+		symPluginPath := path.Join(jarivsm.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
+		defer os.RemoveAll(symPluginPath)
+		if err := os.Symlink(pluginPath, symPluginPath); err != nil {
+			return jvserrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
+		}
+		pluginPath = symPluginPath
+	} else {
 		_pluginPath := path.Join(jarivsm.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		_pluginState, _err := os.Stat(_pluginPath)
 		if _err != nil {
@@ -102,7 +109,7 @@ func loadPlugin(pluginType JVSPluginType, pluginName string) *jvserrors.JVSAstEr
 
 	if _, err := plugin.Open(libPath); err != nil {
 		os.RemoveAll(path.Join(workDir, ".jarvism_plugins"))
-		return jvserrors.JVSPluginLoadError(pluginName, err.Error()+" Please restart Jarvism and try again Or update your Jarvism!", getRealPath(pluginPath))
+		return jvserrors.JVSPluginLoadError(pluginName, err.Error()+" Please restart Jarvism and try again!", getRealPath(pluginPath))
 	}
 
 	return nil
@@ -127,10 +134,9 @@ func compile(pluginType JVSPluginType, pluginFile, libFile string) error {
 	if err := os.RemoveAll(libFile); err != nil {
 		return err
 	}
-	cmd := exec.Command("go", "build", "-o", libFile, "-buildmode", "plugin")
+	cmd := exec.Command("go", "build", "-o", libFile, "-buildmode", "plugin", pluginFile)
 	stderr := compileOutput{""}
 	cmd.Stderr = &stderr
-	cmd.Dir = pluginFile
 	if err := cmd.Run(); err != nil {
 		return errors.New(stderr.msg + "\n" + err.Error())
 	}
