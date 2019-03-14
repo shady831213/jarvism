@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"github.com/shady831213/jarvism/core/errors"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"strconv"
 )
 

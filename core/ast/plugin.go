@@ -2,9 +2,9 @@ package ast
 
 import (
 	"errors"
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	jvserrors "github.com/shady831213/jarvism/core/errors"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"os/exec"
 	"path"
@@ -77,17 +77,17 @@ func getRealPath(path string) string {
 
 func loadPlugin(pluginType JVSPluginType, pluginName string) *jvserrors.JVSAstError {
 	//check plugin path, check customized first, then buildin
-	pluginPath := path.Join(jarivsm.GetPluginsHome(), string(pluginType)+"s", pluginName)
+	pluginPath := path.Join(core.GetPluginsHome(), string(pluginType)+"s", pluginName)
 	pluginState, err := os.Stat(pluginPath)
 	if err == nil {
-		symPluginPath := path.Join(jarivsm.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
+		symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		defer os.RemoveAll(symPluginPath)
 		if err := os.Symlink(pluginPath, symPluginPath); err != nil {
 			return jvserrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
 		}
 		pluginPath = symPluginPath
 	} else {
-		_pluginPath := path.Join(jarivsm.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
+		_pluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		_pluginState, _err := os.Stat(_pluginPath)
 		if _err != nil {
 			return jvserrors.JVSPluginLoadError(pluginName, "["+err.Error()+";"+_err.Error()+"]", "["+pluginPath+";"+_pluginPath+"]")
@@ -157,18 +157,19 @@ func findAllPlugins(pluginType JVSPluginType) {
 			if f.IsDir() {
 				return nil
 			}
-			if paths := strings.Split(p, string(os.PathSeparator)); paths[len(paths)-1] != "main.go" && paths[len(paths)-3] == string(pluginType)+"s" {
-				if base := path.Join(paths[:len(paths)-3]...); base == jarivsm.GetPluginsHome() || base == jarivsm.GetPluginsHome() {
+
+			if paths := strings.Split(p, string(filepath.Separator)); paths[len(paths)-1] == "main.go" && paths[len(paths)-3] == string(pluginType)+"s" {
+				if base := strings.Join(paths[:len(paths)-3], string(filepath.Separator)); base == core.BuildInPluginsHome() || base == core.GetPluginsHome() {
 					pluginFileCache[pluginType][paths[len(paths)-2]] = p
 				}
 			}
 			return nil
 		}
-		if err := filepath.Walk(path.Join(jarivsm.BuildInPluginsHome(), string(pluginType)+"s"), pluginFilter); err != nil {
+		if err := filepath.Walk(path.Join(core.BuildInPluginsHome(), string(pluginType)+"s"), pluginFilter); err != nil {
 			panic("Error in polling all plugins :" + err.Error())
 		}
-		if _, err := os.Stat(jarivsm.GetPluginsHome()); err == nil {
-			if err := filepath.Walk(path.Join(jarivsm.GetPluginsHome(), string(pluginType)+"s"), pluginFilter); err != nil {
+		if _, err := os.Stat(core.GetPluginsHome()); err == nil {
+			if err := filepath.Walk(path.Join(core.GetPluginsHome(), string(pluginType)+"s"), pluginFilter); err != nil {
 				panic("Error in polling all plugins :" + err.Error())
 			}
 		}

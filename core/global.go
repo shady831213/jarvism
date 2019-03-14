@@ -1,4 +1,4 @@
-package jarivsm
+package core
 
 import (
 	"errors"
@@ -11,19 +11,19 @@ import (
 var pkgPath string
 
 func PkgPath() string {
-	return getPkgPath()
+	return getJarvismPath()
 }
 
 func BuildInPluginsHome() string {
-	return path.Join(getPkgPath(), "plugins")
+	return path.Join(getJarvismPath(), "plugins")
 }
 
 func CorePath() string {
-	return path.Join(getPkgPath(), "core")
+	return path.Join(getJarvismPath(), "core")
 }
 
 func BuildInOptionPath() string {
-	return path.Join(getPkgPath(), "buildInOptions")
+	return path.Join(CorePath(), "buildInOptions")
 }
 
 func TestDiscoverersPath() string {
@@ -38,13 +38,13 @@ func RunnersPath() string {
 	return path.Join(BuildInPluginsHome(), "runners")
 }
 
-func getPkgPath() string {
+func getJarvismPath() string {
 	if pkgPath == "" {
 		_, file, _, ok := runtime.Caller(1)
 		if !ok {
 			panic(errors.New("Can not get current file info"))
 		}
-		_pkgPath, err := filepath.Abs(path.Dir(file))
+		_pkgPath, err := filepath.Abs(path.Dir(path.Dir(file)))
 		if err != nil {
 			panic(err)
 		}

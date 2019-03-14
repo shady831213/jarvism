@@ -2,7 +2,7 @@ package main_test
 
 import (
 	"fmt"
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/ast"
 	"os"
 	"path"
@@ -21,10 +21,10 @@ func TestUvmDiscoverer(t *testing.T) {
 	build1 := ast.GetJvsAstRoot().GetBuild("build1")
 	build2 := ast.GetJvsAstRoot().GetBuild("build2")
 	compare(t, "discoverer of build1 name", "uvm_test", build1.GetTestDiscoverer().Name())
-	compare(t, "testDir of build1 name", path.Join(jarivsm.GetPrjHome(), "build1_testcases"), build1.GetTestDiscoverer().TestDir())
+	compare(t, "testDir of build1 name", path.Join(core.GetPrjHome(), "build1_testcases"), build1.GetTestDiscoverer().TestDir())
 	compare(t, "testList of build1 name", fmt.Sprint([]string{"test2"}), fmt.Sprint(build1.GetTestDiscoverer().TestList()))
 	compare(t, "discoverer of build2 name", "uvm_test", build2.GetTestDiscoverer().Name())
-	compare(t, "testDir of build2 name", path.Join(jarivsm.GetPrjHome(), "testcases"), build2.GetTestDiscoverer().TestDir())
+	compare(t, "testDir of build2 name", path.Join(core.GetPrjHome(), "testcases"), build2.GetTestDiscoverer().TestDir())
 	compare(t, "testList of build2 name", fmt.Sprint([]string{"test1"}), fmt.Sprint(build2.GetTestDiscoverer().TestList()))
 }
 
@@ -35,5 +35,5 @@ func compare(t *testing.T, fields, exp, res string) {
 }
 
 func init() {
-	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.TestDiscoverersPath(), "uvm_test", "testFiles"))
+	os.Setenv("JVS_PRJ_HOME", path.Join(core.TestDiscoverersPath(), "uvm_test", "testFiles"))
 }

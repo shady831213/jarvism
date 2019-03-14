@@ -2,7 +2,7 @@ package ast_test
 
 import (
 	"github.com/shady831213/jarvism/core/ast"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"regexp"
 	"strings"
 	"syscall"

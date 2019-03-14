@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/ast"
 	"os"
 	"path"
@@ -16,7 +16,7 @@ func (s *vcs) Name() string {
 }
 
 func (s *vcs) BuildInOptionFile() string {
-	return path.Join(jarivsm.BuildInOptionPath(), "vcs_options.yaml")
+	return path.Join(core.SimulatorsPath(), s.Name(), "buildInOptions", "vcs_options.yaml")
 }
 
 func (s *vcs) CompileCmd() string {

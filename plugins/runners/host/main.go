@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"os/exec"
 	"path"

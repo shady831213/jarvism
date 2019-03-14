@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"
 	"gopkg.in/yaml.v2"
 	"os"
@@ -22,7 +22,7 @@ func Lex(configFile string) (map[interface{}]interface{}, error) {
 }
 
 func Parse(cfg map[interface{}]interface{}) error {
-	if err := jarivsm.CheckEnv(); err != nil {
+	if err := core.CheckEnv(); err != nil {
 		return err
 	}
 	if err := AstParse(jvsAstRoot, cfg); err != nil {
@@ -54,7 +54,7 @@ func LoadBuildInOptions(configFile string) error {
 }
 
 func init() {
-	if err := LoadBuildInOptions(path.Join(jarivsm.BuildInOptionPath(), "global_options.yaml")); err != nil {
-		panic("Error in loading " + path.Join(jarivsm.BuildInOptionPath(), "global_options.yaml") + ":" + err.Error())
+	if err := LoadBuildInOptions(path.Join(core.BuildInOptionPath(), "global_options.yaml")); err != nil {
+		panic("Error in loading " + path.Join(core.BuildInOptionPath(), "global_options.yaml") + ":" + err.Error())
 	}
 }

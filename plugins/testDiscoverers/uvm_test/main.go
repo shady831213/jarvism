@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,7 +34,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAstErr
 	}
 	//use default
 	if d.testDir == "" {
-		d.testDir, _ = filepath.Abs(path.Join(jarivsm.GetPrjHome(), "testcases"))
+		d.testDir, _ = filepath.Abs(path.Join(core.GetPrjHome(), "testcases"))
 	}
 	return nil
 }

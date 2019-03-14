@@ -2,7 +2,7 @@ package main_test
 
 import (
 	"flag"
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/runtime"
@@ -156,7 +156,7 @@ func TestHostRunnerGroupSim(t *testing.T) {
 }
 
 func init() {
-	os.Setenv("JVS_PRJ_HOME", path.Join(jarivsm.RunnersPath(), "host", "testFiles"))
+	os.Setenv("JVS_PRJ_HOME", path.Join(core.RunnersPath(), "host", "testFiles"))
 	flag.BoolVar(&keepResult, "keep", false, "keep test result")
 	flag.Parse()
 }

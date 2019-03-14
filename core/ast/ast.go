@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fatih/set"
-	"github.com/shady831213/jarvism"
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"
-	"github.com/shady831213/jarvism/utils"
+	"github.com/shady831213/jarvism/core/utils"
 	"math"
 	"path"
 	"sort"
@@ -420,7 +420,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	//use default
 	if GetWorkDir() == "" {
-		if err := setWorkDir(path.Join(jarivsm.GetPrjHome(), "work")); err != nil {
+		if err := setWorkDir(path.Join(core.GetPrjHome(), "work")); err != nil {
 			return errors.JVSAstParseError("work_dir in Env", err.Error())
 		}
 	}

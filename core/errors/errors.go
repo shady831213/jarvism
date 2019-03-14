@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/shady831213/jarvism/utils"
+import "github.com/shady831213/jarvism/core/utils"
 
 type JVSRuntimeStatus int
 
