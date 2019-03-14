@@ -91,7 +91,7 @@ func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, str
 
 func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
 	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
-	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), testName, seed)
+	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create test dir
 	if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
@@ -118,10 +118,10 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.
 }
 
 func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
-	_, _, testName, seed, groupsName := parseTestName(testCase.Name)
-	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), testName, seed)
+	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
+	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	//create log file
-	logFile, err := os.Create(path.Join(testDir, testName+"__"+seed+".log"))
+	logFile, err := os.Create(path.Join(testDir, buildName+"__"+testName+"__"+seed+".log"))
 	defer logFile.Close()
 	if err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
