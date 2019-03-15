@@ -1,0 +1,94 @@
+env:
+  simulator:
+    type:
+      "vcs"
+  runner:
+    type:
+      "host"
+    
+  work_dir: $JVS_PRJ_HOME/work
+
+common_compile_option: &common_compile >-
+  -sverilog
+  -ntb_opts uvm-1.2
+
+common_sim_option: &common_sim >-
+  +UVM_VERBOSITY=UVM_LOW
+  +UVM_CONFIG_DB_TRACE
+
+builds:
+  build1:
+    compile_option:
+      - *common_compile
+      - -timescale=1ns/10ps
+    pre_sim_action:
+      - echo "pre_sim_build1"
+    sim_option:
+      - *common_sim
+    post_sim_action:
+      - echo "post_sim_build1"
+
+  build2:
+    pre_compile_action:
+      - echo "pre_compile_build2"
+    compile_option:
+      - -debug_access+pp
+      - *common_compile
+    post_compile_action:
+      - echo "post_compile_build2"
+    sim_option:
+      - *common_sim
+
+options:
+  vh:
+    on_action:
+      sim_option:
+        - +UVM_VERBOSITY=UVM_FULL
+    with_value_action:
+      sim_option:
+        - +UVM_VERBOSITY=$vh
+
+  test_phase:
+    with_value_action:
+      compile_option:
+        - echo "compile_option $test_phase"
+      sim_option:
+        - echo "sim_option $test_phase"
+
+groups:
+  group1:
+    build: build1
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test1:
+          args:
+            - -repeat 10,-wave,-vh UVM_MIDIUM
+      - test2:
+          args:
+            - -seed 1
+            - -wave fsdb
+
+  group2:
+    build: build2
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test3:
+          args:
+            - -repeat 10
+    groups:
+      - group1
+
+  group3:
+    build: build2
+    args:
+      - -vh
+      - -repeat 20
+    tests:
+      - test1:
+    groups:
+      - group2
+      - group1
