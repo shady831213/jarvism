@@ -19,6 +19,14 @@ func newHostRunner() *hostRunner {
 	return inst
 }
 
+func (r *hostRunner) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+	return nil
+}
+
+func (r *hostRunner) KeywordsChecker(key string) (bool, *utils.StringMapSet, string) {
+	return true, nil, ""
+}
+
 func (r *hostRunner) Name() string {
 	return "host"
 }
@@ -44,7 +52,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 	hasFileList := filelistItem != nil && len(filelistItem) > 0
 	if hasFileList {
 		filelistItem = append(filelistItem, build.GetTestDiscoverer().TestDir())
-		fileListContent, err := ast.GetSimulator().GetFileList(filelistItem...)
+		fileListContent, err := ast.GetCurSimulator().GetFileList(filelistItem...)
 		if err != nil {
 			return errors.JVSRuntimeResultFail(err.Error())
 		}
@@ -58,7 +66,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 	if err := utils.WriteNewFile(path.Join(buildDir, "pre_compile.sh"), build.PreCompileAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), ast.GetSimulator().CompileCmd()+" "+build.CompileOption()+filelistCompileOption); err != nil {
+	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), ast.GetCurSimulator().CompileCmd()+" "+build.CompileOption()+filelistCompileOption); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(buildDir, "post_compile.sh"), build.PostCompileAction()); err != nil {
@@ -104,7 +112,7 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRun
 	if err := utils.WriteNewFile(path.Join(testDir, "pre_sim.sh"), testCase.PreSimAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.GetBuild().GetTestDiscoverer().TestCmd()+testName); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetCurSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.GetBuild().GetTestDiscoverer().TestCmd()+testName); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(testDir, "post_sim.sh"), testCase.PostSimAction()); err != nil {

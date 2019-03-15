@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/utils"
 	"math/rand"
 	"time"
 )
@@ -12,6 +13,14 @@ type testRunner struct {
 
 func (r *testRunner) Name() string {
 	return "testRunner"
+}
+
+func (r *testRunner) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+	return nil
+}
+
+func (r *testRunner) KeywordsChecker(key string) (bool, *utils.StringMapSet, string) {
+	return true, nil, ""
 }
 
 func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {

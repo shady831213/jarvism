@@ -14,7 +14,7 @@ type CmdAttr struct {
 type CmdRunner func(attr *CmdAttr, name string, arg ...string) *errors.JVSRuntimeResult
 
 type Runner interface {
-	Name() string
+	pluginOpts
 	PrepareBuild(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
 	Build(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
 	PrepareTest(*AstTestCase, CmdRunner) *errors.JVSRuntimeResult
@@ -28,6 +28,13 @@ func setRunner(r Runner) {
 	runner = r
 }
 
+func GetRunner(key string) Runner {
+	if v, ok := validRunners[key]; ok {
+		return v
+	}
+	return nil
+}
+
 func RegisterRunner(r Runner) {
 	if _, ok := validRunners[r.Name()]; ok {
 		panic("runner " + r.Name() + " has been registered!")
@@ -35,6 +42,6 @@ func RegisterRunner(r Runner) {
 	validRunners[r.Name()] = r
 }
 
-func GetRunner() Runner {
+func GetCurRunner() Runner {
 	return runner
 }

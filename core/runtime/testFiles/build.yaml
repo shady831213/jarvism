@@ -1,6 +1,8 @@
 env:
-  simulator: "vcs"
-  runner: "testRunner"
+  simulator:
+    type: "vcs"
+  runner:
+    type: "testRunner"
   work_dir: $JVS_PRJ_HOME/work
 
 common_compile_option: &common_compile >-

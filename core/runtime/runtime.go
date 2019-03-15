@@ -154,7 +154,7 @@ func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) ast.CmdRunner {
 
 func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
 	return preparePhase(build.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().PrepareBuild(build, f.cmdRunner(nil))
+		return ast.GetCurRunner().PrepareBuild(build, f.cmdRunner(nil))
 	})
 }
 
@@ -179,7 +179,7 @@ func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
 		wr, check, done := f.checkPhase(build.GetChecker())
 		go check()
 		status := errors.JVSRuntimePass
-		execRes := ast.GetRunner().Build(build, f.cmdRunner(wr))
+		execRes := ast.GetCurRunner().Build(build, f.cmdRunner(wr))
 		if execRes.Status > status {
 			status = execRes.Status
 		}
@@ -193,7 +193,7 @@ func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
 
 func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
 	return preparePhase(testCase.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().PrepareTest(testCase, f.cmdRunner(nil))
+		return ast.GetCurRunner().PrepareTest(testCase, f.cmdRunner(nil))
 	})
 }
 
@@ -202,7 +202,7 @@ func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResu
 		wr, check, done := f.checkPhase(testCase.GetChecker())
 		go check()
 		status := errors.JVSRuntimePass
-		execRes := ast.GetRunner().RunTest(testCase, f.cmdRunner(wr))
+		execRes := ast.GetCurRunner().RunTest(testCase, f.cmdRunner(wr))
 		if execRes.Status > status {
 			status = execRes.Status
 		}

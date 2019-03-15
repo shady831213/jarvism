@@ -3,12 +3,22 @@ package main
 import (
 	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"path"
 	"path/filepath"
 )
 
 type vcs struct {
+}
+
+func (s *vcs) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+	return nil
+}
+
+func (s *vcs) KeywordsChecker(key string) (bool, *utils.StringMapSet, string) {
+	return true, nil, ""
 }
 
 func (s *vcs) Name() string {

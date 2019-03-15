@@ -31,10 +31,10 @@ type pluginOpts interface {
 
 func getPlugin(pluginType JVSPluginType, key string) pluginOpts {
 	switch pluginType {
-	//case JVSRunnerPlugin:
-	//	return GetRunner()
-	//case JVSSimulatorPlugin:
-	//	return GetSimulator()
+	case JVSRunnerPlugin:
+		return GetRunner(key)
+	case JVSSimulatorPlugin:
+		return GetSimulator(key)
 	case JVSTestDiscovererPlugin:
 		return GetTestDiscoverer(key)
 	case JVSCheckerPlugin:

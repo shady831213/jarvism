@@ -306,6 +306,26 @@ func newAstChecker() *astChecker {
 	return inst
 }
 
+type astSimulator struct {
+	astPlugin
+}
+
+func newAstSimulator() *astSimulator {
+	inst := new(astSimulator)
+	inst.init(JVSSimulatorPlugin)
+	return inst
+}
+
+type astRunner struct {
+	astPlugin
+}
+
+func newAstRunner() *astRunner {
+	inst := new(astRunner)
+	inst.init(JVSRunnerPlugin)
+	return inst
+}
+
 //Options
 //------------------------
 type AstOptionAction struct {
@@ -481,6 +501,13 @@ func (t *AstOption) GetHierString(space int) string {
 //env
 //------------------------
 type astEnv struct {
+	runner    *astRunner
+	simulator *astSimulator
+}
+
+func newAstEnv() *astEnv {
+	inst := new(astEnv)
+	return inst
 }
 
 func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -510,52 +537,45 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 
 	if err := CfgToAstItemOptional(cfg, "simulator", func(item interface{}) *errors.JVSAstError {
-		simulator, ok := validSimulators[item.(string)]
+		t.simulator = newAstSimulator()
+		v, ok := item.(map[interface{}]interface{})
 		if !ok {
-			if err := astLoadPlugin(JVSSimulatorPlugin, item.(string)); err != nil {
-				return errors.JVSAstParseError("simulator of Env", err.Error())
-			}
-			simulator, _ = validSimulators[item.(string)]
+			return errors.JVSAstParseError("simulator", fmt.Sprintf("expect a map of map but get %T!", item))
 		}
-		setSimulator(simulator)
-		return nil
+		return AstParse(t.simulator, v)
 	}); err != nil {
-		return errors.JVSAstParseError("simulator of Env", err.Msg)
+		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	//use default
-	if GetSimulator() == nil {
-		if err := astLoadPlugin(JVSSimulatorPlugin, "vcs"); err != nil {
-			return errors.JVSAstParseError("simulator of Env", err.Error())
+	if t.simulator == nil {
+		t.simulator = newAstSimulator()
+		if err := AstParse(t.simulator, map[interface{}]interface{}{"type": "vcs"}); err != nil {
+			return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 		}
-		simulator, _ := validSimulators["vcs"]
-		setSimulator(simulator)
 	}
-	if err := LoadBuildInOptions(GetSimulator().BuildInOptionFile()); err != nil {
-		panic("Error in loading " + GetSimulator().BuildInOptionFile() + ":" + err.Error())
+	setSimulator(t.simulator.plugin.(Simulator))
+	if err := LoadBuildInOptions(GetCurSimulator().BuildInOptionFile()); err != nil {
+		panic("Error in loading " + GetCurSimulator().BuildInOptionFile() + ":" + err.Error())
 	}
 
 	if err := CfgToAstItemOptional(cfg, "runner", func(item interface{}) *errors.JVSAstError {
-		runner, ok := validRunners[item.(string)]
+		t.runner = newAstRunner()
+		v, ok := item.(map[interface{}]interface{})
 		if !ok {
-			if err := astLoadPlugin(JVSRunnerPlugin, item.(string)); err != nil {
-				return errors.JVSAstParseError("runner of Env", err.Error())
-			}
-			runner, _ = validRunners[item.(string)]
+			return errors.JVSAstParseError("runner", fmt.Sprintf("expect a map of map but get %T!", item))
 		}
-		setRunner(runner)
-		return nil
+		return AstParse(t.runner, v)
 	}); err != nil {
-		return errors.JVSAstParseError("runner of Env", err.Msg)
+		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	//use default
-	if GetRunner() == nil {
-		if err := astLoadPlugin(JVSRunnerPlugin, "host"); err != nil {
-			return errors.JVSAstParseError("runner of Env", err.Error())
+	if t.runner == nil {
+		t.runner = newAstRunner()
+		if err := AstParse(t.runner, map[interface{}]interface{}{"type": "host"}); err != nil {
+			return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 		}
-		runner, _ := validRunners["host"]
-		setRunner(runner)
 	}
-
+	setRunner(t.runner.plugin.(Runner))
 	return nil
 }
 
@@ -563,10 +583,10 @@ func (t *astEnv) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt("Simulator:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(GetSimulator().Name())
+			fmt.Sprintln(GetCurSimulator().Name())
 	}) + astHierFmt("Runner:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(GetRunner().Name())
+			fmt.Sprintln(GetCurRunner().Name())
 	}) + astHierFmt("WorkDir:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
 			fmt.Sprintln(GetWorkDir())
@@ -646,7 +666,11 @@ func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := CfgToAstItemOptional(cfg, "test_discoverer", func(item interface{}) *errors.JVSAstError {
 		t.testDiscoverer = newAstTestDiscoverer()
-		return AstParse(t.testDiscoverer, item.(map[interface{}]interface{}))
+		v, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("test_discoverer", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		return AstParse(t.testDiscoverer, v)
 	}); err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
@@ -659,7 +683,11 @@ func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	if err := CfgToAstItemOptional(cfg, "test_checker", func(item interface{}) *errors.JVSAstError {
 		t.testChecker = newAstChecker()
-		return AstParse(t.testChecker, item.(map[interface{}]interface{}))
+		v, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("test_checker", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		return AstParse(t.testChecker, v)
 	}); err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
@@ -673,7 +701,11 @@ func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 	if err := CfgToAstItemOptional(cfg, "compile_checker", func(item interface{}) *errors.JVSAstError {
 		t.compileChecker = newAstChecker()
-		return AstParse(t.compileChecker, item.(map[interface{}]interface{}))
+		v, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("compile_checker", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		return AstParse(t.compileChecker, v)
 	}); err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
@@ -923,7 +955,7 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 		//copy sim_options and set seed
 		testcases[i].simItems.Cat(t.GetBuild().simItems)
 		testcases[i].simItems.Cat(t.simItems)
-		testcases[i].simItems.option.Cat(newAstItem(GetSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
+		testcases[i].simItems.option.Cat(newAstItem(GetCurSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
 	}
 	return testcases
 }
@@ -1200,7 +1232,7 @@ func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	//parsing Env
 	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) *errors.JVSAstError {
-		t.Env = new(astEnv)
+		t.Env = newAstEnv()
 		if item != nil {
 			return AstParse(t.Env, item.(map[interface{}]interface{}))
 		}
@@ -1210,7 +1242,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	//use default
 	if t.Env == nil {
-		t.Env = new(astEnv)
+		t.Env = newAstEnv()
 		if err := AstParse(t.Env, make(map[interface{}]interface{})); err != nil {
 			return err
 		}

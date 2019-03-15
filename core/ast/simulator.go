@@ -1,7 +1,7 @@
 package ast
 
 type Simulator interface {
-	Name() string
+	pluginOpts
 	BuildInOptionFile() string
 	SimCmd() string
 	CompileCmd() string
@@ -16,6 +16,13 @@ func setSimulator(s Simulator) {
 	simulator = s
 }
 
+func GetSimulator(key string) Simulator {
+	if v, ok := validSimulators[key]; ok {
+		return v
+	}
+	return nil
+}
+
 func RegisterSimulator(s Simulator) {
 	if _, ok := validSimulators[s.Name()]; ok {
 		panic("simulator " + s.Name() + " has been registered!")
@@ -23,6 +30,6 @@ func RegisterSimulator(s Simulator) {
 	validSimulators[s.Name()] = s
 }
 
-func GetSimulator() Simulator {
+func GetCurSimulator() Simulator {
 	return simulator
 }
