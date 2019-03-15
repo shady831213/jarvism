@@ -80,38 +80,11 @@ func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *error
 	return inst
 }
 
-func (f *runFlow) cmdRunner(attr *ast.CmdAttr, name string, arg ...string) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	cmd := exec.CommandContext(ctx, name, arg...)
-	//set stdout
-	writers := make([]io.Writer, 0)
-	if *f.cmdStdout != nil {
-		writers = append(writers, *f.cmdStdout)
-	}
-	if attr != nil && attr.LogFile != nil {
-		writers = append(writers, attr.LogFile)
-	}
-	fileAndStdoutWriter := io.MultiWriter(writers...)
-	cmd.Stdout = fileAndStdoutWriter
-	//set other attr
-	if attr != nil && attr.SetAttr != nil {
-		if err := attr.SetAttr(cmd); err != nil {
-			return err
-		}
-	}
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	go func() {
-		<-f.ctx.Done()
-		cancel()
-	}()
-	return cmd.Wait()
-}
+type phase func() *errors.JVSRuntimeResult
 
-func (f *runFlow) preparePhase(phaseName string, phase func() *errors.JVSRuntimeResult) *errors.JVSRuntimeResult {
+func preparePhase(phaseName string, p phase) *errors.JVSRuntimeResult {
 	PrintStatus(phaseName, utils.Blue("BEGIN"))
-	result := phase()
+	result := p()
 	if result == nil {
 		result = errors.JVSRuntimeResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
@@ -123,8 +96,8 @@ func (f *runFlow) preparePhase(phaseName string, phase func() *errors.JVSRuntime
 	return result
 }
 
-func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSRuntimeResult) *errors.JVSRuntimeResult {
-	result := phase()
+func runPhase(phaseName string, p phase) *errors.JVSRuntimeResult {
+	result := p()
 	if result == nil {
 		result = errors.JVSRuntimeResultUnknown("No Result!")
 		PrintStatus(phaseName, result.Error())
@@ -134,33 +107,116 @@ func (f *runFlow) runPhase(phaseName string, phase func() *errors.JVSRuntimeResu
 	return result
 }
 
+func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) ast.CmdRunner {
+	return func(attr *ast.CmdAttr, name string, arg ...string) (res *errors.JVSRuntimeResult) {
+		cmd := exec.CommandContext(f.ctx, name, arg...)
+		closers := make([]io.Closer, 0)
+		defer func() {
+			for _, c := range closers {
+				if e := c.Close(); e != nil {
+					res = errors.JVSRuntimeResultUnknown(e.Error())
+				}
+			}
+		}()
+		//set stdout
+		writers := make([]io.Writer, 0)
+		if *f.cmdStdout != nil {
+			writers = append(writers, *f.cmdStdout)
+		}
+		//checker
+		if checkerPipeWriter != nil {
+			writers = append(writers, checkerPipeWriter)
+			closers = append(closers, checkerPipeWriter)
+		}
+		//writeclosers in attr
+		if attr != nil && attr.WriteClosers != nil {
+			for _, wc := range attr.WriteClosers {
+				writers = append(writers, wc)
+				closers = append(closers, wc)
+			}
+
+		}
+
+		fileAndStdoutWriter := io.MultiWriter(writers...)
+		cmd.Stdout = fileAndStdoutWriter
+		//set other attr
+		if attr != nil && attr.SetAttr != nil {
+			if err := attr.SetAttr(cmd); err != nil {
+				return errors.JVSRuntimeResultUnknown(err.Error())
+			}
+		}
+		if err := cmd.Run(); err != nil {
+			return errors.JVSRuntimeResultUnknown(err.Error())
+		}
+		return errors.JVSRuntimeResultPass("")
+	}
+}
+
 func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
-	return f.preparePhase(build.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().PrepareBuild(build, f.cmdRunner)
+	return preparePhase(build.Name, func() *errors.JVSRuntimeResult {
+		return ast.GetRunner().PrepareBuild(build, f.cmdRunner(nil))
 	})
 }
 
+func (f *runFlow) checkPhase(checker ast.Checker) (*io.PipeWriter, func(), chan *errors.JVSRuntimeResult) {
+	rd, wr := io.Pipe()
+	checker.Input(rd)
+	done := make(chan *errors.JVSRuntimeResult)
+	goroutine := func() {
+		defer close(done)
+		select {
+		case <-f.ctx.Done():
+			return
+		case done <- checker.Check():
+			return
+		}
+	}
+	return wr, goroutine, done
+}
+
 func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
-	return f.runPhase(build.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().Build(build, f.cmdRunner)
+	return runPhase(build.Name, func() *errors.JVSRuntimeResult {
+		wr, check, done := f.checkPhase(build.GetChecker())
+		go check()
+		status := errors.JVSRuntimePass
+		execRes := ast.GetRunner().Build(build, f.cmdRunner(wr))
+		if execRes.Status > status {
+			status = execRes.Status
+		}
+		checkRes := <-done
+		if checkRes.Status > status {
+			status = checkRes.Status
+		}
+		return errors.NewJVSRuntimeResult(status, checkRes.GetMsg()+"\n", execRes.GetMsg())
 	})
 }
 
 func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
-	return f.preparePhase(testCase.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().PrepareTest(testCase, f.cmdRunner)
+	return preparePhase(testCase.Name, func() *errors.JVSRuntimeResult {
+		return ast.GetRunner().PrepareTest(testCase, f.cmdRunner(nil))
 	})
 }
 
 func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
-	return f.runPhase(testCase.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetRunner().RunTest(testCase, f.cmdRunner)
+	return runPhase(testCase.Name, func() *errors.JVSRuntimeResult {
+		wr, check, done := f.checkPhase(testCase.GetChecker())
+		go check()
+		status := errors.JVSRuntimePass
+		execRes := ast.GetRunner().RunTest(testCase, f.cmdRunner(wr))
+		if execRes.Status > status {
+			status = execRes.Status
+		}
+		checkRes := <-done
+		if checkRes.Status > status {
+			status = checkRes.Status
+		}
+		return errors.NewJVSRuntimeResult(status, checkRes.GetMsg()+"\n", execRes.GetMsg())
 	})
 }
 
 func (f *runFlow) AddTest(test *ast.AstTestCase) int {
 	test.Name = f.build.Name + "__" + test.Name
-	test.Build = f.build
+	test.SetBuild(f.build)
 	if _, ok := f.testCases[test.Name]; !ok {
 		f.testCases[test.Name] = test
 		return 1

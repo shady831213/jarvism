@@ -55,12 +55,12 @@ func (s *stdout) Write(p []byte) (int, error) {
 	padding := make([]byte, 0)
 	for i, v := range p {
 		//"\n"
-		if v == 10 {
+		if v == '\n' {
 			if i-n < printerPadding {
 				blank := make([]byte, printerPadding-i+n)
 				for j := range blank {
 					//" "
-					blank[j] = 32
+					blank[j] = ' '
 				}
 				padding = append(padding, blank...)
 				paddingCnt += len(blank)

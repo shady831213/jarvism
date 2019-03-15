@@ -37,7 +37,6 @@ func TestHostRunnerBuildFail(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimeFail] != 1 {
 			t.Error("expect build fail but it is not!")
 			t.FailNow()
-			return
 		}
 	}
 }
@@ -60,7 +59,6 @@ func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 1 {
 			t.Error("expect build pass but it is not!")
 			t.FailNow()
-			return
 		}
 		//single test
 		if err := runtime.RunTest("test1", "build1", []string{"-sim_only"}, nil); err != nil {
@@ -70,12 +68,12 @@ func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 0 {
 			t.Error("expect no build!")
 			t.FailNow()
-			return
 		}
-		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 1 {
-			t.Error("expect test pass 1 but it is not!")
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 1 &&
+			runtime.GetTestStatus().Cnts[errors.JVSRuntimeFail] != 1 &&
+			runtime.GetTestStatus().Cnts[errors.JVSRuntimeWarning] != 1 {
+			t.Error("expect test done 1 but it is not!")
 			t.FailNow()
-			return
 		}
 	}
 }
@@ -99,12 +97,10 @@ func TestHostRunnerSim(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 1 {
 			t.Error("expect build pass but it is not!")
 			t.FailNow()
-			return
 		}
-		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 10 {
-			t.Error("expect test pass 10 but it is not!")
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass]+runtime.GetTestStatus().Cnts[errors.JVSRuntimeFail]+runtime.GetTestStatus().Cnts[errors.JVSRuntimeWarning] != 10 {
+			t.Error("expect test done 10 but it is not!")
 			t.FailNow()
-			return
 		}
 		//single test
 		if err := runtime.RunTest("test1", "build1", []string{"-sim_only"}, nil); err != nil {
@@ -114,12 +110,12 @@ func TestHostRunnerSim(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 0 {
 			t.Error("expect no build!")
 			t.FailNow()
-			return
 		}
-		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 1 {
-			t.Error("expect test pass 1 but it is not!")
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 1 &&
+			runtime.GetTestStatus().Cnts[errors.JVSRuntimeFail] != 1 &&
+			runtime.GetTestStatus().Cnts[errors.JVSRuntimeWarning] != 1 {
+			t.Error("expect test done 1 but it is not!")
 			t.FailNow()
-			return
 		}
 	}
 }
@@ -143,12 +139,10 @@ func TestHostRunnerGroupSim(t *testing.T) {
 		if runtime.GetBuildStatus().Cnts[errors.JVSRuntimePass] != 2 {
 			t.Error("expect build pass 2 but it is not!")
 			t.FailNow()
-			return
 		}
-		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass] != 10 {
-			t.Error("expect test pass 10 but it is not!")
+		if runtime.GetTestStatus().Cnts[errors.JVSRuntimePass]+runtime.GetTestStatus().Cnts[errors.JVSRuntimeFail]+runtime.GetTestStatus().Cnts[errors.JVSRuntimeWarning] != 10 {
+			t.Error("expect test done 10 but it is not!")
 			t.FailNow()
-			return
 		}
 	}
 }

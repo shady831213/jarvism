@@ -7,6 +7,7 @@ import (
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ type Checker interface {
 }
 
 type CheckerBase struct {
-	Checker
+	name      string
 	pats      map[errors.JVSRuntimeStatus][]*regexp.Regexp
 	exclPats  map[errors.JVSRuntimeStatus][]*regexp.Regexp
 	finishPat *regexp.Regexp
@@ -27,7 +28,12 @@ type CheckerBase struct {
 	input     *bufio.Reader
 }
 
-func (c *CheckerBase) Init() {
+func (c *CheckerBase) Name() string {
+	return c.name
+}
+
+func (c *CheckerBase) Init(name string) {
+	c.name = name
 	c.result = errors.JVSRuntimeResultUnknown("Unfinished!")
 	c.finished = true
 	c.pats = make(map[errors.JVSRuntimeStatus][]*regexp.Regexp)
@@ -129,26 +135,30 @@ func (c *CheckerBase) Input(reader io.Reader) {
 	c.input = bufio.NewReader(reader)
 }
 
-func (c *CheckerBase) Check() *errors.JVSRuntimeResult {
+func (c *CheckerBase) Check() (res *errors.JVSRuntimeResult) {
 	if c.input == nil {
 		panic("nil input! Call Input(reader) first!")
 	}
+	line := 1
 	for {
 		s, e := c.input.ReadString('\n')
 		if e != nil && e != io.EOF {
 			return errors.JVSRuntimeResultUnknown(e.Error())
 		}
-		c.checkLine(s)
+		if c.result.Status < errors.JVSRuntimeFail {
+			c.checkLine(s, line)
+		}
 		if e == io.EOF {
 			return c.status()
 		}
+		line++
 	}
 }
 
-func (c *CheckerBase) checkLine(s string) {
+func (c *CheckerBase) checkLine(s string, line int) {
 	//check error first
 	for status := errors.JVSRuntimeFail; status > errors.JVSRuntimePass; status-- {
-		if c.checkStatus(status, s) {
+		if c.checkStatus(status, s, line) {
 			break
 		}
 	}
@@ -168,7 +178,7 @@ func (c *CheckerBase) status() *errors.JVSRuntimeResult {
 	return c.result
 }
 
-func (c *CheckerBase) checkStatus(status errors.JVSRuntimeStatus, s string) bool {
+func (c *CheckerBase) checkStatus(status errors.JVSRuntimeStatus, s string, line int) bool {
 	for _, p := range c.pats[status] {
 		if p.MatchString(s) {
 			for _, exp := range c.exclPats[status] {
@@ -179,7 +189,7 @@ func (c *CheckerBase) checkStatus(status errors.JVSRuntimeStatus, s string) bool
 			}
 			//matched
 			if status > c.result.Status {
-				c.result = errors.NewJVSRuntimeResult(status, s)
+				c.result = errors.NewJVSRuntimeResult(status, strings.Replace(s, "\n", "", -1)+", line "+strconv.Itoa(line))
 			}
 			return true
 		}

@@ -41,7 +41,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 func AstParse(parser astParser, cfg map[interface{}]interface{}) *errors.JVSAstError {
 	for name := range cfg {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
-			return errors.JVSAstParseError("", tag+"syntax error of "+name.(string)+"! expect "+fmt.Sprint(keywords))
+			return errors.JVSAstParseError("", tag+"syntax error of \""+name.(string)+"\"! expect "+fmt.Sprint(keywords.Keys()))
 		}
 	}
 	if err := parser.Parse(cfg); err != nil {
@@ -491,7 +491,7 @@ func (t *astEnv) GetHierString(space int) string {
 
 //------------------------
 
-//Build
+//build
 //------------------------
 type astTestDiscoverer struct {
 	discoverer TestDiscoverer
@@ -662,12 +662,8 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 	return t.testDiscoverer.discoverer
 }
 
-func (t *AstBuild) GetTestChecker() Checker {
-	return t.testChecker.checker
-}
-
-func (t *AstBuild) GetCompileChecker() Checker {
-	return t.compileChecker.checker
+func (t *AstBuild) GetChecker() Checker {
+	return GetChecker(t.compileChecker.checker.Name())
 }
 
 func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -758,6 +754,7 @@ type RunTimeOpts interface {
 	GetName() string
 	//bottom-up search
 	GetBuild() *AstBuild
+	SetBuild(*AstBuild)
 	//top-down search
 	GetTestCases() []*AstTestCase
 	ParseArgs()
@@ -773,8 +770,8 @@ type astTestOpts interface {
 type astTest struct {
 	Name       string
 	buildName  string
-	Build      *AstBuild
-	OptionArgs *utils.StringMapSet
+	build      *AstBuild
+	optionArgs *utils.StringMapSet
 	args       []string
 	parent     astTestOpts
 }
@@ -782,15 +779,15 @@ type astTest struct {
 func (t *astTest) init(name string) {
 	t.Name = name
 	t.args = make([]string, 0)
-	t.OptionArgs = utils.NewStringMapSet()
+	t.optionArgs = utils.NewStringMapSet()
 }
 
 func (t *astTest) Copy(i *astTest) {
 	t.Name = i.Name
 	t.buildName = i.buildName
-	t.Build = i.Build
+	t.build = i.build
 	//shared
-	t.OptionArgs = i.OptionArgs
+	t.optionArgs = i.optionArgs
 	//shared
 	t.args = t.args
 	t.parent = i.parent
@@ -809,19 +806,23 @@ func (t *astTest) SetParent(parent astTestOpts) {
 
 func (t *astTest) GetOptionArgs() *utils.StringMapSet {
 	if t.parent != nil {
-		return utils.StringMapSetUnion(t.parent.GetOptionArgs(), t.OptionArgs)
+		return utils.StringMapSetUnion(t.parent.GetOptionArgs(), t.optionArgs)
 	}
-	return t.OptionArgs
+	return t.optionArgs
 }
 
 func (t *astTest) GetBuild() *AstBuild {
-	if t.Build != nil {
-		return t.Build
+	if t.build != nil {
+		return t.build
 	}
 	if t.parent != nil {
 		return t.parent.GetBuild()
 	}
 	return nil
+}
+
+func (t *astTest) SetBuild(build *AstBuild) {
+	t.build = build
 }
 
 func (t *astTest) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -860,7 +861,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 		if build == nil {
 			return errors.JVSAstLinkError(t.Name, "build "+t.buildName+" of "+t.Name+"is undef!")
 		}
-		t.Build = build
+		t.build = build
 	}
 	for _, arg := range t.args {
 		//Options have been all parsed
@@ -868,7 +869,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 		if err != nil {
 			return errors.JVSAstLinkError("args of "+t.Name, err.Error())
 		}
-		t.OptionArgs.Add(opt.GetName(), opt.Clone())
+		t.optionArgs.Add(opt.GetName(), opt.Clone())
 
 	}
 	return nil
@@ -882,7 +883,7 @@ func (t *astTest) GetHierString(space int) string {
 		}
 		return fmt.Sprintln(strings.Repeat(" ", nextSpace) + "null")
 	}) +
-		astHierFmt("OptionArgs:", nextSpace, func() string {
+		astHierFmt("optionArgs:", nextSpace, func() string {
 			s := ""
 			for _, arg := range t.GetOptionArgs().SortedList() {
 				if v, ok := arg.(*AstOption); ok {
@@ -920,6 +921,10 @@ func (t *AstTestCase) PostSimAction() string {
 	return t.simItems.postAction
 }
 
+func (t *AstTestCase) GetChecker() Checker {
+	return GetChecker(t.build.testChecker.checker.Name())
+}
+
 func (t *AstTestCase) Clone() *AstTestCase {
 	inst := new(AstTestCase)
 	inst.astTest.Copy(&t.astTest)
@@ -933,14 +938,14 @@ func (t *AstTestCase) Clone() *AstTestCase {
 }
 
 func (t *AstTestCase) ParseArgs() {
-	t.Build = t.GetBuild().Clone()
+	t.build = t.GetBuild().Clone()
 	//get options sim_options in order
 	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
 		if a, ok := v.(JvsAstOptionForTest); ok {
 			a.TestHandler(t)
 		}
 		if a, ok := v.(JvsAstOptionForBuild); ok {
-			a.BuildHandler(t.Build)
+			a.BuildHandler(t.build)
 		}
 		return false
 	})
@@ -968,8 +973,8 @@ func (t *AstTestCase) Link() *errors.JVSAstError {
 	}
 	//set build and check test
 	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
-		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.Build.Name+"\n"+
-			"valid tests:\n"+strings.Join(t.Build.GetTestDiscoverer().TestList(), "\n"))
+		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.build.Name+"\n"+
+			"valid tests:\n"+strings.Join(t.build.GetTestDiscoverer().TestList(), "\n"))
 	}
 
 	return nil
@@ -1040,11 +1045,11 @@ func (t *AstGroup) Clone() *AstGroup {
 }
 
 func (t *AstGroup) ParseArgs() {
-	t.Build = t.GetBuild().Clone()
+	t.build = t.GetBuild().Clone()
 	//get options sim_options in order
 	t.GetOptionArgs().Foreach(func(k string, v interface{}) bool {
 		if a, ok := v.(JvsAstOptionForBuild); ok {
-			a.BuildHandler(t.Build)
+			a.BuildHandler(t.build)
 		}
 		return false
 	})

@@ -13,6 +13,12 @@ common_sim_option: &common_sim >-
 
 builds:
   build1:
+    compile_checker:
+      type:
+        compileChecker
+      attr:
+        fail:
+          - .*Error.*
     compile_option:
       - *common_compile
       - -timescale=1ns/10ps

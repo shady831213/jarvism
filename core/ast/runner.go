@@ -2,21 +2,23 @@ package ast
 
 import (
 	"github.com/shady831213/jarvism/core/errors"
-	"os"
+	"io"
 	"os/exec"
 )
 
 type CmdAttr struct {
-	LogFile *os.File
-	SetAttr func(*exec.Cmd) error
+	WriteClosers []io.WriteCloser
+	SetAttr      func(*exec.Cmd) error
 }
+
+type CmdRunner func(attr *CmdAttr, name string, arg ...string) *errors.JVSRuntimeResult
 
 type Runner interface {
 	Name() string
-	PrepareBuild(*AstBuild, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
-	Build(*AstBuild, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
-	PrepareTest(*AstTestCase, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
-	RunTest(*AstTestCase, func(*CmdAttr, string, ...string) error) *errors.JVSRuntimeResult
+	PrepareBuild(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
+	Build(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
+	PrepareTest(*AstTestCase, CmdRunner) *errors.JVSRuntimeResult
+	RunTest(*AstTestCase, CmdRunner) *errors.JVSRuntimeResult
 }
 
 var runner Runner

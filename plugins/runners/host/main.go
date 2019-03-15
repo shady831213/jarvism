@@ -4,6 +4,7 @@ import (
 	"github.com/shady831213/jarvism/core/ast"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -30,7 +31,7 @@ func (r *hostRunner) TestsRoot() string {
 	return path.Join(ast.GetWorkDir(), "tests")
 }
 
-func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	_, buildName := parseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create build dir
@@ -69,7 +70,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(*ast.CmdAt
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	_, buildName := parseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create log file
@@ -78,18 +79,16 @@ func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, str
 	if err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	attr := ast.CmdAttr{LogFile: logFile,
+	attr := ast.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
 		SetAttr: func(cmd *exec.Cmd) error {
 			cmd.Dir = path.Join(r.BuildsRoot(), buildName)
 			return nil
 		}}
-	if err := cmdRunner(&attr, "bash", "run_compile.sh"); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error() + "\n" + "path:" + buildDir)
-	}
-	return errors.JVSRuntimeResultPass("path:" + buildDir)
+	res := cmdRunner(&attr, "bash", "run_compile.sh")
+	return errors.NewJVSRuntimeResult(res.Status, res.GetMsg()+"\n", "path:"+buildDir)
 }
 
-func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
@@ -105,7 +104,7 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.
 	if err := utils.WriteNewFile(path.Join(testDir, "pre_sim.sh"), testCase.PreSimAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.Build.GetTestDiscoverer().TestCmd()+testName); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.GetBuild().GetTestDiscoverer().TestCmd()+testName); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(testDir, "post_sim.sh"), testCase.PostSimAction()); err != nil {
@@ -117,7 +116,7 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	//create log file
@@ -126,15 +125,13 @@ func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdA
 	if err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	attr := ast.CmdAttr{LogFile: logFile,
+	attr := ast.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
 		SetAttr: func(cmd *exec.Cmd) error {
 			cmd.Dir = testDir
 			return nil
 		}}
-	if err := cmdRunner(&attr, "bash", "run_sim.sh"); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error() + "\n" + "path:" + testDir)
-	}
-	return errors.JVSRuntimeResultPass("path:" + testDir)
+	res := cmdRunner(&attr, "bash", "run_sim.sh")
+	return errors.NewJVSRuntimeResult(res.Status, res.GetMsg()+"\n", "path:"+testDir)
 }
 
 func init() {

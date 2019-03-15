@@ -1,6 +1,9 @@
 package errors
 
-import "github.com/shady831213/jarvism/core/utils"
+import (
+	"github.com/shady831213/jarvism/core/utils"
+	"strings"
+)
 
 type JVSRuntimeStatus int
 
@@ -56,64 +59,81 @@ func StatusShortString(status JVSRuntimeStatus) string {
 
 type JVSRuntimeResult struct {
 	Status JVSRuntimeStatus
-	Msg    string
+	title  string
+	msg    []string
 }
 
 func (e *JVSRuntimeResult) Error() string {
-	return StatusColor(e.Status)(StatusString(e.Status) + e.Msg)
+	msg := e.GetMsg()
+	if msg != "" {
+		msg = "\n" + e.title + msg
+	}
+	return StatusColor(e.Status)(StatusString(e.Status) + msg)
 }
 
-func NewJVSRuntimeResult(status JVSRuntimeStatus, msg string) *JVSRuntimeResult {
+func (e *JVSRuntimeResult) GetMsg() string {
+	return strings.Join(e.msg, "\n")
+}
+
+func (e *JVSRuntimeResult) addMsgs(msgs ...string) {
+	for _, msg := range msgs {
+		if strings.Replace(strings.Replace(msg, " ", "", -1), "\n", "", -1) != "" {
+			e.msg = append(e.msg, strings.TrimRight(msg, "\n"))
+		}
+	}
+}
+
+func NewJVSRuntimeResult(status JVSRuntimeStatus, msgs ...string) *JVSRuntimeResult {
 	switch status {
 	case JVSRuntimePass:
-		return JVSRuntimeResultPass(msg)
+		return JVSRuntimeResultPass(msgs...)
 	case JVSRuntimeWarning:
-		return JVSRuntimeResultWarning(msg)
+		return JVSRuntimeResultWarning(msgs...)
 	case JVSRuntimeFail:
-		return JVSRuntimeResultFail(msg)
+		return JVSRuntimeResultFail(msgs...)
 	case JVSRuntimeUnknown:
-		return JVSRuntimeResultUnknown(msg)
+		return JVSRuntimeResultUnknown(msgs...)
 	}
-	return JVSRuntimeResultUnknown(msg)
+	return JVSRuntimeResultUnknown(msgs...)
 }
 
-func JVSRuntimeResultPass(msg string) *JVSRuntimeResult {
-	inst := new(JVSRuntimeResult)
-	inst.Status = JVSRuntimePass
-	inst.Msg = "!"
-	if msg != "" {
-		inst.Msg += "\n" + msg
+func JVSRuntimeResultPass(msgs ...string) *JVSRuntimeResult {
+	inst := &JVSRuntimeResult{
+		JVSRuntimePass,
+		"",
+		make([]string, 0),
 	}
+	inst.addMsgs(msgs...)
 	return inst
 }
 
-func JVSRuntimeResultFail(msg string) *JVSRuntimeResult {
-	inst := new(JVSRuntimeResult)
-	inst.Status = JVSRuntimeFail
-	inst.Msg = "!"
-	if msg != "" {
-		inst.Msg += "\n" + "Error:" + msg
+func JVSRuntimeResultFail(msgs ...string) *JVSRuntimeResult {
+	inst := &JVSRuntimeResult{
+		JVSRuntimeFail,
+		"Error:",
+		make([]string, 0),
 	}
+	inst.addMsgs(msgs...)
 	return inst
 }
 
-func JVSRuntimeResultWarning(msg string) *JVSRuntimeResult {
-	inst := new(JVSRuntimeResult)
-	inst.Status = JVSRuntimeWarning
-	inst.Msg = "!"
-	if msg != "" {
-		inst.Msg += "\n" + "Warning:" + msg
+func JVSRuntimeResultWarning(msgs ...string) *JVSRuntimeResult {
+	inst := &JVSRuntimeResult{
+		JVSRuntimeWarning,
+		"Warning:",
+		make([]string, 0),
 	}
+	inst.addMsgs(msgs...)
 	return inst
 }
 
-func JVSRuntimeResultUnknown(msg string) *JVSRuntimeResult {
-	inst := new(JVSRuntimeResult)
-	inst.Status = JVSRuntimeUnknown
-	inst.Msg = "!"
-	if msg != "" {
-		inst.Msg += "\n" + "UnKnown:" + msg
+func JVSRuntimeResultUnknown(msgs ...string) *JVSRuntimeResult {
+	inst := &JVSRuntimeResult{
+		JVSRuntimeUnknown,
+		"Unknown:",
+		make([]string, 0),
 	}
+	inst.addMsgs(msgs...)
 	return inst
 }
 

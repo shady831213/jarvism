@@ -14,36 +14,29 @@ func (r *testRunner) Name() string {
 	return "testRunner"
 }
 
-func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " "); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
+	return cmdRunner(nil, "echo", " ")
 }
 
-func (r *testRunner) Build(build *ast.AstBuild, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " build build ", build.Name); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
+	echoError := rand.Intn(100)
+	if echoError < 20 {
+		return cmdRunner(nil, "echo", " Error here ", build.Name)
+	} else {
+		return cmdRunner(nil, "echo", " Pass here ", build.Name)
 	}
-	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", ""); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
+	return cmdRunner(nil, "echo", "")
 }
 
-func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner func(*ast.CmdAttr, string, ...string) error) *errors.JVSRuntimeResult {
+func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
-	if err := cmdRunner(nil, "echo", " run test ", testCase.Name); err != nil {
-		return errors.JVSRuntimeResultFail(err.Error())
-	}
-	return errors.JVSRuntimeResultPass("")
+	return cmdRunner(nil, "echo", "UVM_WARNING @abc : ", testCase.Name)
 }
 
 func init() {
