@@ -9,14 +9,9 @@ type Simulator interface {
 	GetFileList(...string) (string, error)
 }
 
-var simulator Simulator
 var validSimulators = make(map[string]Simulator)
 
-func setSimulator(s Simulator) {
-	simulator = s
-}
-
-func GetSimulator(key string) Simulator {
+func getSimulator(key string) Simulator {
 	if v, ok := validSimulators[key]; ok {
 		return v
 	}
@@ -31,5 +26,5 @@ func RegisterSimulator(s Simulator) {
 }
 
 func GetCurSimulator() Simulator {
-	return simulator
+	return jvsAstRoot.env.simulator.plugin.(Simulator)
 }

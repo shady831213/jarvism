@@ -198,7 +198,7 @@ func (c *CheckerBase) checkStatus(status errors.JVSRuntimeStatus, s string, line
 
 var validChecker = make(map[string]func() Checker)
 
-func GetChecker(key string) Checker {
+func getChecker(key string) Checker {
 	if v, ok := validChecker[key]; ok {
 		return v()
 	}

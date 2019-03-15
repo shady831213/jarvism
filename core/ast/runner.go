@@ -4,6 +4,7 @@ import (
 	"github.com/shady831213/jarvism/core/errors"
 	"io"
 	"os/exec"
+	"strings"
 )
 
 type CmdAttr struct {
@@ -21,14 +22,24 @@ type Runner interface {
 	RunTest(*AstTestCase, CmdRunner) *errors.JVSRuntimeResult
 }
 
-var runner Runner
-var validRunners = make(map[string]Runner)
-
-func setRunner(r Runner) {
-	runner = r
+func ParseBuildName(name string) (jobId, buildName string) {
+	s := strings.Split(name, "__")
+	return s[0], s[1]
 }
 
-func GetRunner(key string) Runner {
+func ParseTestName(name string) (jobId, buildName, testName, seed string, groupsName []string) {
+	s := strings.Split(name, "__")
+	jobId = s[0]
+	buildName = s[1]
+	groupsName = s[2 : len(s)-2]
+	testName = s[len(s)-2]
+	seed = s[len(s)-1]
+	return
+}
+
+var validRunners = make(map[string]Runner)
+
+func getRunner(key string) Runner {
 	if v, ok := validRunners[key]; ok {
 		return v
 	}
@@ -43,5 +54,5 @@ func RegisterRunner(r Runner) {
 }
 
 func GetCurRunner() Runner {
-	return runner
+	return jvsAstRoot.env.runner.plugin.(Runner)
 }

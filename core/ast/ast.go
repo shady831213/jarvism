@@ -498,7 +498,7 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("simulator", "work_dir", "runner")
 	if !CheckKeyWord(s, keywords) {
-		return false, keywords, "Error in Env:"
+		return false, keywords, "Error in env:"
 	}
 	return true, nil, ""
 }
@@ -507,35 +507,33 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	//must parse work_dir first!
 	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *errors.JVSAstError {
 		if err := setWorkDir(item.(string)); err != nil {
-			return errors.JVSAstParseError("work_dir in Env", err.Error())
+			return errors.JVSAstParseError("work_dir in env", err.Error())
 		}
 		return nil
 	}); err != nil {
-		return errors.JVSAstParseError("work_dir of Env", err.Msg)
+		return errors.JVSAstParseError("work_dir of env", err.Msg)
 	}
 	//use default
 	if GetWorkDir() == "" {
 		if err := setWorkDir(path.Join(core.GetPrjHome(), "work")); err != nil {
-			return errors.JVSAstParseError("work_dir in Env", err.Error())
+			return errors.JVSAstParseError("work_dir in env", err.Error())
 		}
 	}
 
 	simulator, err := astParsPlugin("test_discoverer", JVSSimulatorPlugin, "vcs", cfg)
 	if err != nil {
-		return errors.JVSAstParseError(err.Item+" of Env", err.Msg)
+		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	t.simulator = simulator
-	setSimulator(t.simulator.plugin.(Simulator))
 	if err := LoadBuildInOptions(GetCurSimulator().BuildInOptionFile()); err != nil {
 		panic("Error in loading " + GetCurSimulator().BuildInOptionFile() + ":" + err.Error())
 	}
 
 	runner, err := astParsPlugin("runner", JVSRunnerPlugin, "host", cfg)
 	if err != nil {
-		return errors.JVSAstParseError(err.Item+" of Env", err.Msg)
+		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	t.runner = runner
-	setRunner(t.runner.plugin.(Runner))
 	return nil
 }
 
@@ -604,7 +602,7 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 }
 
 func (t *AstBuild) GetChecker() Checker {
-	return GetChecker(t.compileChecker.plugin.Name())
+	return getChecker(t.compileChecker.plugin.Name())
 }
 
 func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -840,7 +838,7 @@ func (t *AstTestCase) PostSimAction() string {
 }
 
 func (t *AstTestCase) GetChecker() Checker {
-	return GetChecker(t.build.testChecker.plugin.Name())
+	return getChecker(t.build.testChecker.plugin.Name())
 }
 
 func (t *AstTestCase) Clone() *AstTestCase {
@@ -1122,7 +1120,7 @@ func (t *AstGroup) GetHierString(space int) string {
 //Root
 //------------------------
 type astRoot struct {
-	Env     *astEnv
+	env     *astEnv
 	Options map[string]*AstOption
 	Builds  map[string]*AstBuild
 	Groups  map[string]*AstGroup
@@ -1155,20 +1153,20 @@ func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 }
 
 func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	//parsing Env
+	//parsing env
 	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) *errors.JVSAstError {
-		t.Env = newAstEnv()
+		t.env = newAstEnv()
 		if item != nil {
-			return AstParse(t.Env, item.(map[interface{}]interface{}))
+			return AstParse(t.env, item.(map[interface{}]interface{}))
 		}
-		return AstParse(t.Env, make(map[interface{}]interface{}))
+		return AstParse(t.env, make(map[interface{}]interface{}))
 	}); err != nil {
 		return err
 	}
 	//use default
-	if t.Env == nil {
-		t.Env = newAstEnv()
-		if err := AstParse(t.Env, make(map[interface{}]interface{})); err != nil {
+	if t.env == nil {
+		t.env = newAstEnv()
+		if err := AstParse(t.env, make(map[interface{}]interface{})); err != nil {
 			return err
 		}
 	}
@@ -1233,8 +1231,8 @@ func (t *astRoot) Link() *errors.JVSAstError {
 func (t *astRoot) GetHierString(space int) string {
 	nextSpace := space + 1
 	return fmt.Sprintln(strings.Repeat(" ", space)+"astRoot") +
-		astHierFmt("Env:", nextSpace, func() string {
-			return t.Env.GetHierString(nextSpace + 1)
+		astHierFmt("env:", nextSpace, func() string {
+			return t.env.GetHierString(nextSpace + 1)
 		}) +
 		astHierFmt("Options:", nextSpace, func() string {
 			s := ""

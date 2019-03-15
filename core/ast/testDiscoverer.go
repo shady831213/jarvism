@@ -11,7 +11,7 @@ type TestDiscoverer interface {
 
 var validTestDiscoverers = make(map[string]func() TestDiscoverer)
 
-func GetTestDiscoverer(key string) TestDiscoverer {
+func getTestDiscoverer(key string) TestDiscoverer {
 	if v, ok := validTestDiscoverers[key]; ok {
 		return v()
 	}

@@ -11,6 +11,10 @@ import (
 	"strings"
 )
 
+func bashExitGlue() string {
+	return "EXCODE=$?\nif [ $EXCODE != 0 ]\nthen\nexit $EXCODE\nfi"
+}
+
 type hostRunner struct {
 }
 
@@ -40,7 +44,7 @@ func (r *hostRunner) TestsRoot() string {
 }
 
 func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName := parseBuildName(build.Name)
+	_, buildName := ast.ParseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create build dir
 	if err := os.MkdirAll(buildDir, os.ModePerm); err != nil {
@@ -79,7 +83,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 }
 
 func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName := parseBuildName(build.Name)
+	_, buildName := ast.ParseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create log file
 	logFile, err := os.Create(path.Join(buildDir, buildName+".log"))
@@ -97,7 +101,7 @@ func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors
 }
 
 func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
+	_, buildName, testName, seed, groupsName := ast.ParseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create test dir
@@ -125,7 +129,7 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRun
 }
 
 func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName, testName, seed, groupsName := parseTestName(testCase.Name)
+	_, buildName, testName, seed, groupsName := ast.ParseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	//create log file
 	logFile, err := os.Create(path.Join(testDir, buildName+"__"+testName+"__"+seed+".log"))
