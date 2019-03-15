@@ -3,7 +3,7 @@ package main_test
 import (
 	"flag"
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/runtime"
 	"os"
@@ -15,18 +15,18 @@ var keepResult bool
 
 func tearDown() {
 	if !keepResult {
-		os.RemoveAll(ast.GetWorkDir())
+		os.RemoveAll(loader.GetWorkDir())
 	}
 }
 
 func TestHostRunnerBuildFail(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := ast.Lex("testFiles/runner_compile_fail.yaml")
+		cfg, err := loader.Lex("testFiles/runner_compile_fail.yaml")
 		if err != nil {
 			t.Error(err)
 		}
-		err = ast.Parse(cfg)
+		err = loader.Parse(cfg)
 		if err != nil {
 			t.Error(err)
 		}
@@ -44,11 +44,11 @@ func TestHostRunnerBuildFail(t *testing.T) {
 func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := ast.Lex("testFiles/runner.yaml")
+		cfg, err := loader.Lex("testFiles/runner.yaml")
 		if err != nil {
 			t.Error(err)
 		}
-		err = ast.Parse(cfg)
+		err = loader.Parse(cfg)
 		if err != nil {
 			t.Error(err)
 		}
@@ -81,11 +81,11 @@ func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 func TestHostRunnerSim(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := ast.Lex("testFiles/runner.yaml")
+		cfg, err := loader.Lex("testFiles/runner.yaml")
 		if err != nil {
 			t.Error(err)
 		}
-		err = ast.Parse(cfg)
+		err = loader.Parse(cfg)
 		if err != nil {
 			t.Error(err)
 		}
@@ -123,11 +123,11 @@ func TestHostRunnerSim(t *testing.T) {
 func TestHostRunnerGroupSim(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := ast.Lex("testFiles/runner.yaml")
+		cfg, err := loader.Lex("testFiles/runner.yaml")
 		if err != nil {
 			t.Error(err)
 		}
-		err = ast.Parse(cfg)
+		err = loader.Parse(cfg)
 		if err != nil {
 			t.Error(err)
 		}

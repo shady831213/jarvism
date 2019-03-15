@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/core/utils"
@@ -59,8 +59,8 @@ func runTimeFinish() {
 }
 
 type runFlow struct {
-	build     *ast.AstBuild
-	testCases map[string]*ast.AstTestCase
+	build     *loader.AstBuild
+	testCases map[string]*loader.AstTestCase
 	testWg    sync.WaitGroup
 	cmdStdout *io.Writer
 	buildDone chan *errors.JVSRuntimeResult
@@ -68,12 +68,12 @@ type runFlow struct {
 	ctx       context.Context
 }
 
-func newRunFlow(build *ast.AstBuild, cmdStdout *io.Writer, buildDone chan *errors.JVSRuntimeResult, testDone chan *errors.JVSRuntimeResult, ctx context.Context) *runFlow {
+func newRunFlow(build *loader.AstBuild, cmdStdout *io.Writer, buildDone chan *errors.JVSRuntimeResult, testDone chan *errors.JVSRuntimeResult, ctx context.Context) *runFlow {
 	inst := new(runFlow)
 	inst.build = build
 	inst.testWg = sync.WaitGroup{}
 	inst.cmdStdout = cmdStdout
-	inst.testCases = make(map[string]*ast.AstTestCase)
+	inst.testCases = make(map[string]*loader.AstTestCase)
 	inst.buildDone = buildDone
 	inst.testDone = testDone
 	inst.ctx = ctx
@@ -107,8 +107,8 @@ func runPhase(phaseName string, p phase) *errors.JVSRuntimeResult {
 	return result
 }
 
-func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) ast.CmdRunner {
-	return func(attr *ast.CmdAttr, name string, arg ...string) (res *errors.JVSRuntimeResult) {
+func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) loader.CmdRunner {
+	return func(attr *loader.CmdAttr, name string, arg ...string) (res *errors.JVSRuntimeResult) {
 		cmd := exec.CommandContext(f.ctx, name, arg...)
 		closers := make([]io.Closer, 0)
 		defer func() {
@@ -152,13 +152,13 @@ func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) ast.CmdRunner {
 	}
 }
 
-func (f *runFlow) prepareBuildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
+func (f *runFlow) prepareBuildPhase(build *loader.AstBuild) *errors.JVSRuntimeResult {
 	return preparePhase(build.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetCurRunner().PrepareBuild(build, f.cmdRunner(nil))
+		return loader.GetCurRunner().PrepareBuild(build, f.cmdRunner(nil))
 	})
 }
 
-func (f *runFlow) checkPhase(checker ast.Checker) (*io.PipeWriter, func(), chan *errors.JVSRuntimeResult) {
+func (f *runFlow) checkPhase(checker loader.Checker) (*io.PipeWriter, func(), chan *errors.JVSRuntimeResult) {
 	rd, wr := io.Pipe()
 	checker.Input(rd)
 	done := make(chan *errors.JVSRuntimeResult)
@@ -174,12 +174,12 @@ func (f *runFlow) checkPhase(checker ast.Checker) (*io.PipeWriter, func(), chan 
 	return wr, goroutine, done
 }
 
-func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
+func (f *runFlow) buildPhase(build *loader.AstBuild) *errors.JVSRuntimeResult {
 	return runPhase(build.Name, func() *errors.JVSRuntimeResult {
 		wr, check, done := f.checkPhase(build.GetChecker())
 		go check()
 		status := errors.JVSRuntimePass
-		execRes := ast.GetCurRunner().Build(build, f.cmdRunner(wr))
+		execRes := loader.GetCurRunner().Build(build, f.cmdRunner(wr))
 		if execRes.Status > status {
 			status = execRes.Status
 		}
@@ -191,18 +191,18 @@ func (f *runFlow) buildPhase(build *ast.AstBuild) *errors.JVSRuntimeResult {
 	})
 }
 
-func (f *runFlow) prepareTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
+func (f *runFlow) prepareTestPhase(testCase *loader.AstTestCase) *errors.JVSRuntimeResult {
 	return preparePhase(testCase.Name, func() *errors.JVSRuntimeResult {
-		return ast.GetCurRunner().PrepareTest(testCase, f.cmdRunner(nil))
+		return loader.GetCurRunner().PrepareTest(testCase, f.cmdRunner(nil))
 	})
 }
 
-func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResult {
+func (f *runFlow) runTestPhase(testCase *loader.AstTestCase) *errors.JVSRuntimeResult {
 	return runPhase(testCase.Name, func() *errors.JVSRuntimeResult {
 		wr, check, done := f.checkPhase(testCase.GetChecker())
 		go check()
 		status := errors.JVSRuntimePass
-		execRes := ast.GetCurRunner().RunTest(testCase, f.cmdRunner(wr))
+		execRes := loader.GetCurRunner().RunTest(testCase, f.cmdRunner(wr))
 		if execRes.Status > status {
 			status = execRes.Status
 		}
@@ -214,7 +214,7 @@ func (f *runFlow) runTestPhase(testCase *ast.AstTestCase) *errors.JVSRuntimeResu
 	})
 }
 
-func (f *runFlow) AddTest(test *ast.AstTestCase) int {
+func (f *runFlow) AddTest(test *loader.AstTestCase) int {
 	test.Name = f.build.Name + "__" + test.Name
 	test.SetBuild(f.build)
 	if _, ok := f.testCases[test.Name]; !ok {
@@ -247,7 +247,7 @@ func (f *runFlow) run() {
 	for _, test := range f.testCases {
 		f.testWg.Add(1)
 		runTimeLimiter.put()
-		go func(testCase *ast.AstTestCase) {
+		go func(testCase *loader.AstTestCase) {
 			defer f.testWg.Add(-1)
 			defer runTimeLimiter.get()
 			result := f.prepareTestPhase(testCase)
@@ -276,7 +276,7 @@ type runTime struct {
 	cancel                      func()
 }
 
-func newRunTime(name string, group *ast.AstGroup) *runTime {
+func newRunTime(name string, group *loader.AstGroup) *runTime {
 	r := new(runTime)
 	r.Name = name
 	r.runFlow = make(map[string]*runFlow)
@@ -310,7 +310,7 @@ func newRunTime(name string, group *ast.AstGroup) *runTime {
 	return r
 }
 
-func (r *runTime) createFlow(build *ast.AstBuild) *runFlow {
+func (r *runTime) createFlow(build *loader.AstBuild) *runFlow {
 	var hash string
 	if runTimeUnique {
 		hash = hashFunc(r.runtimeId + build.GetRawSign())
@@ -326,7 +326,7 @@ func (r *runTime) createFlow(build *ast.AstBuild) *runFlow {
 	return r.runFlow[hash]
 }
 
-func (r *runTime) initSubTest(test *ast.AstTestCase) int {
+func (r *runTime) initSubTest(test *loader.AstTestCase) int {
 	test.ParseArgs()
 	flow := r.createFlow(test.GetBuild())
 	cnt := 0
@@ -395,7 +395,7 @@ func filterAstArgs(args []string) []interface{} {
 	if args != nil {
 		for _, arg := range args {
 			//Parse all args and only pass the jvsAstOption to Ast
-			if a, _ := ast.GetJvsAstOption(arg); a != nil {
+			if a, _ := loader.GetJvsAstOption(arg); a != nil {
 				_args = append(_args, arg)
 			}
 		}
@@ -404,7 +404,7 @@ func filterAstArgs(args []string) []interface{} {
 }
 
 func run(name string, cfg map[interface{}]interface{}, sc chan os.Signal) error {
-	group := ast.NewAstGroup("Jarvis")
+	group := loader.NewAstGroup("Jarvis")
 	if err := group.Parse(cfg); err != nil {
 		return err
 	}

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
@@ -62,11 +62,11 @@ func (s *vcs) GetFileList(paths ...string) (string, error) {
 	return fileList, nil
 }
 
-func newVcs() ast.Simulator {
+func newVcs() loader.Simulator {
 	inst := new(vcs)
 	return inst
 }
 
 func init() {
-	ast.RegisterSimulator(newVcs())
+	loader.RegisterSimulator(newVcs())
 }

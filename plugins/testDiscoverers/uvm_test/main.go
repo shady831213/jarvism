@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
@@ -18,7 +18,7 @@ type uvmDiscoverer struct {
 
 func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	//AstParse test_dir
-	if err := ast.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *errors.JVSAstError {
+	if err := loader.CfgToAstItemOptional(cfg, "test_dir", func(item interface{}) *errors.JVSAstError {
 		testDir, err := filepath.Abs(os.ExpandEnv(item.(string)))
 		if err != nil {
 			return errors.JVSAstParseError(d.Name(), err.Error())
@@ -42,7 +42,7 @@ func (d *uvmDiscoverer) Parse(cfg map[interface{}]interface{}) *errors.JVSAstErr
 func (d *uvmDiscoverer) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("test_dir")
-	if !ast.CheckKeyWord(s, keywords) {
+	if !loader.CheckKeyWord(s, keywords) {
 		return false, keywords, "Error in " + d.Name() + ":"
 	}
 	return true, nil, ""
@@ -108,11 +108,11 @@ func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	return ok
 }
 
-func newUvmDiscoverer() ast.TestDiscoverer {
+func newUvmDiscoverer() loader.TestDiscoverer {
 	inst := new(uvmDiscoverer)
 	return inst
 }
 
 func init() {
-	ast.RegisterTestDiscoverer(newUvmDiscoverer)
+	loader.RegisterTestDiscoverer(newUvmDiscoverer)
 }

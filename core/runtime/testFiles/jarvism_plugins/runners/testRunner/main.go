@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"math/rand"
@@ -23,12 +23,12 @@ func (r *testRunner) KeywordsChecker(key string) (bool, *utils.StringMapSet, str
 	return true, nil, ""
 }
 
-func (r *testRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareBuild(build *loader.AstBuild, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmdRunner(nil, "echo", " ")
 }
 
-func (r *testRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
+func (r *testRunner) Build(build *loader.AstBuild, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	echoError := rand.Intn(100)
 	if echoError < 20 {
@@ -38,16 +38,16 @@ func (r *testRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors
 	}
 }
 
-func (r *testRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
+func (r *testRunner) PrepareTest(testCase *loader.AstTestCase, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmdRunner(nil, "echo", "")
 }
 
-func (r *testRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
+func (r *testRunner) RunTest(testCase *loader.AstTestCase, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
 	time.Sleep(time.Duration(rand.Int63n(100)) * time.Millisecond)
 	return cmdRunner(nil, "echo", "UVM_WARNING @abc : ", testCase.Name)
 }
 
 func init() {
-	ast.RegisterRunner(new(testRunner))
+	loader.RegisterRunner(new(testRunner))
 }

@@ -2,7 +2,7 @@ package runtime_test
 
 import (
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/runtime"
 	"math/rand"
 	"os"
@@ -20,7 +20,7 @@ func setup() {
 }
 
 func tearDonw() {
-	os.RemoveAll(path.Join(ast.GetWorkDir(), "JarvismLog"))
+	os.RemoveAll(path.Join(loader.GetWorkDir(), "JarvismLog"))
 	os.RemoveAll("/tmp/jarvism_plugins")
 }
 
@@ -101,11 +101,11 @@ func init() {
 	os.Setenv("JVS_PRJ_HOME", abs)
 	os.Setenv("JVS_PLUGINS_HOME", "/tmp/jarvism_plugins")
 	os.Symlink(path.Join(core.CorePath(), "runtime", "testFiles", "jarvism_plugins"), "/tmp/jarvism_plugins")
-	cfg, err := ast.Lex(path.Join(abs, "build.yaml"))
+	cfg, err := loader.Lex(path.Join(abs, "build.yaml"))
 	if err != nil {
 		panic(err)
 	}
-	err = ast.Parse(cfg)
+	err = loader.Parse(cfg)
 	if err != nil {
 		panic(err)
 	}

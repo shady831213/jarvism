@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"regexp"
 )
 
 type compileChecker struct {
-	ast.CheckerBase
+	loader.CheckerBase
 }
 
-func newCompileChecker() ast.Checker {
+func newCompileChecker() loader.Checker {
 	inst := new(compileChecker)
 	inst.Init("compileChecker")
 	//Errors
@@ -19,5 +19,5 @@ func newCompileChecker() ast.Checker {
 }
 
 func init() {
-	ast.RegisterChecker(newCompileChecker)
+	loader.RegisterChecker(newCompileChecker)
 }

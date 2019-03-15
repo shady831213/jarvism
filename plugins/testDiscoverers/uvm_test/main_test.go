@@ -3,23 +3,23 @@ package main_test
 import (
 	"fmt"
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"os"
 	"path"
 	"testing"
 )
 
 func TestUvmDiscoverer(t *testing.T) {
-	cfg, err := ast.Lex("testFiles/test_discover.yaml")
+	cfg, err := loader.Lex("testFiles/test_discover.yaml")
 	if err != nil {
 		t.Error(err)
 	}
-	err = ast.Parse(cfg)
+	err = loader.Parse(cfg)
 	if err != nil {
 		t.Error(err)
 	}
-	build1 := ast.GetJvsAstRoot().GetBuild("build1")
-	build2 := ast.GetJvsAstRoot().GetBuild("build2")
+	build1 := loader.GetJvsAstRoot().GetBuild("build1")
+	build2 := loader.GetJvsAstRoot().GetBuild("build2")
 	compare(t, "discoverer of build1 name", "uvm_test", build1.GetTestDiscoverer().Name())
 	compare(t, "testDir of build1 name", path.Join(core.GetPrjHome(), "build1_testcases"), build1.GetTestDiscoverer().TestDir())
 	compare(t, "testList of build1 name", fmt.Sprint([]string{"test2"}), fmt.Sprint(build1.GetTestDiscoverer().TestList()))

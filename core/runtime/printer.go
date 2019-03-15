@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"fmt"
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"log"
 	"os"
 	"path"
@@ -15,10 +15,10 @@ var runtimeLog *log.Logger
 const printerPadding = 100
 
 func setLog(logFileName string) (*os.File, error) {
-	if err := os.MkdirAll(path.Join(ast.GetWorkDir(), "JarvismLog"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(path.Join(loader.GetWorkDir(), "JarvismLog"), os.ModePerm); err != nil {
 		return nil, err
 	}
-	logFile, err := os.Create(path.Join(ast.GetWorkDir(), "JarvismLog", logFileName))
+	logFile, err := os.Create(path.Join(loader.GetWorkDir(), "JarvismLog", logFileName))
 	if err != nil {
 		return logFile, err
 	}

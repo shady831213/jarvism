@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
@@ -36,15 +36,15 @@ func (r *hostRunner) Name() string {
 }
 
 func (r *hostRunner) BuildsRoot() string {
-	return path.Join(ast.GetWorkDir(), "builds")
+	return path.Join(loader.GetWorkDir(), "builds")
 }
 
 func (r *hostRunner) TestsRoot() string {
-	return path.Join(ast.GetWorkDir(), "tests")
+	return path.Join(loader.GetWorkDir(), "tests")
 }
 
-func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName := ast.ParseBuildName(build.Name)
+func (r *hostRunner) PrepareBuild(build *loader.AstBuild, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
+	_, buildName := loader.ParseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create build dir
 	if err := os.MkdirAll(buildDir, os.ModePerm); err != nil {
@@ -56,7 +56,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 	hasFileList := filelistItem != nil && len(filelistItem) > 0
 	if hasFileList {
 		filelistItem = append(filelistItem, build.GetTestDiscoverer().TestDir())
-		fileListContent, err := ast.GetCurSimulator().GetFileList(filelistItem...)
+		fileListContent, err := loader.GetCurSimulator().GetFileList(filelistItem...)
 		if err != nil {
 			return errors.JVSRuntimeResultFail(err.Error())
 		}
@@ -70,7 +70,7 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 	if err := utils.WriteNewFile(path.Join(buildDir, "pre_compile.sh"), build.PreCompileAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), ast.GetCurSimulator().CompileCmd()+" "+build.CompileOption()+filelistCompileOption); err != nil {
+	if err := utils.WriteNewFile(path.Join(buildDir, "compile.sh"), loader.GetCurSimulator().CompileCmd()+" "+build.CompileOption()+filelistCompileOption); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(buildDir, "post_compile.sh"), build.PostCompileAction()); err != nil {
@@ -82,8 +82,8 @@ func (r *hostRunner) PrepareBuild(build *ast.AstBuild, cmdRunner ast.CmdRunner) 
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName := ast.ParseBuildName(build.Name)
+func (r *hostRunner) Build(build *loader.AstBuild, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
+	_, buildName := loader.ParseBuildName(build.Name)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create log file
 	logFile, err := os.Create(path.Join(buildDir, buildName+".log"))
@@ -91,7 +91,7 @@ func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors
 	if err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	attr := ast.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
+	attr := loader.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
 		SetAttr: func(cmd *exec.Cmd) error {
 			cmd.Dir = path.Join(r.BuildsRoot(), buildName)
 			return nil
@@ -100,8 +100,8 @@ func (r *hostRunner) Build(build *ast.AstBuild, cmdRunner ast.CmdRunner) *errors
 	return errors.NewJVSRuntimeResult(res.Status, res.GetMsg()+"\n", "path:"+buildDir)
 }
 
-func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName, testName, seed, groupsName := ast.ParseTestName(testCase.Name)
+func (r *hostRunner) PrepareTest(testCase *loader.AstTestCase, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
+	_, buildName, testName, seed, groupsName := loader.ParseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	buildDir := path.Join(r.BuildsRoot(), buildName)
 	//create test dir
@@ -116,7 +116,7 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRun
 	if err := utils.WriteNewFile(path.Join(testDir, "pre_sim.sh"), testCase.PreSimAction()); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, ast.GetCurSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.GetBuild().GetTestDiscoverer().TestCmd()+testName); err != nil {
+	if err := utils.WriteNewFile(path.Join(testDir, "sim.sh"), path.Join(buildName, loader.GetCurSimulator().SimCmd())+" "+testCase.SimOption()+" "+testCase.GetBuild().GetTestDiscoverer().TestCmd()+testName); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	if err := utils.WriteNewFile(path.Join(testDir, "post_sim.sh"), testCase.PostSimAction()); err != nil {
@@ -128,8 +128,8 @@ func (r *hostRunner) PrepareTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRun
 	return errors.JVSRuntimeResultPass("")
 }
 
-func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner) *errors.JVSRuntimeResult {
-	_, buildName, testName, seed, groupsName := ast.ParseTestName(testCase.Name)
+func (r *hostRunner) RunTest(testCase *loader.AstTestCase, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {
+	_, buildName, testName, seed, groupsName := loader.ParseTestName(testCase.Name)
 	testDir := path.Join(r.TestsRoot(), path.Join(groupsName...), buildName+"__"+testName, seed)
 	//create log file
 	logFile, err := os.Create(path.Join(testDir, buildName+"__"+testName+"__"+seed+".log"))
@@ -137,7 +137,7 @@ func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner)
 	if err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
-	attr := ast.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
+	attr := loader.CmdAttr{WriteClosers: []io.WriteCloser{logFile},
 		SetAttr: func(cmd *exec.Cmd) error {
 			cmd.Dir = testDir
 			return nil
@@ -147,5 +147,5 @@ func (r *hostRunner) RunTest(testCase *ast.AstTestCase, cmdRunner ast.CmdRunner)
 }
 
 func init() {
-	ast.RegisterRunner(newHostRunner())
+	loader.RegisterRunner(newHostRunner())
 }

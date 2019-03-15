@@ -1,14 +1,14 @@
 package runtime
 
 import (
-	"github.com/shady831213/jarvism/core/ast"
+	"github.com/shady831213/jarvism/core/loader"
 	"strconv"
 	"strings"
 	"testing"
 )
 
 func setUp(name string, cfg map[interface{}]interface{}) (*runTime, error) {
-	group := ast.NewAstGroup("Jarvis")
+	group := loader.NewAstGroup("Jarvis")
 	if err := group.Parse(cfg); err != nil {
 		return nil, err
 	}
@@ -18,7 +18,7 @@ func setUp(name string, cfg map[interface{}]interface{}) (*runTime, error) {
 	return newRunTime(name, group), nil
 }
 
-func setUpGroup(group *ast.AstGroup, args []string) (*runTime, error) {
+func setUpGroup(group *loader.AstGroup, args []string) (*runTime, error) {
 	return setUp(group.Name, map[interface{}]interface{}{"args": filterAstArgs(args), "groups": []interface{}{group.Name}})
 }
 
@@ -34,7 +34,7 @@ func setUpOnlyBuild(buildName string, args []string) (*runTime, error) {
 }
 
 func TestGroupSetup(t *testing.T) {
-	r, err := setUpGroup(ast.GetJvsAstRoot().GetGroup("group1"), []string{"-max_job 5"})
+	r, err := setUpGroup(loader.GetJvsAstRoot().GetGroup("group1"), []string{"-max_job 5"})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -49,7 +49,7 @@ func TestGroupSetup(t *testing.T) {
 	}
 	runTimeFinish()
 
-	r, err = setUpGroup(ast.GetJvsAstRoot().GetGroup("group2"), []string{"-sim_only"})
+	r, err = setUpGroup(loader.GetJvsAstRoot().GetGroup("group2"), []string{"-sim_only"})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -64,7 +64,7 @@ func TestGroupSetup(t *testing.T) {
 	}
 	runTimeFinish()
 
-	r, err = setUpGroup(ast.GetJvsAstRoot().GetGroup("group3"), []string{})
+	r, err = setUpGroup(loader.GetJvsAstRoot().GetGroup("group3"), []string{})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
