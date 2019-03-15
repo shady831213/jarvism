@@ -12,8 +12,7 @@ import (
 )
 
 type Checker interface {
-	astParser
-	Name() string
+	pluginOpts
 	Check() *errors.JVSRuntimeResult
 	Input(reader io.Reader)
 }

@@ -24,6 +24,25 @@ const (
 	JVSCheckerPlugin        = "checker"
 )
 
+type pluginOpts interface {
+	astParser
+	Name() string
+}
+
+func getPlugin(pluginType JVSPluginType, key string) pluginOpts {
+	switch pluginType {
+	//case JVSRunnerPlugin:
+	//	return GetRunner()
+	//case JVSSimulatorPlugin:
+	//	return GetSimulator()
+	case JVSTestDiscovererPlugin:
+		return GetTestDiscoverer(key)
+	case JVSCheckerPlugin:
+		return GetChecker(key)
+	}
+	return nil
+}
+
 var pluginFileCache map[JVSPluginType]map[string]interface{}
 var gotool string
 

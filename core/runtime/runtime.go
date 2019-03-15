@@ -166,7 +166,7 @@ func (f *runFlow) checkPhase(checker ast.Checker) (*io.PipeWriter, func(), chan 
 		defer close(done)
 		select {
 		case <-f.ctx.Done():
-			return
+			done <- errors.JVSRuntimeResultUnknown("context canceled!")
 		case done <- checker.Check():
 			return
 		}

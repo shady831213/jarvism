@@ -1,8 +1,7 @@
 package ast
 
 type TestDiscoverer interface {
-	astParser
-	Name() string
+	pluginOpts
 	TestDir() string
 	TestCmd() string
 	TestList() []string
