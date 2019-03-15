@@ -13,6 +13,10 @@ import (
 type vcs struct {
 }
 
+func newVcs() loader.Plugin  {
+	return new(vcs)
+}
+
 func (s *vcs) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	return nil
 }
@@ -62,11 +66,7 @@ func (s *vcs) GetFileList(paths ...string) (string, error) {
 	return fileList, nil
 }
 
-func newVcs() loader.Simulator {
-	inst := new(vcs)
-	return inst
-}
 
 func init() {
-	loader.RegisterSimulator(newVcs())
+	loader.RegisterSimulator(newVcs)
 }

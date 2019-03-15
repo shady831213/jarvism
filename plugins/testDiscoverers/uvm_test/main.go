@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"path"
@@ -108,7 +108,7 @@ func (d *uvmDiscoverer) IsValidTest(test string) bool {
 	return ok
 }
 
-func newUvmDiscoverer() loader.TestDiscoverer {
+func newUvmDiscoverer() loader.Plugin {
 	inst := new(uvmDiscoverer)
 	return inst
 }

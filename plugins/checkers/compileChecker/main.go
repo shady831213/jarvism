@@ -10,7 +10,7 @@ type compileChecker struct {
 	loader.CheckerBase
 }
 
-func newCompileChecker() loader.Checker {
+func newCompileChecker() loader.Plugin {
 	inst := new(compileChecker)
 	inst.Init("compileChecker")
 	//Errors

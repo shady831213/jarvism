@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
 	"os"
@@ -18,7 +18,7 @@ func bashExitGlue() string {
 type hostRunner struct {
 }
 
-func newHostRunner() *hostRunner {
+func newHostRunner() loader.Plugin {
 	inst := new(hostRunner)
 	return inst
 }
@@ -147,5 +147,5 @@ func (r *hostRunner) RunTest(testCase *loader.AstTestCase, cmdRunner loader.CmdR
 }
 
 func init() {
-	loader.RegisterRunner(newHostRunner())
+	loader.RegisterRunner(newHostRunner)
 }

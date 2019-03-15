@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"regexp"
 )
 
@@ -10,7 +10,7 @@ type testChecker struct {
 	loader.CheckerBase
 }
 
-func newTestChecker() loader.Checker {
+func newTestChecker() loader.Plugin {
 	inst := new(testChecker)
 	inst.Init("testChecker")
 

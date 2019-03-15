@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
 	"math/rand"
 	"time"
@@ -11,6 +11,9 @@ import (
 type testRunner struct {
 }
 
+func newTestRunner() loader.Plugin {
+	return new(testRunner)
+}
 func (r *testRunner) Name() string {
 	return "testRunner"
 }
@@ -49,5 +52,5 @@ func (r *testRunner) RunTest(testCase *loader.AstTestCase, cmdRunner loader.CmdR
 }
 
 func init() {
-	loader.RegisterRunner(new(testRunner))
+	loader.RegisterRunner(newTestRunner)
 }
