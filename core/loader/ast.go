@@ -38,7 +38,7 @@ func astHierFmt(title string, space int, handler func() string) string {
 func AstParse(parser astParser, cfg interface{}) *errors.JVSAstError {
 	v, ok := cfg.(map[interface{}]interface{})
 	if !ok {
-		return errors.JVSAstParseError("", fmt.Sprintf("expect a map of map but get %T!", cfg))
+		return errors.JVSAstParseError("", fmt.Sprintf("expect a map but get %T!", cfg))
 	}
 	for name := range v {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
@@ -60,19 +60,14 @@ func AstParseMaybeNil(parser astParser, cfg interface{}) *errors.JVSAstError {
 
 func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) *errors.JVSAstError) *errors.JVSAstError {
 	if item, ok := cfg[key]; ok {
-		if err := handler(item); err != nil {
-			return errors.JVSAstParseError(key, err.Msg)
-		}
-		return nil
+		return handler(item)
 	}
 	return errors.JVSAstParseError("", "not define "+key+"!")
 }
 
 func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) *errors.JVSAstError) *errors.JVSAstError {
 	if item, ok := cfg[key]; ok {
-		if err := handler(item); err != nil {
-			return errors.JVSAstParseError(key, err.Msg)
-		}
+		return handler(item)
 	}
 	return nil
 }
@@ -1072,6 +1067,9 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	})); err != nil {
+		if err.Item == "" {
+			return errors.JVSAstParseError("tests of group "+t.Name, err.Msg)
+		}
 		return errors.JVSAstParseError(err.Item+"of group "+t.Name, err.Msg)
 	}
 
@@ -1086,7 +1084,10 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	})); err != nil {
-		return errors.JVSAstParseError("group "+t.Name, err.Msg)
+		if err.Item == "" {
+			return errors.JVSAstParseError("groups of group "+t.Name, err.Msg)
+		}
+		return errors.JVSAstParseError(err.Item+"of group "+t.Name, err.Msg)
 	}
 	return nil
 }
@@ -1225,6 +1226,9 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	})); err != nil {
+		if err.Item == "" {
+			err.Item = "builds"
+		}
 		return err
 	}
 	//parsing options
@@ -1243,6 +1247,9 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	})); err != nil {
+		if err.Item == "" {
+			err.Item = "options"
+		}
 		return err
 	}
 
@@ -1262,6 +1269,9 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 		return nil
 	})); err != nil {
+		if err.Item == "" {
+			err.Item = "groups"
+		}
 		return err
 	}
 	return nil
