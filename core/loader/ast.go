@@ -284,7 +284,22 @@ func (t *astPlugin) GetHierString(space int) string {
 	})
 }
 
-func astParsPlugin(key string, pluginType JVSPluginType, defaultName string, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
+func astParsPluginWithDefault(key string, pluginType JVSPluginType, defaultName string, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
+	plugin, err := astParsPlugin(key, pluginType, cfg)
+	if err != nil {
+		return nil, err
+	}
+	//use default
+	if plugin == nil {
+		plugin, err = astParsPlugin(key, pluginType, map[interface{}]interface{}{key: map[interface{}]interface{}{"type": defaultName}})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return plugin, nil
+}
+
+func astParsPlugin(key string, pluginType JVSPluginType, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
 	var plugin *astPlugin
 	if err := CfgToAstItemOptional(cfg, key, func(item interface{}) *errors.JVSAstError {
 		plugin = new(astPlugin)
@@ -296,14 +311,6 @@ func astParsPlugin(key string, pluginType JVSPluginType, defaultName string, cfg
 		return AstParse(plugin, v)
 	}); err != nil {
 		return nil, errors.JVSAstParseError(err.Item, err.Msg)
-	}
-	//use default
-	if plugin == nil {
-		plugin = new(astPlugin)
-		plugin.init(pluginType)
-		if err := AstParse(plugin, map[interface{}]interface{}{"type": defaultName}); err != nil {
-			return nil, errors.JVSAstParseError(err.Item, err.Msg)
-		}
 	}
 	return plugin, nil
 }
@@ -502,24 +509,44 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 }
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	simulator, err := astParsPlugin("test_discoverer", JVSSimulatorPlugin, "vcs", cfg)
+	simulator, err := astParsPlugin("simulator", JVSSimulatorPlugin, cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
+	if t.simulator != nil && simulator != nil && simulator.plugin.Name() != t.simulator.plugin.Name() {
+		return errors.JVSAstParseError("env", "simulator conflict["+t.simulator.plugin.Name()+","+simulator.plugin.Name()+"]! simulator must be unique!")
+	}
 	t.simulator = simulator
 
-	runner, err := astParsPlugin("runner", JVSRunnerPlugin, "host", cfg)
+	runner, err := astParsPlugin("runner", JVSRunnerPlugin, cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
+	}
+	if t.runner != nil && runner != nil && runner.plugin.Name() != t.runner.plugin.Name() {
+		return errors.JVSAstParseError("env", "runner conflict["+t.runner.plugin.Name()+","+runner.plugin.Name()+"]! runner must be unique!")
 	}
 	t.runner = runner
 	return nil
 }
 
 func (t *astEnv) Link() *errors.JVSAstError {
-	//link default option
+	//link default
+	if t.simulator == nil {
+		simulator, err := astParsPlugin("simulator", JVSSimulatorPlugin, map[interface{}]interface{}{"simulator": map[interface{}]interface{}{"type": "vcs"}})
+		if err != nil {
+			return err
+		}
+		t.simulator = simulator
+	}
 	if err := LoadBuildInOptions(GetCurSimulator().BuildInOptionFile()); err != nil {
 		return errors.JVSAstLexError("simulator "+GetCurSimulator().Name(), "Error in loading "+GetCurSimulator().BuildInOptionFile()+":"+err.Error())
+	}
+	if t.runner == nil {
+		runner, err := astParsPlugin("runner", JVSRunnerPlugin, map[interface{}]interface{}{"runner": map[interface{}]interface{}{"type": "host"}})
+		if err != nil {
+			return err
+		}
+		t.runner = runner
 	}
 	return nil
 }
@@ -606,19 +633,19 @@ func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 }
 
 func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	testDiscover, err := astParsPlugin("test_discoverer", JVSTestDiscovererPlugin, "uvm_test", cfg)
+	testDiscover, err := astParsPluginWithDefault("test_discoverer", JVSTestDiscovererPlugin, "uvm_test", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
 	t.testDiscoverer = testDiscover
 
-	testChecker, err := astParsPlugin("test_checker", JVSCheckerPlugin, "testChecker", cfg)
+	testChecker, err := astParsPluginWithDefault("test_checker", JVSCheckerPlugin, "testChecker", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
 	t.testChecker = testChecker
 
-	compileChecker, err := astParsPlugin("compile_checker", JVSCheckerPlugin, "compileChecker", cfg)
+	compileChecker, err := astParsPluginWithDefault("compile_checker", JVSCheckerPlugin, "compileChecker", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
@@ -1156,10 +1183,17 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	//parsing builds
 	if err := CfgToAstItemOptional(cfg, "builds", func(item interface{}) *errors.JVSAstError {
-		for name, build := range item.(map[interface{}]interface{}) {
+		buildsCfg, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("builds", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		for name, buildCfg := range buildsCfg {
+			if build, ok := t.Builds[name.(string)]; ok {
+				return errors.JVSAstParseError("builds", "build conflict["+build.Name+","+name.(string)+"]! build name must be unique!")
+			}
 			t.Builds[name.(string)] = newAstBuild(name.(string))
-			if build != nil {
-				if err := AstParse(t.Builds[name.(string)], build.(map[interface{}]interface{})); err != nil {
+			if buildCfg != nil {
+				if err := AstParse(t.Builds[name.(string)], buildCfg.(map[interface{}]interface{})); err != nil {
 					return err
 				}
 			} else {
@@ -1174,9 +1208,16 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 	//parsing options
 	if err := CfgToAstItemOptional(cfg, "options", func(item interface{}) *errors.JVSAstError {
-		for name, option := range item.(map[interface{}]interface{}) {
+		optionsCfg, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("options", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		for name, optionCfg := range optionsCfg {
+			if option, ok := t.Options[name.(string)]; ok {
+				return errors.JVSAstParseError("options", "option conflict["+option.Name+","+name.(string)+"]! option name must be unique!")
+			}
 			t.Options[name.(string)] = newAstOption(name.(string))
-			if err := AstParse(t.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(t.Options[name.(string)], optionCfg.(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
@@ -1187,9 +1228,16 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 	//parsing groups
 	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *errors.JVSAstError {
-		for name, group := range item.(map[interface{}]interface{}) {
+		groupsCfg, ok := item.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("groups", fmt.Sprintf("expect a map of map but get %T!", item))
+		}
+		for name, groupCfg := range groupsCfg {
+			if group, ok := t.Groups[name.(string)]; ok {
+				return errors.JVSAstParseError("groups", "group conflict["+group.Name+","+name.(string)+"]! group name must be unique!")
+			}
 			t.Groups[name.(string)] = NewAstGroup(name.(string))
-			if err := AstParse(t.Groups[name.(string)], group.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(t.Groups[name.(string)], groupCfg.(map[interface{}]interface{})); err != nil {
 				return err
 			}
 		}
