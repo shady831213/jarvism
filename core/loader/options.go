@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/shady831213/jarvism/core"
-	jvsEorros "github.com/shady831213/jarvism/core/errors"
+	jvsErrors "github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/options"
 	"math"
 	"math/rand"
@@ -64,15 +64,21 @@ func LoadBuildInOptions(configFile string) error {
 	if err != nil {
 		panic(err)
 	}
-	if err := CfgToAstItemRequired(cfg, "options", func(item interface{}) *jvsEorros.JVSAstError {
-		for name, option := range item.(map[interface{}]interface{}) {
+	if err := CfgToAstItemRequired(cfg, "options", WithCheckMap(func(item map[interface{}]interface{}) *jvsErrors.JVSAstError {
+		for name, optionCfg := range item {
+			if option, ok := jvsAstRoot.Options[name.(string)]; ok {
+				return jvsErrors.JVSAstParseError("options", "option conflict["+option.Name+","+name.(string)+"]! option name must be unique!")
+			}
 			jvsAstRoot.Options[name.(string)] = newAstOption(name.(string))
-			if err := AstParse(jvsAstRoot.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
+			if err := AstParse(jvsAstRoot.Options[name.(string)], optionCfg); err != nil {
+				if err.Item == "" {
+					err.Item = name.(string)
+				}
 				return err
 			}
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return err
 	}
 	return nil

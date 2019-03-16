@@ -1,7 +1,6 @@
 package loader
 
 import (
-	"flag"
 	"fmt"
 	"github.com/fatih/set"
 	"github.com/shady831213/jarvism/core/errors"
@@ -36,31 +35,66 @@ func astHierFmt(title string, space int, handler func() string) string {
 		"\n"
 }
 
-func AstParse(parser astParser, cfg map[interface{}]interface{}) *errors.JVSAstError {
-	for name := range cfg {
+func AstParse(parser astParser, cfg interface{}) *errors.JVSAstError {
+	v, ok := cfg.(map[interface{}]interface{})
+	if !ok {
+		return errors.JVSAstParseError("", fmt.Sprintf("expect a map of map but get %T!", cfg))
+	}
+	for name := range v {
 		if ok, keywords, tag := parser.KeywordsChecker(name.(string)); !ok {
 			return errors.JVSAstParseError("", tag+"syntax error of \""+name.(string)+"\"! expect "+fmt.Sprint(keywords.Keys()))
 		}
 	}
-	if err := parser.Parse(cfg); err != nil {
+	if err := parser.Parse(v); err != nil {
 		return err
 	}
 	return nil
 }
 
+func AstParseMaybeNil(parser astParser, cfg interface{}) *errors.JVSAstError {
+	if cfg == nil {
+		return AstParse(parser, make(map[interface{}]interface{}))
+	}
+	return AstParse(parser, cfg)
+}
+
 func CfgToAstItemRequired(cfg map[interface{}]interface{}, key string, handler func(interface{}) *errors.JVSAstError) *errors.JVSAstError {
 	if item, ok := cfg[key]; ok {
-		flag.Args()
-		return handler(item)
+		if err := handler(item); err != nil {
+			return errors.JVSAstParseError(key, err.Msg)
+		}
+		return nil
 	}
 	return errors.JVSAstParseError("", "not define "+key+"!")
 }
 
 func CfgToAstItemOptional(cfg map[interface{}]interface{}, key string, handler func(interface{}) *errors.JVSAstError) *errors.JVSAstError {
 	if item, ok := cfg[key]; ok {
-		return handler(item)
+		if err := handler(item); err != nil {
+			return errors.JVSAstParseError(key, err.Msg)
+		}
 	}
 	return nil
+}
+
+func WithCheckMap(handler func(map[interface{}]interface{}) *errors.JVSAstError) func(interface{}) *errors.JVSAstError {
+	return func(cfg interface{}) *errors.JVSAstError {
+		v, ok := cfg.(map[interface{}]interface{})
+		if !ok {
+			return errors.JVSAstParseError("", fmt.Sprintf("expect a map but get %T!", cfg))
+		}
+		return handler(v)
+	}
+}
+
+func WithCheckList(handler func([]interface{}) *errors.JVSAstError) func(interface{}) *errors.JVSAstError {
+	return func(cfg interface{}) *errors.JVSAstError {
+		v, ok := cfg.([]interface{})
+		if !ok {
+			return errors.JVSAstParseError("", fmt.Sprintf("expect a list but get %T!", cfg))
+		}
+		return handler(v)
+	}
 }
 
 func astLoadPlugin(pluginType JVSPluginType, pluginName string) *errors.JVSAstError {
@@ -304,11 +338,13 @@ func astParsPlugin(key string, pluginType JVSPluginType, cfg map[interface{}]int
 	if err := CfgToAstItemOptional(cfg, key, func(item interface{}) *errors.JVSAstError {
 		plugin = new(astPlugin)
 		plugin.init(pluginType)
-		v, ok := item.(map[interface{}]interface{})
-		if !ok {
-			return errors.JVSAstParseError(key, fmt.Sprintf("expect a map of map but get %T!", item))
+		if err := AstParse(plugin, item); err != nil {
+			if err.Item == "" {
+				err.Item = key
+			}
+			return err
 		}
-		return AstParse(plugin, v)
+		return nil
 	}); err != nil {
 		return nil, errors.JVSAstParseError(err.Item, err.Msg)
 	}
@@ -777,19 +813,15 @@ func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.buildName = v
 		return nil
 	}); err != nil {
-		return errors.JVSAstParseError(t.Name, err.Msg)
+		return errors.JVSAstParseError("build of "+t.Name, err.Msg)
 	}
-	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) *errors.JVSAstError {
-		v, ok := item.([]interface{})
-		if !ok {
-			return errors.JVSAstParseError("args in test or group", fmt.Sprintf("expect a list of string but get %T!", item))
-		}
-		for _, arg := range v {
+	if err := CfgToAstItemOptional(cfg, "args", WithCheckList(func(item []interface{}) *errors.JVSAstError {
+		for _, arg := range item {
 			t.args = append(t.args, strings.Split(arg.(string), ",")...)
 		}
 		return nil
-	}); err != nil {
-		return errors.JVSAstParseError(t.Name, err.Msg)
+	})); err != nil {
+		return errors.JVSAstParseError("args of "+t.Name, err.Msg)
 	}
 	return nil
 }
@@ -1023,52 +1055,37 @@ func (t *AstGroup) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 
 	//AstParse tests
-	if err := CfgToAstItemOptional(cfg, "tests", func(item interface{}) *errors.JVSAstError {
+	if err := CfgToAstItemOptional(cfg, "tests", WithCheckList(func(item []interface{}) *errors.JVSAstError {
 		t.Tests = make([]*AstTestCase, 0)
-		tests, ok := item.([]interface{})
-		if !ok {
-			return errors.JVSAstParseError("tests", fmt.Sprintf("tests must be a list of maps! but it is %T", item))
-		}
-		for _, test := range tests {
+		for _, test := range item {
 			_test, ok := test.(map[interface{}]interface{})
 			if !ok || len(_test) > 1 {
 				return errors.JVSAstParseError("tests", fmt.Sprintf("tests must be a list of maps! but it is %T", item))
 			}
 			for name, attr := range _test {
 				testCase := newAstTestCase(name.(string))
-				if v, ok := attr.(map[interface{}]interface{}); ok {
-					if err := AstParse(testCase, v); err != nil {
-						return err
-					}
-					t.Tests = append(t.Tests, testCase)
-					break
-				}
-				if err := AstParse(testCase, make(map[interface{}]interface{})); err != nil {
+				if err := AstParseMaybeNil(testCase, attr); err != nil {
 					return err
 				}
 				t.Tests = append(t.Tests, testCase)
 			}
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return errors.JVSAstParseError(err.Item+"of group "+t.Name, err.Msg)
 	}
 
 	//AstParse groups
-	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *errors.JVSAstError {
-		groups, ok := item.([]interface{})
-		if !ok {
-			return errors.JVSAstParseError("groups", fmt.Sprintf("groups must be a list of string! but it is %T", item))
-		}
+	if err := CfgToAstItemOptional(cfg, "groups", WithCheckList(func(item []interface{}) *errors.JVSAstError {
 		t.Groups = make(map[string]*AstGroup)
-		for _, name := range groups {
+		for _, name := range item {
 			if _, ok := t.Groups[name.(string)]; ok {
 				return errors.JVSAstParseError("group "+t.Name, "sub group "+name.(string)+" is redefined in group "+t.Name+"!")
 			}
 			t.Groups[name.(string)] = nil
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return errors.JVSAstParseError("group "+t.Name, err.Msg)
 	}
 	return nil
@@ -1193,75 +1210,58 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}
 
 	//parsing builds
-	if err := CfgToAstItemOptional(cfg, "builds", func(item interface{}) *errors.JVSAstError {
-		buildsCfg, ok := item.(map[interface{}]interface{})
-		if !ok {
-			return errors.JVSAstParseError("builds", fmt.Sprintf("expect a map of map but get %T!", item))
-		}
-		for name, buildCfg := range buildsCfg {
+	if err := CfgToAstItemOptional(cfg, "builds", WithCheckMap(func(item map[interface{}]interface{}) *errors.JVSAstError {
+		for name, buildCfg := range item {
 			if build, ok := t.Builds[name.(string)]; ok {
 				return errors.JVSAstParseError("builds", "build conflict["+build.Name+","+name.(string)+"]! build name must be unique!")
 			}
 			t.Builds[name.(string)] = newAstBuild(name.(string))
-			if buildCfg != nil {
-				if err := AstParse(t.Builds[name.(string)], buildCfg.(map[interface{}]interface{})); err != nil {
-					return err
+			if err := AstParseMaybeNil(t.Builds[name.(string)], buildCfg); err != nil {
+				if err.Item == "" {
+					err.Item = name.(string)
 				}
-			} else {
-				if err := AstParse(t.Builds[name.(string)], make(map[interface{}]interface{})); err != nil {
-					return err
-				}
+				return err
 			}
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return err
 	}
 	//parsing options
-	if err := CfgToAstItemOptional(cfg, "options", func(item interface{}) *errors.JVSAstError {
-		optionsCfg, ok := item.(map[interface{}]interface{})
-		if !ok {
-			return errors.JVSAstParseError("options", fmt.Sprintf("expect a map of map but get %T!", item))
-		}
-		for name, optionCfg := range optionsCfg {
+	if err := CfgToAstItemOptional(cfg, "options", WithCheckMap(func(item map[interface{}]interface{}) *errors.JVSAstError {
+		for name, optionCfg := range item {
 			if option, ok := t.Options[name.(string)]; ok {
 				return errors.JVSAstParseError("options", "option conflict["+option.Name+","+name.(string)+"]! option name must be unique!")
 			}
 			t.Options[name.(string)] = newAstOption(name.(string))
-			v, ok := optionCfg.(map[interface{}]interface{})
-			if !ok {
-				return errors.JVSAstParseError("option "+name.(string), fmt.Sprintf("expect a map of map but get %T!", optionCfg))
-			}
-			if err := AstParse(t.Options[name.(string)], v); err != nil {
+			if err := AstParse(t.Options[name.(string)], optionCfg); err != nil {
+				if err.Item == "" {
+					err.Item = name.(string)
+				}
 				return err
 			}
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return err
 	}
 
 	//parsing groups
-	if err := CfgToAstItemOptional(cfg, "groups", func(item interface{}) *errors.JVSAstError {
-		groupsCfg, ok := item.(map[interface{}]interface{})
-		if !ok {
-			return errors.JVSAstParseError("groups", fmt.Sprintf("expect a map of map but get %T!", item))
-		}
-		for name, groupCfg := range groupsCfg {
+	if err := CfgToAstItemOptional(cfg, "groups", WithCheckMap(func(item map[interface{}]interface{}) *errors.JVSAstError {
+		for name, groupCfg := range item {
 			if group, ok := t.Groups[name.(string)]; ok {
 				return errors.JVSAstParseError("groups", "group conflict["+group.Name+","+name.(string)+"]! group name must be unique!")
 			}
 			t.Groups[name.(string)] = NewAstGroup(name.(string))
-			v, ok := groupCfg.(map[interface{}]interface{})
-			if !ok {
-				return errors.JVSAstParseError("group "+name.(string), fmt.Sprintf("expect a map of map but get %T!", groupCfg))
-			}
-			if err := AstParse(t.Groups[name.(string)], v); err != nil {
+			if err := AstParse(t.Groups[name.(string)], groupCfg); err != nil {
+				if err.Item == "" {
+					err.Item = name.(string)
+				}
 				return err
 			}
 		}
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return err
 	}
 	return nil
