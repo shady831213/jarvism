@@ -739,6 +739,7 @@ type astTest struct {
 	optionArgs *utils.StringMapSet
 	args       []string
 	parent     astTestOpts
+	file       string
 }
 
 func (t *astTest) init(name string) {
@@ -800,6 +801,7 @@ func (t *astTest) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 }
 
 func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+	t.file = curLexFile
 	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) *errors.JVSAstError {
 		v, ok := item.(string)
 		if !ok {
@@ -828,7 +830,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 	if t.buildName != "" {
 		build := jvsAstRoot.GetBuild(t.buildName)
 		if build == nil {
-			return errors.JVSAstLinkError(t.Name, "build "+t.buildName+" of "+t.Name+"is undef!")
+			return errors.JVSAstLinkError(t.Name+"("+t.file+")", "build "+t.buildName+" of "+t.Name+"is undef!")
 		}
 		t.build = build
 	}
@@ -836,7 +838,7 @@ func (t *astTest) Link() *errors.JVSAstError {
 		//Options have been all parsed
 		opt, err := GetJvsAstOption(arg)
 		if err != nil {
-			return errors.JVSAstLinkError("args of "+t.Name, err.Error())
+			return errors.JVSAstLinkError("args of "+t.Name+"("+t.file+")", err.Error())
 		}
 		t.optionArgs.Add(opt.GetName(), opt.Clone())
 
@@ -942,7 +944,7 @@ func (t *AstTestCase) Link() *errors.JVSAstError {
 	}
 	//set build and check test
 	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
-		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.GetBuild().Name+"\n"+
+		return errors.JVSAstLinkError(t.Name+"("+t.file+")", t.Name+" is not valid test of build"+t.GetBuild().Name+"\n"+
 			"valid tests:\n"+strings.Join(t.GetBuild().GetTestDiscoverer().TestList(), "\n"))
 	}
 
@@ -1102,7 +1104,7 @@ func (t *AstGroup) Link() *errors.JVSAstError {
 		group := jvsAstRoot.GetGroup(name)
 		if !group.linked {
 			if group == nil {
-				return errors.JVSAstLinkError("group "+t.Name, "sub group "+name+"of group "+t.Name+" is undef!")
+				return errors.JVSAstLinkError("group "+t.Name+"("+t.file+")", "sub group "+name+"of group "+t.Name+" is undef!")
 			}
 			if err := group.Link(); err != nil {
 				return err
@@ -1115,7 +1117,7 @@ func (t *AstGroup) Link() *errors.JVSAstError {
 	if t.parent != nil {
 		for g := t.parent.(*AstGroup); g.parent != nil; g = g.parent.(*AstGroup) {
 			if g.Name == t.Name {
-				return errors.JVSAstLinkError("group "+t.Name, "Loop include: group "+t.Name+" and group "+g.Name)
+				return errors.JVSAstLinkError("group "+t.Name+"("+t.file+")", "Loop include: group "+t.Name+" and group "+g.Name)
 			}
 		}
 	}
@@ -1352,4 +1354,18 @@ var jvsAstRoot = newAstRoot()
 
 func GetJvsAstRoot() *astRoot {
 	return jvsAstRoot
+}
+
+func Parse(cfg map[interface{}]interface{}) error {
+	if err := AstParse(jvsAstRoot, cfg); err != nil {
+		return errors.JVSAstParseError(err.Item+"("+curLexFile+")", err.Msg)
+	}
+	return nil
+}
+
+func Link() error {
+	if err := jvsAstRoot.Link(); err != nil {
+		return err
+	}
+	return nil
 }
