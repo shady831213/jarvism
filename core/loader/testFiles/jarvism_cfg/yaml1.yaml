@@ -1,0 +1,45 @@
+env:
+  simulator:
+    type:
+      "vcs"
+
+common_compile_option: &common_compile >-
+  -sverilog
+  -ntb_opts uvm-1.2
+
+common_sim_option: &common_sim >-
+  +UVM_VERBOSITY=UVM_LOW
+  +UVM_CONFIG_DB_TRACE
+
+builds:
+  build1:
+    compile_option:
+      - *common_compile
+      - -timescale=1ns/10ps
+    pre_sim_action:
+      - echo "pre_sim_build1"
+    sim_option:
+      - *common_sim
+    post_sim_action:
+      - echo "post_sim_build1"
+
+options:
+  vh:
+    on_action:
+      sim_option:
+        - +UVM_VERBOSITY=UVM_FULL
+    with_value_action:
+      sim_option:
+        - +UVM_VERBOSITY=$vh
+
+groups:
+  group3:
+    build: build2
+    args:
+      - -vh
+      - -repeat 20
+    tests:
+      - test1:
+    groups:
+      - group2
+      - group1

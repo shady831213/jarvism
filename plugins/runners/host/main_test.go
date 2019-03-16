@@ -16,21 +16,14 @@ var keepResult bool
 func tearDown() {
 	if !keepResult {
 		os.RemoveAll(core.GetWorkDir())
+		os.MkdirAll(core.GetWorkDir(), os.ModePerm)
 	}
 }
 
 func TestHostRunnerBuildFail(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := loader.Lex("testFiles/runner_compile_fail.yaml")
-		if err != nil {
-			t.Error(err)
-		}
-		err = loader.Parse(cfg)
-		if err != nil {
-			t.Error(err)
-		}
-		if err := runtime.RunOnlyBuild("build1", nil, nil); err != nil {
+		if err := runtime.RunOnlyBuild("build2", nil, nil); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
@@ -44,14 +37,6 @@ func TestHostRunnerBuildFail(t *testing.T) {
 func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := loader.Lex("testFiles/runner.yaml")
-		if err != nil {
-			t.Error(err)
-		}
-		err = loader.Parse(cfg)
-		if err != nil {
-			t.Error(err)
-		}
 		if err := runtime.RunOnlyBuild("build1", nil, nil); err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -81,14 +66,6 @@ func TestHostRunnerBuildOnlyAndSimOnly(t *testing.T) {
 func TestHostRunnerSim(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := loader.Lex("testFiles/runner.yaml")
-		if err != nil {
-			t.Error(err)
-		}
-		err = loader.Parse(cfg)
-		if err != nil {
-			t.Error(err)
-		}
 		//repeat test
 		if err := runtime.RunTest("test1", "build1", []string{"-repeat 10"}, nil); err != nil {
 			t.Error(err)
@@ -123,14 +100,6 @@ func TestHostRunnerSim(t *testing.T) {
 func TestHostRunnerGroupSim(t *testing.T) {
 	if vcs := os.Getenv("VCS_HOME"); vcs != "" {
 		defer tearDown()
-		cfg, err := loader.Lex("testFiles/runner.yaml")
-		if err != nil {
-			t.Error(err)
-		}
-		err = loader.Parse(cfg)
-		if err != nil {
-			t.Error(err)
-		}
 		//repeat test
 		if err := runtime.RunGroup("group1", []string{"-repeat 10"}, nil); err != nil {
 			t.Error(err)
@@ -149,6 +118,10 @@ func TestHostRunnerGroupSim(t *testing.T) {
 
 func init() {
 	os.Setenv("JVS_PRJ_HOME", path.Join(core.RunnersPath(), "host", "testFiles"))
+	err := loader.Load("testFiles/runner.yaml")
+	if err != nil {
+		panic(err)
+	}
 	flag.BoolVar(&keepResult, "keep", false, "keep test result")
 	flag.Parse()
 }

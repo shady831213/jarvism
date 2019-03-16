@@ -101,11 +101,7 @@ func init() {
 	os.Setenv("JVS_PRJ_HOME", abs)
 	os.Setenv("JVS_PLUGINS_HOME", "/tmp/jarvism_plugins")
 	os.Symlink(path.Join(core.CorePath(), "runtime", "testFiles", "jarvism_plugins"), "/tmp/jarvism_plugins")
-	cfg, err := loader.Lex(path.Join(abs, "build.yaml"))
-	if err != nil {
-		panic(err)
-	}
-	err = loader.Parse(cfg)
+	err := loader.Load(path.Join(abs, "jarvism_cfg"))
 	if err != nil {
 		panic(err)
 	}

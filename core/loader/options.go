@@ -4,9 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/shady831213/jarvism/core"
+	jvsEorros "github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/options"
 	"math"
 	"math/rand"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,6 +54,25 @@ func GetJvsAstOption(arg string) (JvsAstOption, error) {
 		return nil, errors.New("Not JvsAstOption")
 	}
 	return v, nil
+}
+
+func LoadBuildInOptions(configFile string) error {
+	cfg, err := Lex(configFile)
+	if err != nil {
+		panic(err)
+	}
+	if err := CfgToAstItemRequired(cfg, "options", func(item interface{}) *jvsEorros.JVSAstError {
+		for name, option := range item.(map[interface{}]interface{}) {
+			jvsAstRoot.Options[name.(string)] = newAstOption(name.(string))
+			if err := AstParse(jvsAstRoot.Options[name.(string)], option.(map[interface{}]interface{})); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type jvsAstNonBoolOption struct {
@@ -171,6 +193,9 @@ var jvsRand *rand.Rand
 
 func init() {
 	jvsRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	if err := LoadBuildInOptions(path.Join(core.BuildInOptionPath(), "global_options.yaml")); err != nil {
+		panic("Error in loading " + path.Join(core.BuildInOptionPath(), "global_options.yaml") + ":" + err.Error())
+	}
 	RegisterJvsAstOption(newRepeatOption())
 	RegisterJvsAstOption(newSeedOption())
 }

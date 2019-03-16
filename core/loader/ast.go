@@ -507,15 +507,20 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	t.simulator = simulator
-	if err := LoadBuildInOptions(GetCurSimulator().BuildInOptionFile()); err != nil {
-		panic("Error in loading " + GetCurSimulator().BuildInOptionFile() + ":" + err.Error())
-	}
 
 	runner, err := astParsPlugin("runner", JVSRunnerPlugin, "host", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
 	t.runner = runner
+	return nil
+}
+
+func (t *astEnv) Link() *errors.JVSAstError {
+	//link default option
+	if err := LoadBuildInOptions(GetCurSimulator().BuildInOptionFile()); err != nil {
+		return errors.JVSAstLexError("simulator "+GetCurSimulator().Name(), "Error in loading "+GetCurSimulator().BuildInOptionFile()+":"+err.Error())
+	}
 	return nil
 }
 
@@ -1150,7 +1155,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		}
 	}
 	//parsing builds
-	if err := CfgToAstItemRequired(cfg, "builds", func(item interface{}) *errors.JVSAstError {
+	if err := CfgToAstItemOptional(cfg, "builds", func(item interface{}) *errors.JVSAstError {
 		for name, build := range item.(map[interface{}]interface{}) {
 			t.Builds[name.(string)] = newAstBuild(name.(string))
 			if build != nil {
@@ -1196,6 +1201,16 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 }
 
 func (t *astRoot) Link() *errors.JVSAstError {
+	//link ENV
+	if err := t.env.Link(); err != nil {
+		return err
+	}
+
+	//check build
+	if t.Builds == nil {
+		return errors.JVSAstLinkError("root", "no build defined!")
+	}
+
 	//dfs link groups
 	for _, group := range t.Groups {
 		if !group.linked {

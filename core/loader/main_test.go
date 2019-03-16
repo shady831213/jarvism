@@ -3,6 +3,7 @@ package loader_test
 import (
 	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
+	"os"
 	"regexp"
 	"strings"
 	"syscall"
@@ -18,6 +19,11 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	err := loader.Load("testFiles/jarvism_cfg")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	expect, _ := utils.ReadFile("testFiles/build.ast")
 	result := loader.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
@@ -39,4 +45,8 @@ func dealAstResult(result string) string {
 	_result = regexp.MustCompile(`\[[0-9]+\]`).ReplaceAllString(_result, "[seeds]")
 	return _result
 
+}
+
+func init() {
+	os.Setenv("JVS_PRJ_HOME", "testFiles")
 }

@@ -18,6 +18,18 @@ builds:
       - *common_sim
     post_sim_action:
       - echo "post_sim_build1"
+  build2:
+    compile_option:
+      - *common_compile
+      - -timescale=1ns/10ps
+      - $test.sv -top test
+    pre_compile_action:
+      - echo "pre_compile_build1"
+      - echo "pre_compile_build1 again"
+    sim_option:
+      - *common_sim
+    post_sim_action:
+      - echo "post_sim_build1"
 
 groups:
   group1:
