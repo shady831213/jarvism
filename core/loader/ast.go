@@ -509,6 +509,7 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 }
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+
 	simulator, err := astParsPlugin("simulator", JVSSimulatorPlugin, cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
@@ -516,7 +517,10 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if t.simulator != nil && simulator != nil && simulator.plugin.Name() != t.simulator.plugin.Name() {
 		return errors.JVSAstParseError("env", "simulator conflict["+t.simulator.plugin.Name()+","+simulator.plugin.Name()+"]! simulator must be unique!")
 	}
-	t.simulator = simulator
+	//if configured, can't be changed
+	if t.simulator == nil {
+		t.simulator = simulator
+	}
 
 	runner, err := astParsPlugin("runner", JVSRunnerPlugin, cfg)
 	if err != nil {
@@ -525,7 +529,10 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if t.runner != nil && runner != nil && runner.plugin.Name() != t.runner.plugin.Name() {
 		return errors.JVSAstParseError("env", "runner conflict["+t.runner.plugin.Name()+","+runner.plugin.Name()+"]! runner must be unique!")
 	}
-	t.runner = runner
+	//if configured, can't be changed
+	if t.runner == nil {
+		t.runner = runner
+	}
 	return nil
 }
 
@@ -1166,7 +1173,9 @@ func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	//parsing env
 	if err := CfgToAstItemOptional(cfg, "env", func(item interface{}) *errors.JVSAstError {
-		t.env = newAstEnv()
+		if t.env == nil {
+			t.env = newAstEnv()
+		}
 		if item != nil {
 			return AstParse(t.env, item.(map[interface{}]interface{}))
 		}
@@ -1174,13 +1183,7 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	}); err != nil {
 		return err
 	}
-	//use default
-	if t.env == nil {
-		t.env = newAstEnv()
-		if err := AstParse(t.env, make(map[interface{}]interface{})); err != nil {
-			return err
-		}
-	}
+
 	//parsing builds
 	if err := CfgToAstItemOptional(cfg, "builds", func(item interface{}) *errors.JVSAstError {
 		buildsCfg, ok := item.(map[interface{}]interface{})
@@ -1250,6 +1253,12 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
 func (t *astRoot) Link() *errors.JVSAstError {
 	//link ENV
+	if t.env == nil {
+		t.env = newAstEnv()
+		if err := AstParse(t.env, make(map[interface{}]interface{})); err != nil {
+			return err
+		}
+	}
 	if err := t.env.Link(); err != nil {
 		return err
 	}

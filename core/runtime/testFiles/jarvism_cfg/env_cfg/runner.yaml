@@ -1,0 +1,3 @@
+env:
+  runner:
+    type: "testRunner"

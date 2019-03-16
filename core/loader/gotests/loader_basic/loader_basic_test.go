@@ -1,11 +1,9 @@
 package loader_basic_test
 
 import (
-	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
-	"path"
 	"regexp"
 	"strings"
 	"syscall"
@@ -13,7 +11,7 @@ import (
 )
 
 func TestLex(t *testing.T) {
-	cfg, err := loader.Lex(path.Join(core.CorePath(), "loader", "testFiles/build.yaml"))
+	cfg, err := loader.Lex("testFiles/build.yaml")
 	if err != nil {
 		t.Error(err)
 	}
@@ -21,22 +19,22 @@ func TestLex(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	err := loader.Load(path.Join(core.CorePath(), "loader", "testFiles/jarvism_cfg"))
+	err := loader.Load("testFiles/jarvism_cfg")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	expect, _ := utils.ReadFile(path.Join(core.CorePath(), "loader", "testFiles/build.ast"))
+	expect, _ := utils.ReadFile("testFiles/build.ast")
 	result := loader.GetJvsAstRoot().GetHierString(0)
 	result = dealAstResult(result)
 
 	if result != expect {
 		t.Log(loader.GetJvsAstRoot().GetHierString(0))
-		utils.WriteNewFile(path.Join(core.CorePath(), "loader", "testFiles/build.ast.result"), result)
+		utils.WriteNewFile("testFiles/build.ast.result", result)
 		t.Error("not equal! please diff testFiles/build.ast and estFiles/build.ast.result")
 		return
 	}
-	syscall.Unlink(path.Join(core.CorePath(), "loader", "testFiles/build.ast.result"))
+	syscall.Unlink("testFiles/build.ast.result")
 }
 
 func dealAstResult(result string) string {
@@ -50,5 +48,5 @@ func dealAstResult(result string) string {
 }
 
 func init() {
-	os.Setenv("JVS_PRJ_HOME", path.Join(core.CorePath(), "loader", "testFiles"))
+	os.Setenv("JVS_PRJ_HOME", "testFiles")
 }

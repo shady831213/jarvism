@@ -1,0 +1,36 @@
+groups:
+  group1:
+    build: build1
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test1:
+          args:
+            - -repeat 10
+      - test2:
+          args:
+            - -seed 1
+
+  group2:
+    build: build2
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test3:
+          args:
+            - -repeat 10
+    groups:
+      - group1
+
+  group3:
+    build: build2
+    args:
+      - -vh
+      - -repeat 20
+    tests:
+      - test1:
+    groups:
+      - group2
+      - group1

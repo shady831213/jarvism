@@ -1,0 +1,13 @@
+options:
+  vh:
+    on_action:
+      sim_option:
+        - +UVM_VERBOSITY=UVM_FULL
+
+  test_phase:
+    with_value_action:
+      compile_option:
+        - echo "compile_option $test_phase"
+      sim_option:
+        - echo "sim_option $test_phase"
+
