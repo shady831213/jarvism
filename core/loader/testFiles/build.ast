@@ -9,10 +9,6 @@ vcs
 Runner:
 host
 
------------------
-WorkDir:
-/home/yli/work/jarivsm/core/loader/testFiles/work
-
 
 -------------------
 Options:

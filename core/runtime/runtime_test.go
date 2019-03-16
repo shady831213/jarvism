@@ -20,7 +20,7 @@ func setup() {
 }
 
 func tearDonw() {
-	os.RemoveAll(path.Join(loader.GetWorkDir(), "JarvismLog"))
+	os.RemoveAll(path.Join(core.GetWorkDir(), "JarvismLog"))
 	os.RemoveAll("/tmp/jarvism_plugins")
 }
 

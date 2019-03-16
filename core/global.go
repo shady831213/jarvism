@@ -55,17 +55,30 @@ func getJarvismPath() string {
 
 var prjHome string
 var pluginsHome string
+var workDir string
 
 func CheckEnv() error {
 	if os.Getenv("JVS_PRJ_HOME") == "" {
 		return errors.New("Env $JVS_PRJ_HOME is not set!")
 	}
 	prjHome = os.ExpandEnv(os.Getenv("JVS_PRJ_HOME"))
-	if os.Getenv("JVS_PLUGINS_HOME") == "" {
-		pluginsHome = path.Join(prjHome, "jarvism_plugins")
-		return nil
-	}
+
 	pluginsHome = os.ExpandEnv(os.Getenv("JVS_PLUGINS_HOME"))
+	if pluginsHome == "" {
+		pluginsHome = path.Join(prjHome, "jarvism_plugins")
+	}
+
+	workDir = os.ExpandEnv(os.Getenv("JVS_WORK_DIR"))
+	if workDir == "" {
+		workDir = path.Join(prjHome, "work")
+	}
+
+	if err := os.MkdirAll(workDir, os.ModePerm); err != nil {
+		return err
+	}
+	if _, err := os.Stat(workDir); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,4 +88,8 @@ func GetPrjHome() string {
 
 func GetPluginsHome() string {
 	return pluginsHome
+}
+
+func GetWorkDir() string {
+	return workDir
 }

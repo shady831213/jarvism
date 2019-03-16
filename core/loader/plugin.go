@@ -3,7 +3,7 @@ package loader
 import (
 	"errors"
 	"github.com/shady831213/jarvism/core"
-	jvserrors "github.com/shady831213/jarvism/core/errors"
+	jvsErrors "github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"os/exec"
@@ -109,7 +109,7 @@ func getRealPath(path string) string {
 	return p
 }
 
-func loadPlugin(pluginType JVSPluginType, pluginName string) *jvserrors.JVSAstError {
+func loadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstError {
 	//check plugin path, check customized first, then buildin
 	pluginPath := path.Join(core.GetPluginsHome(), string(pluginType)+"s", pluginName)
 	pluginState, err := os.Stat(pluginPath)
@@ -117,49 +117,40 @@ func loadPlugin(pluginType JVSPluginType, pluginName string) *jvserrors.JVSAstEr
 		symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		defer os.RemoveAll(symPluginPath)
 		if err := os.Symlink(pluginPath, symPluginPath); err != nil {
-			return jvserrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
+			return jvsErrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
 		}
 		pluginPath = symPluginPath
 	} else {
 		_pluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		_pluginState, _err := os.Stat(_pluginPath)
 		if _err != nil {
-			return jvserrors.JVSPluginLoadError(pluginName, "["+err.Error()+";"+_err.Error()+"]", "["+pluginPath+";"+_pluginPath+"]")
+			return jvsErrors.JVSPluginLoadError(pluginName, "["+err.Error()+";"+_err.Error()+"]", "["+pluginPath+";"+_pluginPath+"]")
 		}
 		pluginPath = _pluginPath
 		pluginState = _pluginState
 	}
 
 	//check lib
-	libPath := path.Join(workDir, ".jarvism_plugins", string(pluginType)+"s", pluginName+".so")
+	libPath := path.Join(core.GetWorkDir(), ".jarvism_plugins", string(pluginType)+"s", pluginName+".so")
 	libState, err := os.Stat(libPath)
 
 	//compile
 	if err != nil || libState.ModTime().Before(pluginState.ModTime()) {
 		if err := compile(pluginType, pluginPath, libPath); err != nil {
-			return jvserrors.JVSPluginLoadError(pluginName, err.Error(), getRealPath(pluginPath))
+			return jvsErrors.JVSPluginLoadError(pluginName, err.Error(), getRealPath(pluginPath))
 		}
 	}
 
 	if _, err := plugin.Open(libPath); err != nil {
-		os.RemoveAll(path.Join(workDir, ".jarvism_plugins"))
-		return jvserrors.JVSPluginLoadError(pluginName, err.Error()+" Please restart Jarvism and try again!", getRealPath(pluginPath))
+		os.RemoveAll(path.Join(core.GetWorkDir(), ".jarvism_plugins"))
+		return jvsErrors.JVSPluginLoadError(pluginName, err.Error()+" Please restart Jarvism and try again!", getRealPath(pluginPath))
 	}
 
 	return nil
 }
 
-type compileOutput struct {
-	msg string
-}
-
-func (o *compileOutput) Write(p []byte) (n int, err error) {
-	o.msg += string(p)
-	return len(p), nil
-}
-
 func compile(pluginType JVSPluginType, pluginFile, libFile string) error {
-	if err := os.MkdirAll(path.Join(workDir, string(pluginType)+"s"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(path.Join(core.GetWorkDir(), string(pluginType)+"s"), os.ModePerm); err != nil {
 		return err
 	}
 	if err := checkGo(); err != nil {
@@ -169,10 +160,10 @@ func compile(pluginType JVSPluginType, pluginFile, libFile string) error {
 		return err
 	}
 	cmd := exec.Command("go", "build", "-o", libFile, "-buildmode", "plugin", pluginFile)
-	stderr := compileOutput{""}
+	stderr := jvsErrors.JVSStderr{""}
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return errors.New(stderr.msg + "\n" + err.Error())
+		return errors.New(stderr.Msg + "\n" + err.Error())
 	}
 	return nil
 }

@@ -4,11 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fatih/set"
-	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"math"
-	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -496,7 +494,7 @@ func newAstEnv() *astEnv {
 
 func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
-	keywords.AddKey("simulator", "work_dir", "runner")
+	keywords.AddKey("simulator", "runner")
 	if !CheckKeyWord(s, keywords) {
 		return false, keywords, "Error in env:"
 	}
@@ -504,22 +502,6 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 }
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	//must parse work_dir first!
-	if err := CfgToAstItemOptional(cfg, "work_dir", func(item interface{}) *errors.JVSAstError {
-		if err := setWorkDir(item.(string)); err != nil {
-			return errors.JVSAstParseError("work_dir in env", err.Error())
-		}
-		return nil
-	}); err != nil {
-		return errors.JVSAstParseError("work_dir of env", err.Msg)
-	}
-	//use default
-	if GetWorkDir() == "" {
-		if err := setWorkDir(path.Join(core.GetPrjHome(), "work")); err != nil {
-			return errors.JVSAstParseError("work_dir in env", err.Error())
-		}
-	}
-
 	simulator, err := astParsPlugin("test_discoverer", JVSSimulatorPlugin, "vcs", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
@@ -545,9 +527,6 @@ func (t *astEnv) GetHierString(space int) string {
 	}) + astHierFmt("Runner:", nextSpace, func() string {
 		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
 			fmt.Sprintln(GetCurRunner().Name())
-	}) + astHierFmt("WorkDir:", nextSpace, func() string {
-		return fmt.Sprint(strings.Repeat(" ", nextSpace)) +
-			fmt.Sprintln(GetWorkDir())
 	})
 }
 

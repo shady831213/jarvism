@@ -3,8 +3,8 @@ package main_test
 import (
 	"flag"
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/runtime"
 	"os"
 	"path"
@@ -15,7 +15,7 @@ var keepResult bool
 
 func tearDown() {
 	if !keepResult {
-		os.RemoveAll(loader.GetWorkDir())
+		os.RemoveAll(core.GetWorkDir())
 	}
 }
 

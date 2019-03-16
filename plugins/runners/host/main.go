@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/utils"
@@ -36,11 +37,11 @@ func (r *hostRunner) Name() string {
 }
 
 func (r *hostRunner) BuildsRoot() string {
-	return path.Join(loader.GetWorkDir(), "builds")
+	return path.Join(core.GetWorkDir(), "builds")
 }
 
 func (r *hostRunner) TestsRoot() string {
-	return path.Join(loader.GetWorkDir(), "tests")
+	return path.Join(core.GetWorkDir(), "tests")
 }
 
 func (r *hostRunner) PrepareBuild(build *loader.AstBuild, cmdRunner loader.CmdRunner) *errors.JVSRuntimeResult {

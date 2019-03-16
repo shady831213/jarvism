@@ -178,3 +178,12 @@ func JVSPluginLoadError(pluginName, msg, filePath string) *JVSAstError {
 	inst.phase = "Load Plugin"
 	return inst
 }
+
+type JVSStderr struct {
+	Msg string
+}
+
+func (e *JVSStderr) Write(p []byte) (n int, err error) {
+	e.Msg += string(p)
+	return len(p), nil
+}

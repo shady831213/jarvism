@@ -10,6 +10,7 @@ import (
 )
 
 func TestUvmDiscoverer(t *testing.T) {
+	defer os.RemoveAll(core.GetWorkDir())
 	cfg, err := loader.Lex("testFiles/test_discover.yaml")
 	if err != nil {
 		t.Error(err)

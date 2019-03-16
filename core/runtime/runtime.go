@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
@@ -139,6 +139,8 @@ func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) loader.CmdRunner {
 
 		fileAndStdoutWriter := io.MultiWriter(writers...)
 		cmd.Stdout = fileAndStdoutWriter
+		stderr := errors.JVSStderr{""}
+		cmd.Stderr = &stderr
 		//set other attr
 		if attr != nil && attr.SetAttr != nil {
 			if err := attr.SetAttr(cmd); err != nil {
@@ -146,7 +148,7 @@ func (f *runFlow) cmdRunner(checkerPipeWriter io.WriteCloser) loader.CmdRunner {
 			}
 		}
 		if err := cmd.Run(); err != nil {
-			return errors.JVSRuntimeResultUnknown(err.Error())
+			return errors.JVSRuntimeResultUnknown(stderr.Msg+"\n", err.Error())
 		}
 		return errors.JVSRuntimeResultPass("")
 	}
