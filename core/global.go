@@ -61,7 +61,11 @@ func CheckEnv() error {
 	if os.Getenv("JVS_PRJ_HOME") == "" {
 		return errors.New("Env $JVS_PRJ_HOME is not set!")
 	}
-	prjHome = os.ExpandEnv(os.Getenv("JVS_PRJ_HOME"))
+	p, err := filepath.Abs(os.ExpandEnv(os.Getenv("JVS_PRJ_HOME")))
+	if err!=nil {
+		return err
+	}
+	prjHome = p
 
 	pluginsHome = os.ExpandEnv(os.Getenv("JVS_PLUGINS_HOME"))
 	if pluginsHome == "" {

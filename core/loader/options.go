@@ -57,6 +57,9 @@ func GetJvsAstOption(arg string) (JvsAstOption, error) {
 }
 
 func LoadBuildInOptions(configFile string) error {
+	if configFile == "" {
+		return nil
+	}
 	cfg, err := Lex(configFile)
 	if err != nil {
 		panic(err)

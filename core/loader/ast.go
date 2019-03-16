@@ -770,13 +770,21 @@ func (t *astTest) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) 
 
 func (t *astTest) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := CfgToAstItemOptional(cfg, "build", func(item interface{}) *errors.JVSAstError {
-		t.buildName = item.(string)
+		v, ok := item.(string)
+		if !ok {
+			return errors.JVSAstParseError("build in test or group", fmt.Sprintf("expect a string but get %T!", item))
+		}
+		t.buildName = v
 		return nil
 	}); err != nil {
 		return errors.JVSAstParseError(t.Name, err.Msg)
 	}
 	if err := CfgToAstItemOptional(cfg, "args", func(item interface{}) *errors.JVSAstError {
-		for _, arg := range item.([]interface{}) {
+		v, ok := item.([]interface{})
+		if !ok {
+			return errors.JVSAstParseError("args in test or group", fmt.Sprintf("expect a list of string but get %T!", item))
+		}
+		for _, arg := range v {
 			t.args = append(t.args, strings.Split(arg.(string), ",")...)
 		}
 		return nil
@@ -907,8 +915,8 @@ func (t *AstTestCase) Link() *errors.JVSAstError {
 	}
 	//set build and check test
 	if !t.GetBuild().GetTestDiscoverer().IsValidTest(t.Name) {
-		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.build.Name+"\n"+
-			"valid tests:\n"+strings.Join(t.build.GetTestDiscoverer().TestList(), "\n"))
+		return errors.JVSAstLinkError(t.Name, t.Name+" is not valid test of build"+t.GetBuild().Name+"\n"+
+			"valid tests:\n"+strings.Join(t.GetBuild().GetTestDiscoverer().TestList(), "\n"))
 	}
 
 	return nil
@@ -1220,7 +1228,11 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 				return errors.JVSAstParseError("options", "option conflict["+option.Name+","+name.(string)+"]! option name must be unique!")
 			}
 			t.Options[name.(string)] = newAstOption(name.(string))
-			if err := AstParse(t.Options[name.(string)], optionCfg.(map[interface{}]interface{})); err != nil {
+			v, ok := optionCfg.(map[interface{}]interface{})
+			if !ok {
+				return errors.JVSAstParseError("option "+name.(string), fmt.Sprintf("expect a map of map but get %T!", optionCfg))
+			}
+			if err := AstParse(t.Options[name.(string)], v); err != nil {
 				return err
 			}
 		}
@@ -1240,7 +1252,11 @@ func (t *astRoot) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 				return errors.JVSAstParseError("groups", "group conflict["+group.Name+","+name.(string)+"]! group name must be unique!")
 			}
 			t.Groups[name.(string)] = NewAstGroup(name.(string))
-			if err := AstParse(t.Groups[name.(string)], groupCfg.(map[interface{}]interface{})); err != nil {
+			v, ok := groupCfg.(map[interface{}]interface{})
+			if !ok {
+				return errors.JVSAstParseError("group "+name.(string), fmt.Sprintf("expect a map of map but get %T!", groupCfg))
+			}
+			if err := AstParse(t.Groups[name.(string)], v); err != nil {
 				return err
 			}
 		}
