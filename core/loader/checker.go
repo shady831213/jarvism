@@ -118,7 +118,7 @@ func (c *CheckerBase) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError
 
 func (c *CheckerBase) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
-	for k, _ := range c.pats {
+	for k := range c.pats {
 		name := strings.ToLower(errors.StatusString(k))
 		exclName := "exclude_" + name
 		keywords.AddKey(name)
