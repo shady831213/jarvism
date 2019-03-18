@@ -67,7 +67,7 @@ func Run() error {
 	if showBuilds {
 		fmt.Println("all builds:")
 		for _, b := range loader.GetJvsAstRoot().GetAllBuilds() {
-			fmt.Println("\t", b, )
+			fmt.Println("\t", b)
 		}
 		return nil
 	}
@@ -75,7 +75,7 @@ func Run() error {
 	if showGroups {
 		fmt.Println("all groups:")
 		for _, g := range loader.GetJvsAstRoot().GetAllGroups() {
-			fmt.Println("\t", g, )
+			fmt.Println("\t", g)
 		}
 		return nil
 	}
@@ -87,7 +87,7 @@ func Run() error {
 		dis := loader.GetJvsAstRoot().GetBuild(build).GetTestDiscoverer()
 		fmt.Println("all tests founded by testDiscoverer " + dis.Name() + " of build " + build + ":")
 		for _, t := range dis.TestList() {
-			fmt.Println("\t", t, )
+			fmt.Println("\t", t)
 		}
 		return nil
 	}
@@ -97,14 +97,14 @@ func Run() error {
 		case plugin.JVSReporterPlugin, plugin.JVSTestDiscovererPlugin, plugin.JVSSimulatorPlugin, plugin.JVSCheckerPlugin, plugin.JVSRunnerPlugin:
 			fmt.Println("all " + showPlugins + "s:")
 			for _, r := range plugin.ValidPlugins(plugin.JVSPluginType(showPlugins)) {
-				fmt.Println("\t", r, )
+				fmt.Println("\t", r)
 			}
 		case "all":
 			fmt.Println("all plugins:")
 			for _, t := range plugin.ValidPluginTypes() {
 				fmt.Println("all " + t + "s:")
 				for _, r := range plugin.ValidPlugins(plugin.JVSPluginType(t)) {
-					fmt.Println("\t", r, )
+					fmt.Println("\t", r)
 				}
 			}
 		default:
