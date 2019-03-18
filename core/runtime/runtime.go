@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/loader"
-	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
 	"math"
@@ -311,6 +310,9 @@ func newRunTime(name string, group *loader.AstGroup) *runTime {
 		r.cmdStdout = &stdout{}
 	}
 
+	//init reporters
+	r.addReporter(runTimeReporter.getReporters()...)
+
 	return r
 }
 
@@ -480,15 +482,4 @@ func RunTest(testName, buildName string, args []string, sc chan os.Signal) error
 func RunOnlyBuild(buildName string, args []string, sc chan os.Signal) error {
 	return run(buildName, map[interface{}]interface{}{"build": buildName,
 		"args": filterAstArgs(args)}, sc)
-}
-
-var runTimeMaxJob int
-var runTimeSimOnly bool
-var runTimeUnique bool
-
-func init() {
-	options.GetJvsOptions().IntVar(&runTimeMaxJob, "max_job", -1, "limit of runtime coroutines, default is unlimited.")
-	options.GetJvsOptions().BoolVar(&runTimeSimOnly, "sim_only", false, "bypass compile and only run simulation, default is false.")
-	options.GetJvsOptions().BoolVar(&runTimeUnique, "unique", false, "if set jobId(timestamp) will be included in hash, then builds and testcases will have unique name and be in unique dir.default is false.")
-
 }
