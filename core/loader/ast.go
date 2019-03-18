@@ -1188,11 +1188,27 @@ func (t *astRoot) GetBuild(name string) *AstBuild {
 	return nil
 }
 
+func (t *astRoot) GetAllBuilds() []string {
+	builds := make([]string, 0)
+	for k := range t.Builds {
+		builds = append(builds, k)
+	}
+	return builds
+}
+
 func (t *astRoot) GetGroup(name string) *AstGroup {
 	if group, ok := t.Groups[name]; ok {
 		return group
 	}
 	return nil
+}
+
+func (t *astRoot) GetAllGroups() []string {
+	groups := make([]string, 0)
+	for k := range t.Groups {
+		groups = append(groups, k)
+	}
+	return groups
 }
 
 func (t *astRoot) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {

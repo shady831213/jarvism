@@ -205,3 +205,7 @@ func ValidPlugins(pluginType JVSPluginType) []string {
 	findAllPlugins(pluginType)
 	return utils.KeyOfStringMap(pluginFileCache[pluginType])
 }
+
+func ValidPluginTypes() []string {
+	return []string{JVSRunnerPlugin, JVSTestDiscovererPlugin, JVSSimulatorPlugin, JVSCheckerPlugin, JVSReporterPlugin}
+}

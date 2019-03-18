@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func ParseFile(configFile string) error {
+func parseFile(configFile string) error {
 	cfg, err := Lex(configFile)
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func Load(config string) error {
 	}
 	//is file
 	if !stat.IsDir() {
-		if err := ParseFile(config); err != nil {
+		if err := parseFile(config); err != nil {
 			return err
 		}
 	} else {
@@ -40,7 +40,7 @@ func Load(config string) error {
 				return err
 			}
 			if filepath.Ext(path) == ".yaml" {
-				return ParseFile(path)
+				return parseFile(path)
 			}
 			return nil
 		}); err != nil {

@@ -43,10 +43,15 @@ func GetJvsAstOption(arg string) (JvsAstOption, error) {
 	if err != nil {
 		return nil, err
 	}
+	_args := make([]string, 0)
 	if len(args) > 1 {
 		args[0] += "="
+		_args = append(_args, args[0])
+		_args = append(_args, strings.Join(args[1:], " "))
+	} else {
+		_args = append(_args, args...)
 	}
-	if err := options.GetJvsOptions().Parse([]string{strings.Join(args, "")}); err != nil {
+	if err := options.GetJvsOptions().Parse([]string{strings.Join(_args, "")}); err != nil {
 		return nil, err
 	}
 	v, ok := options.GetJvsOptions().Lookup(optName).Value.(JvsAstOption)
