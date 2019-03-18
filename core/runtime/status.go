@@ -1,17 +1,18 @@
 package runtime
 
 import (
+	"fmt"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/utils"
 	"strconv"
+	"text/tabwriter"
 )
 
 type StatusCnt struct {
-	Cnts   map[errors.JVSRuntimeStatus]int
-	total  int
-	keys   []errors.JVSRuntimeStatus
-	name   string
-	finish bool
+	Cnts  map[errors.JVSRuntimeStatus]int
+	total int
+	keys  []errors.JVSRuntimeStatus
+	name  string
 }
 
 func newStatusCnt(name string, total int) *StatusCnt {
@@ -28,7 +29,6 @@ func newStatusCnt(name string, total int) *StatusCnt {
 	inst.keys = append(inst.keys, errors.JVSRuntimeFail)
 	inst.keys = append(inst.keys, errors.JVSRuntimeWarning)
 	inst.keys = append(inst.keys, errors.JVSRuntimeUnknown)
-	inst.finish = false
 	return inst
 }
 
@@ -46,25 +46,13 @@ func (s *StatusCnt) update(result *errors.JVSRuntimeResult) {
 
 func (s *StatusCnt) StatusString() string {
 	res := ""
-	if s.finish {
-		res += utils.Brown("[" + s.name + ":(")
-	} else {
-		res += utils.Brown("[" + string(s.name[0]) + ":(")
-	}
+	res += utils.Brown("[" + string(s.name[0]) + ":(")
 
 	for _, k := range s.keys {
-		if s.finish {
-			res += errors.StatusColor(k)(errors.StatusString(k) + ":" + strconv.Itoa(s.Cnts[k]))
-		} else {
-			res += errors.StatusColor(k)(errors.StatusShortString(k) + ":" + strconv.Itoa(s.Cnts[k]))
-		}
+		res += errors.StatusColor(k)(errors.StatusShortString(k) + ":" + strconv.Itoa(s.Cnts[k]))
 		res += utils.Brown("/")
 	}
-	if s.finish {
-		res += utils.Brown("DONE:" + strconv.Itoa(s.done()) + "/TOTAL:" + strconv.Itoa(s.total) + ")]")
-	} else {
-		res += utils.Brown("D:" + strconv.Itoa(s.done()) + "/T:" + strconv.Itoa(s.total) + ")]")
-	}
+	res += utils.Brown("D:" + strconv.Itoa(s.done()) + "/T:" + strconv.Itoa(s.total) + ")]")
 	return res
 }
 
@@ -77,6 +65,29 @@ func GetBuildStatus() *StatusCnt {
 
 func GetTestStatus() *StatusCnt {
 	return testStatus
+}
+
+func statusReport() {
+	const padding = 3
+	w := tabwriter.NewWriter(&stdout{}, 0, 0, padding, ' ', tabwriter.DiscardEmptyColumns|tabwriter.TabIndent|tabwriter.StripEscape|tabwriter.Debug)
+	fmt.Fprintln(w, utils.Brown("Jarvism Report:"))
+	fmt.Fprintln(w, " \t"+utils.Brown("TOTAL\t")+
+		errors.StatusColor(errors.JVSRuntimePass)(errors.StatusString(errors.JVSRuntimePass))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeFail)(errors.StatusString(errors.JVSRuntimeFail))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeWarning)(errors.StatusString(errors.JVSRuntimeWarning))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeUnknown)(errors.StatusString(errors.JVSRuntimeUnknown))+"\t")
+	fmt.Fprintln(w, "BUILDS\t"+utils.Brown(strconv.Itoa(buildStatus.total)+"\t")+
+		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
+	fmt.Fprintln(w, "TESTS\t"+utils.Brown(strconv.Itoa(testStatus.total)+"\t")+
+		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
+	fmt.Fprintln(w, utils.Brown("Jarvism Report Done!"))
+	w.Flush()
 }
 
 func statusMonitor(status *string, totalBuild, totalTest int, buildDone, testDone chan *errors.JVSRuntimeResult, done chan bool) {
@@ -104,10 +115,8 @@ LableFor:
 				break
 			}
 		case <-done:
-			buildStatus.finish = true
-			testStatus.finish = true
 			break LableFor
 		}
 	}
-	*status = buildStatus.StatusString() + testStatus.StatusString()
+	statusReport()
 }

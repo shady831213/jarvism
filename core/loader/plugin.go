@@ -22,6 +22,7 @@ const (
 	JVSTestDiscovererPlugin = "testDiscoverer"
 	JVSSimulatorPlugin      = "simulator"
 	JVSCheckerPlugin        = "checker"
+	JVSReporterPlugin        = "reporter"
 )
 
 type Plugin interface {

@@ -40,9 +40,8 @@ func PrintProccessing(color func(str string, modifier ...interface{}) string) fu
 				}
 			}
 		}
-		result := color(processingString+"...") + (*status) + color("done!")
-		fmt.Println(result)
-		runtimeLog.Println(result)
+		Println("")
+		runtimeLog.Println("")
 	}
 }
 
