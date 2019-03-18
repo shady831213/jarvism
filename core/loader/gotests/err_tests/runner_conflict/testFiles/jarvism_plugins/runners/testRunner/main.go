@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/loader"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"math/rand"
 	"time"
@@ -11,7 +12,7 @@ import (
 type testRunner struct {
 }
 
-func newTestRunner() loader.Plugin {
+func newTestRunner() plugin.Plugin {
 	return new(testRunner)
 }
 func (r *testRunner) Name() string {

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
 	"regexp"
@@ -12,7 +13,7 @@ import (
 )
 
 type Checker interface {
-	Plugin
+	LoderPlugin
 	Check() *errors.JVSRuntimeResult
 	Input(reader io.Reader)
 }
@@ -196,6 +197,6 @@ func (c *CheckerBase) checkStatus(status errors.JVSRuntimeStatus, s string, line
 	return false
 }
 
-func RegisterChecker(c func() Plugin) {
-	registerPlugin(JVSCheckerPlugin, c)
+func RegisterChecker(c func() plugin.Plugin) {
+	plugin.RegisterPlugin(plugin.JVSCheckerPlugin, c)
 }

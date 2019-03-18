@@ -2,6 +2,7 @@ package loader
 
 import (
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/plugin"
 	"io"
 	"os/exec"
 	"strings"
@@ -15,7 +16,7 @@ type CmdAttr struct {
 type CmdRunner func(attr *CmdAttr, name string, arg ...string) *errors.JVSRuntimeResult
 
 type Runner interface {
-	Plugin
+	LoderPlugin
 	PrepareBuild(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
 	Build(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
 	PrepareTest(*AstTestCase, CmdRunner) *errors.JVSRuntimeResult
@@ -37,8 +38,8 @@ func ParseTestName(name string) (jobId, buildName, testName, seed string, groups
 	return
 }
 
-func RegisterRunner(c func() Plugin) {
-	registerPlugin(JVSRunnerPlugin, c)
+func RegisterRunner(c func() plugin.Plugin) {
+	plugin.RegisterPlugin(plugin.JVSRunnerPlugin, c)
 }
 
 func GetCurRunner() Runner {

@@ -2,8 +2,9 @@ package main
 
 import (
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/loader"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/loader"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
 	"path"
@@ -13,7 +14,7 @@ import (
 type vcs struct {
 }
 
-func newVcs() loader.Plugin  {
+func newVcs() plugin.Plugin {
 	return new(vcs)
 }
 
@@ -65,7 +66,6 @@ func (s *vcs) GetFileList(paths ...string) (string, error) {
 	}
 	return fileList, nil
 }
-
 
 func init() {
 	loader.RegisterSimulator(newVcs)

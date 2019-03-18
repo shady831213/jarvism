@@ -56,18 +56,33 @@ func (s *StatusCnt) StatusString() string {
 	return res
 }
 
-var buildStatus *StatusCnt
-var testStatus *StatusCnt
-
-func GetBuildStatus() *StatusCnt {
-	return buildStatus
+type statusReporter struct {
+	buildStatus *StatusCnt
+	testStatus  *StatusCnt
+	status      string
 }
 
-func GetTestStatus() *StatusCnt {
-	return testStatus
+func (r *statusReporter) Name() string {
+	return "statusReporter"
 }
 
-func statusReport() {
+func (r *statusReporter) Init(totalBuild, totalTest int) {
+	r.buildStatus = newStatusCnt("BUILDS", totalBuild)
+	r.testStatus = newStatusCnt("TESTS", totalTest)
+	r.status = r.buildStatus.StatusString() + r.testStatus.StatusString()
+}
+
+func (r *statusReporter) CollectBuildResult(result *errors.JVSRuntimeResult) {
+	r.buildStatus.update(result)
+	r.status = r.buildStatus.StatusString() + r.testStatus.StatusString()
+}
+
+func (r *statusReporter) CollectTestResult(result *errors.JVSRuntimeResult) {
+	r.testStatus.update(result)
+	r.status = r.buildStatus.StatusString() + r.testStatus.StatusString()
+}
+
+func (r *statusReporter) Report() {
 	const padding = 3
 	w := tabwriter.NewWriter(&stdout{}, 0, 0, padding, ' ', tabwriter.DiscardEmptyColumns|tabwriter.TabIndent|tabwriter.StripEscape|tabwriter.Debug)
 	fmt.Fprintln(w, utils.Brown("Jarvism Report:"))
@@ -76,47 +91,25 @@ func statusReport() {
 		errors.StatusColor(errors.JVSRuntimeFail)(errors.StatusString(errors.JVSRuntimeFail))+"\t"+
 		errors.StatusColor(errors.JVSRuntimeWarning)(errors.StatusString(errors.JVSRuntimeWarning))+"\t"+
 		errors.StatusColor(errors.JVSRuntimeUnknown)(errors.StatusString(errors.JVSRuntimeUnknown))+"\t")
-	fmt.Fprintln(w, "BUILDS\t"+utils.Brown(strconv.Itoa(buildStatus.total)+"\t")+
-		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(buildStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
-	fmt.Fprintln(w, "TESTS\t"+utils.Brown(strconv.Itoa(testStatus.total)+"\t")+
-		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
-		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(testStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
+	fmt.Fprintln(w, "BUILDS\t"+utils.Brown(strconv.Itoa(r.buildStatus.total)+"\t")+
+		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(r.buildStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(r.buildStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(r.buildStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(r.buildStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
+	fmt.Fprintln(w, "TESTS\t"+utils.Brown(strconv.Itoa(r.testStatus.total)+"\t")+
+		errors.StatusColor(errors.JVSRuntimePass)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimePass]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
+		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
 	fmt.Fprintln(w, utils.Brown("Jarvism Report Done!"))
 	w.Flush()
 }
 
-func statusMonitor(status *string, totalBuild, totalTest int, buildDone, testDone chan *errors.JVSRuntimeResult, done chan bool) {
-	buildStatus = newStatusCnt("BUILDS", totalBuild)
-	testStatus = newStatusCnt("TESTS", totalTest)
-	*status = buildStatus.StatusString() + testStatus.StatusString()
+var status = &statusReporter{}
 
-LableFor:
-	for {
-		select {
-		case result, ok := <-buildDone:
-			{
-				if ok {
-					buildStatus.update(result)
-					*status = buildStatus.StatusString() + testStatus.StatusString()
-				}
-				break
-			}
-		case result, ok := <-testDone:
-			{
-				if ok {
-					testStatus.update(result)
-					*status = buildStatus.StatusString() + testStatus.StatusString()
-				}
-				break
-			}
-		case <-done:
-			break LableFor
-		}
-	}
-	statusReport()
+func GetBuildStatus() *StatusCnt {
+	return status.buildStatus
+}
+func GetTestStatus() *StatusCnt {
+	return status.testStatus
 }

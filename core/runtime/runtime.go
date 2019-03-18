@@ -266,6 +266,7 @@ func (f *runFlow) run() {
 
 type runTime struct {
 	cmdStdout                   io.Writer
+	reporters                   []Reporter
 	runtimeId                   string
 	Name                        string
 	totalTest                   int
@@ -309,7 +310,16 @@ func newRunTime(name string, group *loader.AstGroup) *runTime {
 	if r.totalTest <= 1 {
 		r.cmdStdout = &stdout{}
 	}
+
 	return r
+}
+
+func (r *runTime) addReporter(reporters ...Reporter) {
+	//init all reporters
+	r.reporters = append(r.reporters, reporters...)
+	for _, reporter := range r.reporters {
+		reporter.Init(len(r.runFlow), r.totalTest)
+	}
 }
 
 func (r *runTime) createFlow(build *loader.AstBuild) *runFlow {
@@ -376,16 +386,47 @@ func (r *runTime) signalHandler(sc chan os.Signal) {
 	}
 }
 
+func (r *runTime) monitor() {
+LableFor:
+	for {
+		select {
+		case result, ok := <-r.buildDone:
+			{
+				if ok {
+					for _, reporter := range r.reporters {
+						reporter.CollectBuildResult(result)
+					}
+				}
+				break
+			}
+		case result, ok := <-r.testDone:
+			{
+				if ok {
+					for _, reporter := range r.reporters {
+						reporter.CollectTestResult(result)
+					}
+				}
+				break
+			}
+		case <-r.monitorDone:
+			break LableFor
+		}
+	}
+	for _, reporter := range r.reporters {
+		reporter.Report()
+	}
+}
+
 func (r *runTime) daemon(sc chan os.Signal) {
 
 	defer r.exit()
-	var status string
+	r.addReporter(status)
 
 	// run
 
 	//monitor status
-	go PrintProccessing(utils.Brown)("Jarvism is running", &status, r.processingDone)
-	go statusMonitor(&status, len(r.runFlow), r.totalTest, r.buildDone, r.testDone, r.monitorDone)
+	go PrintProccessing(utils.Brown)("Jarvism is running", &status.status, r.processingDone)
+	go r.monitor()
 
 	//monitor signals and run
 	go r.signalHandler(sc)

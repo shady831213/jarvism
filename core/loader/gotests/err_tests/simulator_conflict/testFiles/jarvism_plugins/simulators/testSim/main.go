@@ -3,13 +3,14 @@ package main
 import (
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/loader"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 )
 
 type testSim struct {
 }
 
-func newTestSim() loader.Plugin {
+func newTestSim() plugin.Plugin {
 	return new(testSim)
 }
 

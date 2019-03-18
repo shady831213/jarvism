@@ -4,6 +4,7 @@ import (
 	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/loader"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"io"
 	"os"
@@ -19,7 +20,7 @@ func bashExitGlue() string {
 type hostRunner struct {
 }
 
-func newHostRunner() loader.Plugin {
+func newHostRunner() plugin.Plugin {
 	inst := new(hostRunner)
 	return inst
 }

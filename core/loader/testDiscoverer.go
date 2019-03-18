@@ -1,7 +1,9 @@
 package loader
 
+import "github.com/shady831213/jarvism/core/plugin"
+
 type TestDiscoverer interface {
-	Plugin
+	LoderPlugin
 	TestDir() string
 	TestCmd() string
 	TestList() []string
@@ -9,6 +11,6 @@ type TestDiscoverer interface {
 	TestFileList() []string
 }
 
-func RegisterTestDiscoverer(c func() Plugin) {
-	registerPlugin(JVSTestDiscovererPlugin, c)
+func RegisterTestDiscoverer(c func() plugin.Plugin) {
+	plugin.RegisterPlugin(plugin.JVSTestDiscovererPlugin, c)
 }

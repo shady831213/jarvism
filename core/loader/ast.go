@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fatih/set"
 	"github.com/shady831213/jarvism/core/errors"
+	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"math"
 	"sort"
@@ -92,10 +93,10 @@ func WithCheckList(handler func([]interface{}) *errors.JVSAstError) func(interfa
 	}
 }
 
-func astLoadPlugin(pluginType JVSPluginType, pluginName string) *errors.JVSAstError {
-	if err := loadPlugin(pluginType, pluginName); err != nil {
+func astLoadPlugin(pluginType plugin.JVSPluginType, pluginName string) *errors.JVSAstError {
+	if err := plugin.LoadPlugin(pluginType, pluginName); err != nil {
 		errMsg := string(pluginType) + " " + pluginName + " is invalid! valid " + string(pluginType) + "s are [ "
-		for _, k := range validPlugins(pluginType) {
+		for _, k := range plugin.ValidPlugins(pluginType) {
 			errMsg += k + " "
 		}
 		errMsg += "]!"
@@ -252,12 +253,12 @@ func (items *astItems) GetHierString(space int) string {
 //Plugins
 //------------------------
 type astPlugin struct {
-	plugin     Plugin
-	pluginType JVSPluginType
+	plugin     LoderPlugin
+	pluginType plugin.JVSPluginType
 	attr       map[interface{}]interface{}
 }
 
-func (t *astPlugin) init(pluginType JVSPluginType) {
+func (t *astPlugin) init(pluginType plugin.JVSPluginType) {
 	t.pluginType = pluginType
 	t.attr = make(map[interface{}]interface{})
 }
@@ -313,7 +314,7 @@ func (t *astPlugin) GetHierString(space int) string {
 	})
 }
 
-func astParsPluginWithDefault(key string, pluginType JVSPluginType, defaultName string, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
+func astParsPluginWithDefault(key string, pluginType plugin.JVSPluginType, defaultName string, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
 	plugin, err := astParsPlugin(key, pluginType, cfg)
 	if err != nil {
 		return nil, err
@@ -328,7 +329,7 @@ func astParsPluginWithDefault(key string, pluginType JVSPluginType, defaultName 
 	return plugin, nil
 }
 
-func astParsPlugin(key string, pluginType JVSPluginType, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
+func astParsPlugin(key string, pluginType plugin.JVSPluginType, cfg map[interface{}]interface{}) (*astPlugin, *errors.JVSAstError) {
 	var plugin *astPlugin
 	if err := CfgToAstItemOptional(cfg, key, func(item interface{}) *errors.JVSAstError {
 		plugin = new(astPlugin)
@@ -541,7 +542,7 @@ func (t *astEnv) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 
 func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 
-	simulator, err := astParsPlugin("simulator", JVSSimulatorPlugin, cfg)
+	simulator, err := astParsPlugin("simulator", plugin.JVSSimulatorPlugin, cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
@@ -553,7 +554,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 		t.simulator = simulator
 	}
 
-	runner, err := astParsPlugin("runner", JVSRunnerPlugin, cfg)
+	runner, err := astParsPlugin("runner", plugin.JVSRunnerPlugin, cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of env", err.Msg)
 	}
@@ -570,7 +571,7 @@ func (t *astEnv) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 func (t *astEnv) Link() *errors.JVSAstError {
 	//link default
 	if t.simulator == nil {
-		simulator, err := astParsPlugin("simulator", JVSSimulatorPlugin, map[interface{}]interface{}{"simulator": map[interface{}]interface{}{"type": "vcs"}})
+		simulator, err := astParsPlugin("simulator", plugin.JVSSimulatorPlugin, map[interface{}]interface{}{"simulator": map[interface{}]interface{}{"type": "vcs"}})
 		if err != nil {
 			return err
 		}
@@ -580,7 +581,7 @@ func (t *astEnv) Link() *errors.JVSAstError {
 		return errors.JVSAstLexError("simulator "+GetCurSimulator().Name(), "Error in loading "+GetCurSimulator().BuildInOptionFile()+":"+err.Error())
 	}
 	if t.runner == nil {
-		runner, err := astParsPlugin("runner", JVSRunnerPlugin, map[interface{}]interface{}{"runner": map[interface{}]interface{}{"type": "host"}})
+		runner, err := astParsPlugin("runner", plugin.JVSRunnerPlugin, map[interface{}]interface{}{"runner": map[interface{}]interface{}{"type": "host"}})
 		if err != nil {
 			return err
 		}
@@ -651,7 +652,7 @@ func (t *AstBuild) GetTestDiscoverer() TestDiscoverer {
 }
 
 func (t *AstBuild) GetChecker() Checker {
-	return getPlugin(JVSCheckerPlugin, t.compileChecker.plugin.Name()).(Checker)
+	return getPlugin(plugin.JVSCheckerPlugin, t.compileChecker.plugin.Name()).(Checker)
 }
 
 func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
@@ -671,19 +672,19 @@ func (t *AstBuild) KeywordsChecker(s string) (bool, *utils.StringMapSet, string)
 }
 
 func (t *AstBuild) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
-	testDiscover, err := astParsPluginWithDefault("test_discoverer", JVSTestDiscovererPlugin, "uvm_test", cfg)
+	testDiscover, err := astParsPluginWithDefault("test_discoverer", plugin.JVSTestDiscovererPlugin, "uvm_test", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
 	t.testDiscoverer = testDiscover
 
-	testChecker, err := astParsPluginWithDefault("test_checker", JVSCheckerPlugin, "testChecker", cfg)
+	testChecker, err := astParsPluginWithDefault("test_checker", plugin.JVSCheckerPlugin, "testChecker", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
 	t.testChecker = testChecker
 
-	compileChecker, err := astParsPluginWithDefault("compile_checker", JVSCheckerPlugin, "compileChecker", cfg)
+	compileChecker, err := astParsPluginWithDefault("compile_checker", plugin.JVSCheckerPlugin, "compileChecker", cfg)
 	if err != nil {
 		return errors.JVSAstParseError(err.Item+" of build "+t.Name, err.Msg)
 	}
@@ -893,7 +894,7 @@ func (t *AstTestCase) PostSimAction() string {
 }
 
 func (t *AstTestCase) GetChecker() Checker {
-	return getPlugin(JVSCheckerPlugin, t.build.testChecker.plugin.Name()).(Checker)
+	return getPlugin(plugin.JVSCheckerPlugin, t.build.testChecker.plugin.Name()).(Checker)
 }
 
 func (t *AstTestCase) Clone() *AstTestCase {
