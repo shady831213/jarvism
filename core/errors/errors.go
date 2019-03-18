@@ -61,6 +61,7 @@ type JVSRuntimeResult struct {
 	Status JVSRuntimeStatus
 	title  string
 	msg    []string
+	Name   string
 }
 
 func (e *JVSRuntimeResult) Error() string {
@@ -102,6 +103,7 @@ func JVSRuntimeResultPass(msgs ...string) *JVSRuntimeResult {
 		JVSRuntimePass,
 		"",
 		make([]string, 0),
+		"",
 	}
 	inst.addMsgs(msgs...)
 	return inst
@@ -112,6 +114,7 @@ func JVSRuntimeResultFail(msgs ...string) *JVSRuntimeResult {
 		JVSRuntimeFail,
 		"Error:",
 		make([]string, 0),
+		"",
 	}
 	inst.addMsgs(msgs...)
 	return inst
@@ -122,6 +125,7 @@ func JVSRuntimeResultWarning(msgs ...string) *JVSRuntimeResult {
 		JVSRuntimeWarning,
 		"Warning:",
 		make([]string, 0),
+		"",
 	}
 	inst.addMsgs(msgs...)
 	return inst
@@ -132,6 +136,7 @@ func JVSRuntimeResultUnknown(msgs ...string) *JVSRuntimeResult {
 		JVSRuntimeUnknown,
 		"Unknown:",
 		make([]string, 0),
+		"",
 	}
 	inst.addMsgs(msgs...)
 	return inst

@@ -229,6 +229,7 @@ func (f *runFlow) run() {
 	//run compile
 	if !runTimeSimOnly {
 		result := f.prepareBuildPhase(f.build)
+		result.Name = f.build.Name
 		if result.Status != errors.JVSRuntimePass {
 			f.buildDone <- result
 			runTimeLimiter.get()
@@ -252,6 +253,7 @@ func (f *runFlow) run() {
 			defer f.testWg.Add(-1)
 			defer runTimeLimiter.get()
 			result := f.prepareTestPhase(testCase)
+			result.Name = testCase.Name
 			if result.Status != errors.JVSRuntimePass {
 				f.testDone <- result
 				return
@@ -320,7 +322,7 @@ func (r *runTime) addReporter(reporters ...Reporter) {
 	//init all reporters
 	r.reporters = append(r.reporters, reporters...)
 	for _, reporter := range r.reporters {
-		reporter.Init(len(r.runFlow), r.totalTest)
+		reporter.Init(r.runtimeId, len(r.runFlow), r.totalTest)
 	}
 }
 

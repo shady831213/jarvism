@@ -59,6 +59,7 @@ func (s *StatusCnt) StatusString() string {
 type statusReporter struct {
 	buildStatus *StatusCnt
 	testStatus  *StatusCnt
+	jobId       string
 	status      string
 }
 
@@ -66,9 +67,10 @@ func (r *statusReporter) Name() string {
 	return "statusReporter"
 }
 
-func (r *statusReporter) Init(totalBuild, totalTest int) {
+func (r *statusReporter) Init(jobId string, totalBuild, totalTest int) {
 	r.buildStatus = newStatusCnt("BUILDS", totalBuild)
 	r.testStatus = newStatusCnt("TESTS", totalTest)
+	r.jobId = jobId
 	r.status = r.buildStatus.StatusString() + r.testStatus.StatusString()
 }
 
@@ -85,7 +87,7 @@ func (r *statusReporter) CollectTestResult(result *errors.JVSRuntimeResult) {
 func (r *statusReporter) Report() {
 	const padding = 3
 	w := tabwriter.NewWriter(&stdout{}, 0, 0, padding, ' ', tabwriter.DiscardEmptyColumns|tabwriter.TabIndent|tabwriter.StripEscape|tabwriter.Debug)
-	fmt.Fprintln(w, utils.Brown("Jarvism Report:"))
+	fmt.Fprintln(w, utils.Brown("Jarvism Report for jobId "+r.jobId+":"))
 	fmt.Fprintln(w, " \t"+utils.Brown("TOTAL\t")+
 		errors.StatusColor(errors.JVSRuntimePass)(errors.StatusString(errors.JVSRuntimePass))+"\t"+
 		errors.StatusColor(errors.JVSRuntimeFail)(errors.StatusString(errors.JVSRuntimeFail))+"\t"+
@@ -101,7 +103,7 @@ func (r *statusReporter) Report() {
 		errors.StatusColor(errors.JVSRuntimeFail)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeFail]))+"\t"+
 		errors.StatusColor(errors.JVSRuntimeWarning)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeWarning]))+"\t"+
 		errors.StatusColor(errors.JVSRuntimeUnknown)(strconv.Itoa(r.testStatus.Cnts[errors.JVSRuntimeUnknown]))+"\t")
-	fmt.Fprintln(w, utils.Brown("Jarvism Report Done!"))
+	fmt.Fprintln(w, utils.Brown("Jarvism Report for jobId "+r.jobId+" Done!"))
 	w.Flush()
 }
 

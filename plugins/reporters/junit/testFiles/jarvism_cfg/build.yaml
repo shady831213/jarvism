@@ -1,0 +1,38 @@
+
+common_compile_option: &common_compile >-
+  -sverilog
+  -ntb_opts uvm-1.2
+
+common_sim_option: &common_sim >-
+  +UVM_VERBOSITY=UVM_LOW
+  +UVM_CONFIG_DB_TRACE
+
+builds:
+  build1:
+    compile_checker:
+      type:
+        compileChecker
+      attr:
+        fail:
+          - .*Error.*
+    compile_option:
+      - *common_compile
+      - -timescale=1ns/10ps
+    pre_sim_action:
+      - echo "pre_sim_build1"
+    sim_option:
+      - *common_sim
+    post_sim_action:
+      - echo "post_sim_build1"
+
+  build2:
+    pre_compile_action:
+      - echo "pre_compile_build2"
+    compile_option:
+      - -debug_access+pp
+      - *common_compile
+    post_compile_action:
+      - echo "post_compile_build2"
+    sim_option:
+      - *common_sim
+

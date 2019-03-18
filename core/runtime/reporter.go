@@ -9,6 +9,10 @@ type Reporter interface {
 	plugin.Plugin
 	CollectBuildResult(*errors.JVSRuntimeResult)
 	CollectTestResult(*errors.JVSRuntimeResult)
-	Init(totalBuild, totalTest int)
+	Init(jobId string, totalBuild, totalTest int)
 	Report()
+}
+
+func RegisterReporter(c func() plugin.Plugin) {
+	plugin.RegisterPlugin(plugin.JVSReporterPlugin, c)
 }

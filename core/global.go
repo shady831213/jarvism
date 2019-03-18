@@ -62,7 +62,7 @@ func CheckEnv() error {
 		return errors.New("Env $JVS_PRJ_HOME is not set!")
 	}
 	p, err := filepath.Abs(os.ExpandEnv(os.Getenv("JVS_PRJ_HOME")))
-	if err!=nil {
+	if err != nil {
 		return err
 	}
 	prjHome = p
@@ -96,4 +96,8 @@ func GetPluginsHome() string {
 
 func GetWorkDir() string {
 	return workDir
+}
+
+func GetReportDir() string {
+	return path.Join(GetWorkDir(), "report")
 }
