@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+//Lex a yaml file, output a map tree
 func Lex(configFile string) (cfg map[interface{}]interface{}, err error) {
 	if filepath.Ext(configFile) != ".yaml" {
 		return nil, errors.JVSAstLexError(configFile, "file ext must be .yaml!")

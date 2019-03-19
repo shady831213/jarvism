@@ -2,6 +2,7 @@ package loader
 
 import "github.com/shady831213/jarvism/core/plugin"
 
+//plugin interface and add parse interface
 type LoderPlugin interface {
 	plugin.Plugin
 	astParser

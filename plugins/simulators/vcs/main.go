@@ -1,3 +1,7 @@
+/*
+vcs simulator implementation
+*/
+
 package main
 
 import (

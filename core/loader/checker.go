@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+//Plugin Checker interface
+//
+//Check return build or test result
+//
+//Input take a reader as input
 type Checker interface {
 	LoderPlugin
 	Check() *errors.JVSRuntimeResult

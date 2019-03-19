@@ -1,3 +1,30 @@
+
+/*
+host runner implementation
+
+work with "uvm_test" test_discoverer, testcases can be automatically discovered and "test.f" will be generated in test dir.
+
+tests will be automatically discovered if testcases organized as follow:
+
+. $TestDir(default is $JVS_PRJ_HOME/testcases)
+
+|--- test1(test1 is valid, and pass to simulator through +UVM_TESTNAME=test1)
+
+|------test1.sv
+
+|--- test2(test2 is invalid)
+
+|------test2.c
+
+|--- test3(test3 is invalid)
+
+builds will be compile into dir $JVS_WORK_DIR/builds/$build_name__$hash
+
+tests will be run in dir $JVS_WORK_DIR/tests/$parentGroupDirTree/$build_name__$hash__$test_name__$seed. Corresponding build will be linked into test dir.
+
+*/
+
+
 package main
 
 import (

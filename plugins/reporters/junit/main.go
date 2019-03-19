@@ -1,5 +1,13 @@
 package main
 
+/*
+junit report implementation
+
+generate junit xml report in path: $JVS_WORK_DIR/report/junit/$job_id.xml
+
+-junitNoXMLHeader: "if enable, xmlHeader will not be generated"
+*/
+
 import (
 	"github.com/shady831213/jarvism/core"
 	"github.com/shady831213/jarvism/core/errors"

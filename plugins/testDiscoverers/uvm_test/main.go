@@ -1,3 +1,23 @@
+/*
+uvm_test test discoverers
+
+work with "host" runner, testcases can be automatically discovered and "test.f" will be generated in test dir.
+
+tests will be automatically discovered if testcases organized as follow:
+
+. $TestDir(default is $JVS_PRJ_HOME/testcases)
+
+|--- test1(test1 is valid, and pass to simulator through +UVM_TESTNAME=test1)
+
+|------test1.sv
+
+|--- test2(test2 is invalid)
+
+|------test2.c
+
+|--- test3(test3 is invalid)
+*/
+
 package main
 
 import (

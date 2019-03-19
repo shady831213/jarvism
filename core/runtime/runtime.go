@@ -1,3 +1,15 @@
+/*
+runtime logic
+
+According to ast, generate runflow.
+
+Runflow includes 1 build and multi testcases.
+
+All runflows run in parallel, all testcases in 1 runflow run in parallel.
+
+In 1 runflow, all testcases start after build done.
+*/
+
 package runtime
 
 import (

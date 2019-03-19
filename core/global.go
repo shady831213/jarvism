@@ -1,5 +1,7 @@
 package core
-
+/*
+define some global path
+*/
 import (
 	"errors"
 	"os"

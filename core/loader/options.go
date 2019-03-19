@@ -16,6 +16,9 @@ import (
 	"time"
 )
 
+//user defined options
+//
+//please refer to gotests/loader_basic/testFiles/jarvism_cfg/yaml1.yaml
 type JvsAstOption interface {
 	flag.Value
 	GetName() string

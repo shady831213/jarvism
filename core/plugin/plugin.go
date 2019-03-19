@@ -1,3 +1,16 @@
+/*
+5 type plugins:
+
+runner : define how to run build and test
+
+testDiscoverer : define how to detect tests
+
+simulator: define sim_cmd, compile cmd ...
+
+checker: define how to return result(pass, fail, warning, unknown)
+
+reporter: define how to generate report
+*/
 package plugin
 
 import (

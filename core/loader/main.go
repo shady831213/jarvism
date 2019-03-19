@@ -1,3 +1,8 @@
+/*
+Lex -> Parse -> Link
+
+input the cfg dir or cfg file and output ast
+*/
 package loader
 
 import (
@@ -17,6 +22,9 @@ func parseFile(configFile string) error {
 	return nil
 }
 
+//lex and parse all files, then link all
+//
+//input can be a dir or a file
 func Load(config string) error {
 	if err := core.CheckEnv(); err != nil {
 		return err

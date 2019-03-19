@@ -5,6 +5,9 @@ import (
 	"github.com/shady831213/jarvism/core/plugin"
 )
 
+//report interface
+//
+//collect result and generate report
 type Reporter interface {
 	plugin.Plugin
 	CollectBuildResult(*errors.JVSRuntimeResult)

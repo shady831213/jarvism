@@ -1,3 +1,9 @@
+/*
+compile checker implementation
+
+"Error:" will be detected
+*/
+
 package main
 
 import (

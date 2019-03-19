@@ -132,14 +132,14 @@ func newAstItem(content interface{}) *astItem {
 	return nil
 }
 
-func (item *astItem) Cat(i *astItem) {
+func (item *astItem) cat(i *astItem) {
 	if i == nil {
 		return
 	}
 	item.content.Merge(i.content)
 }
 
-func (item *astItem) Replace(old, new string, cnt int) *astItem {
+func (item *astItem) replace(old, new string, cnt int) *astItem {
 	inst := newAstItem("")
 	item.content.Each(func(i interface{}) bool {
 		s := strings.Replace(i.(string), old, new, cnt)
@@ -149,7 +149,7 @@ func (item *astItem) Replace(old, new string, cnt int) *astItem {
 	return inst
 }
 
-func (item *astItem) GetString() string {
+func (item *astItem) getString() string {
 	l := set.StringSlice(item.content)
 	sort.Strings(l)
 	return strings.Join(l, " ")
@@ -181,20 +181,20 @@ func (items *astItems) optionName() string {
 	return items.name + "_option"
 }
 
-func (items *astItems) Cat(i *astItems) {
+func (items *astItems) cat(i *astItems) {
 	if i == nil {
 		return
 	}
 	items.preAction += " " + i.preAction
 	items.postAction += " " + i.postAction
-	items.option.Cat(i.option)
+	items.option.cat(i.option)
 }
 
-func (items *astItems) Replace(old, new string, cnt int) *astItems {
+func (items *astItems) replace(old, new string, cnt int) *astItems {
 	inst := newAstItems(items.name)
 	inst.preAction = strings.Replace(items.preAction, old, new, cnt)
 	inst.postAction = strings.Replace(items.postAction, old, new, cnt)
-	inst.option = items.option.Replace(old, new, cnt)
+	inst.option = items.option.replace(old, new, cnt)
 	return inst
 }
 
@@ -221,7 +221,7 @@ func (items *astItems) Parse(cfg map[interface{}]interface{}) *errors.JVSAstErro
 		return err
 	}
 	if err := CfgToAstItemOptional(cfg, items.optionName(), func(i interface{}) *errors.JVSAstError {
-		items.option.Cat(newAstItem(i))
+		items.option.cat(newAstItem(i))
 		return nil
 	}); err != nil {
 		return err
@@ -244,7 +244,7 @@ func (items *astItems) GetHierString(space int) string {
 	return astHierFmt(items.preActionName()+":", space, func() string {
 		return fmt.Sprint(strings.Repeat(" ", space) + items.preAction)
 	}) + astHierFmt(items.optionName()+":", space, func() string {
-		return fmt.Sprint(strings.Repeat(" ", space) + items.option.GetString())
+		return fmt.Sprint(strings.Repeat(" ", space) + items.option.getString())
 	}) + astHierFmt(items.postActionName()+":", space, func() string {
 		return fmt.Sprint(strings.Repeat(" ", space) + items.postAction)
 	})
@@ -349,18 +349,18 @@ func astParsPlugin(key string, pluginType plugin.JVSPluginType, cfg map[interfac
 
 //Options
 //------------------------
-type AstOptionAction struct {
+type astOptionAction struct {
 	compileOption, simOption *astItem
 }
 
-func NewAstOptionAction() *AstOptionAction {
-	inst := new(AstOptionAction)
+func NewAstOptionAction() *astOptionAction {
+	inst := new(astOptionAction)
 	inst.compileOption = newAstItem("")
 	inst.simOption = newAstItem("")
 	return inst
 }
 
-func (a *AstOptionAction) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+func (a *astOptionAction) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("compile_option")
 	keywords.AddKey("sim_option")
@@ -370,16 +370,16 @@ func (a *AstOptionAction) KeywordsChecker(s string) (bool, *utils.StringMapSet, 
 	return true, nil, ""
 }
 
-func (a *AstOptionAction) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+func (a *astOptionAction) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := CfgToAstItemOptional(cfg, "compile_option", func(i interface{}) *errors.JVSAstError {
-		a.compileOption.Cat(newAstItem(i))
+		a.compileOption.cat(newAstItem(i))
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	if err := CfgToAstItemOptional(cfg, "sim_option", func(i interface{}) *errors.JVSAstError {
-		a.simOption.Cat(newAstItem(i))
+		a.simOption.cat(newAstItem(i))
 		return nil
 	}); err != nil {
 		return err
@@ -388,39 +388,39 @@ func (a *AstOptionAction) Parse(cfg map[interface{}]interface{}) *errors.JVSAstE
 	return nil
 }
 
-func (a *AstOptionAction) GetHierString(space int) string {
+func (a *astOptionAction) GetHierString(space int) string {
 	return astHierFmt("compile_option:", space, func() string {
-		return fmt.Sprint(strings.Repeat(" ", space) + a.compileOption.GetString())
+		return fmt.Sprint(strings.Repeat(" ", space) + a.compileOption.getString())
 	}) + astHierFmt("sim_option:", space, func() string {
-		return fmt.Sprint(strings.Repeat(" ", space) + a.simOption.GetString())
+		return fmt.Sprint(strings.Repeat(" ", space) + a.simOption.getString())
 	})
 }
 
-type AstOption struct {
-	On        *AstOptionAction
-	WithValue *AstOptionAction
+type astOption struct {
+	On        *astOptionAction
+	WithValue *astOptionAction
 	Value     string
 	Name      string
 	usage     string
 }
 
-func newAstOption(name string) *AstOption {
-	inst := new(AstOption)
+func newAstOption(name string) *astOption {
+	inst := new(astOption)
 	inst.Init(name)
 	inst.usage = "user-defined flag"
 	return inst
 }
 
-func (t *AstOption) Init(name string) {
+func (t *astOption) Init(name string) {
 	t.Name = name
 	t.Value = "false"
 }
 
-func (t *AstOption) GetName() string {
+func (t *astOption) GetName() string {
 	return t.Name
 }
 
-func (t *AstOption) Clone() JvsAstOption {
+func (t *astOption) Clone() JvsAstOption {
 	inst := newAstOption(t.Name)
 	inst.Value = t.Value
 	inst.On = t.On
@@ -428,40 +428,40 @@ func (t *AstOption) Clone() JvsAstOption {
 	return inst
 }
 
-func (t *AstOption) Set(s string) error {
+func (t *astOption) Set(s string) error {
 	t.Value = s
 	return nil
 }
 
-func (t *AstOption) String() string {
+func (t *astOption) String() string {
 	return t.Value
 }
 
-func (t *AstOption) IsBoolFlag() bool {
+func (t *astOption) IsBoolFlag() bool {
 	return t.On != nil
 }
 
-func (t *AstOption) Usage() string {
+func (t *astOption) Usage() string {
 	return t.usage
 }
 
-func (t *AstOption) TestHandler(test *AstTestCase) {
+func (t *astOption) TestHandler(test *AstTestCase) {
 	if t.Value == "true" && t.IsBoolFlag() {
-		test.simItems.option.Cat(t.On.simOption)
+		test.simItems.option.cat(t.On.simOption)
 		return
 	}
-	test.simItems.option.Cat(t.WithValue.simOption.Replace("$"+t.Name, t.Value, -1))
+	test.simItems.option.cat(t.WithValue.simOption.replace("$"+t.Name, t.Value, -1))
 }
 
-func (t *AstOption) BuildHandler(build *AstBuild) {
+func (t *astOption) BuildHandler(build *AstBuild) {
 	if t.Value == "true" && t.IsBoolFlag() {
-		build.compileItems.option.Cat(t.On.compileOption)
+		build.compileItems.option.cat(t.On.compileOption)
 		return
 	}
-	build.compileItems.option.Cat(t.WithValue.compileOption.Replace("$"+t.Name, t.Value, -1))
+	build.compileItems.option.cat(t.WithValue.compileOption.replace("$"+t.Name, t.Value, -1))
 }
 
-func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
+func (t *astOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string) {
 	keywords := utils.NewStringMapSet()
 	keywords.AddKey("on_action", "with_value_action", "usage")
 	if !CheckKeyWord(s, keywords) {
@@ -470,7 +470,7 @@ func (t *AstOption) KeywordsChecker(s string) (bool, *utils.StringMapSet, string
 	return true, nil, ""
 }
 
-func (t *AstOption) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
+func (t *astOption) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	if err := CfgToAstItemOptional(cfg, "usage", func(item interface{}) *errors.JVSAstError {
 		t.usage = item.(string)
 		return nil
@@ -497,7 +497,7 @@ func (t *AstOption) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
 	return nil
 }
 
-func (t *AstOption) GetHierString(space int) string {
+func (t *astOption) GetHierString(space int) string {
 	nextSpace := space + 1
 	return astHierFmt(t.Name+":", space, func() string {
 		return astHierFmt("Usage:", nextSpace, func() string {
@@ -630,7 +630,7 @@ func (t *AstBuild) PreCompileAction() string {
 }
 
 func (t *AstBuild) CompileOption() string {
-	return t.compileItems.option.GetString()
+	return t.compileItems.option.getString()
 }
 
 func (t *AstBuild) PostCompileAction() string {
@@ -642,8 +642,8 @@ func (t *AstBuild) Clone() *AstBuild {
 	inst.testDiscoverer = t.testDiscoverer
 	inst.compileChecker = t.compileChecker
 	inst.testChecker = t.testChecker
-	inst.simItems.Cat(t.simItems)
-	inst.compileItems.Cat(t.compileItems)
+	inst.simItems.cat(t.simItems)
+	inst.compileItems.cat(t.compileItems)
 	return inst
 }
 
@@ -858,7 +858,7 @@ func (t *astTest) GetHierString(space int) string {
 		astHierFmt("optionArgs:", nextSpace, func() string {
 			s := ""
 			for _, arg := range t.GetOptionArgs().SortedList() {
-				if v, ok := arg.(*AstOption); ok {
+				if v, ok := arg.(*astOption); ok {
 					s += v.GetHierString(nextSpace + 1)
 				} else {
 					s += fmt.Sprintln(strings.Repeat(" ", nextSpace) + "buildIn Option: " + arg.(JvsAstOptionForTest).GetName())
@@ -886,7 +886,7 @@ func (t *AstTestCase) PreSimAction() string {
 }
 
 func (t *AstTestCase) SimOption() string {
-	return t.simItems.option.GetString()
+	return t.simItems.option.getString()
 }
 
 func (t *AstTestCase) PostSimAction() string {
@@ -901,7 +901,7 @@ func (t *AstTestCase) Clone() *AstTestCase {
 	inst := new(AstTestCase)
 	inst.astTest.Copy(&t.astTest)
 	inst.simItems = newAstItems("sim")
-	inst.simItems.Cat(t.simItems)
+	inst.simItems.cat(t.simItems)
 	if t.seeds != nil {
 		inst.seeds = make([]int, len(t.seeds))
 		copy(inst.seeds, t.seeds)
@@ -932,9 +932,9 @@ func (t *AstTestCase) GetTestCases() []*AstTestCase {
 	for i := range testcases {
 		testcases[i] = newAstTestCase(t.GetName() + "__" + strconv.Itoa(t.seeds[i]))
 		//copy sim_options and set seed
-		testcases[i].simItems.Cat(t.GetBuild().simItems)
-		testcases[i].simItems.Cat(t.simItems)
-		testcases[i].simItems.option.Cat(newAstItem(GetCurSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
+		testcases[i].simItems.cat(t.GetBuild().simItems)
+		testcases[i].simItems.cat(t.simItems)
+		testcases[i].simItems.option.cat(newAstItem(GetCurSimulator().SeedOption() + strconv.Itoa(t.seeds[i])))
 	}
 	return testcases
 }
@@ -1168,7 +1168,7 @@ func (t *AstGroup) GetHierString(space int) string {
 //------------------------
 type astRoot struct {
 	env     *astEnv
-	Options map[string]*AstOption
+	Options map[string]*astOption
 	Builds  map[string]*AstBuild
 	Groups  map[string]*AstGroup
 }
@@ -1177,7 +1177,7 @@ func newAstRoot() *astRoot {
 	inst := new(astRoot)
 	inst.Builds = make(map[string]*AstBuild)
 	inst.Groups = make(map[string]*AstGroup)
-	inst.Options = make(map[string]*AstOption)
+	inst.Options = make(map[string]*astOption)
 	return inst
 }
 

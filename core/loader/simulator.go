@@ -2,6 +2,9 @@ package loader
 
 import "github.com/shady831213/jarvism/core/plugin"
 
+//simulator interface
+//
+//sim cmd , compile cmd...
 type Simulator interface {
 	LoderPlugin
 	BuildInOptionFile() string

@@ -1,3 +1,17 @@
+/*
+sim checker implementation
+
+"Error:" will be detected
+
+"UVM_ERROR:" will be detected
+
+"UVM_FATAL:" will be detected
+
+"UVM_WARNING:" will be detected
+
+"Timing violation:" will be detected
+*/
+
 package main
 
 import (

@@ -15,6 +15,9 @@ type CmdAttr struct {
 
 type CmdRunner func(attr *CmdAttr, name string, arg ...string) *errors.JVSRuntimeResult
 
+// Runner interface
+//
+// 4 phase functions
 type Runner interface {
 	LoderPlugin
 	PrepareBuild(*AstBuild, CmdRunner) *errors.JVSRuntimeResult
