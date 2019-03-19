@@ -17,7 +17,7 @@ func newTestRunner() plugin.Plugin {
 	return new(testRunner)
 }
 func (r *testRunner) Name() string {
-	return "testRunner"
+	return "cmdTestRunner"
 }
 
 func (r *testRunner) Parse(cfg map[interface{}]interface{}) *errors.JVSAstError {
