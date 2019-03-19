@@ -130,12 +130,17 @@ func LoadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstEr
 		pluginState = _pluginState
 	}
 
+	needCompile := false
 	//check lib
 	libPath := path.Join(core.GetWorkDir(), ".jarvism_plugins", string(pluginType)+"s", pluginName+".so")
 	libState, err := os.Stat(libPath)
-
+	needCompile = err != nil || libState.ModTime().Before(pluginState.ModTime())
+	//exe file
+	if exeState := getExeStat(); exeState != nil {
+		needCompile = needCompile || libState.ModTime().Before(exeState.ModTime())
+	}
 	//compile
-	if err != nil || libState.ModTime().Before(pluginState.ModTime()) {
+	if needCompile {
 		if err := compile(pluginType, pluginPath, libPath); err != nil {
 			return jvsErrors.JVSPluginLoadError(pluginName, err.Error(), getRealPath(pluginPath))
 		}
@@ -147,6 +152,22 @@ func LoadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstEr
 	}
 
 	return nil
+}
+
+func getExeStat() os.FileInfo {
+	exeFile, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		return nil
+	}
+	exeFilePath, err := filepath.Abs(exeFile)
+	if err != nil {
+		return nil
+	}
+	exeState, err := os.Stat(exeFilePath)
+	if err != nil {
+		return nil
+	}
+	return exeState
 }
 
 func compile(pluginType JVSPluginType, pluginFile, libFile string) error {
