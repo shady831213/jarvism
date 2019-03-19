@@ -13,11 +13,11 @@ import (
 	"unicode/utf8"
 )
 
-func Help(args []string) {
+func help(args []string) {
 	// 'jarvsim help documentation' generates doc.go.
 	if len(args) == 1 && args[0] == "documentation" {
 		buf := new(bytes.Buffer)
-		PrintUsage(buf, base.Jarvism)
+		printUsage(buf, base.Jarvism)
 		usage := &base.Command{Long: buf.String()}
 		cmds := []*base.Command{usage}
 		for _, cmd := range base.Jarvism.Commands {
@@ -48,7 +48,7 @@ Args:
 	}
 
 	if len(cmd.Commands) > 0 {
-		PrintUsage(os.Stdout, cmd)
+		printUsage(os.Stdout, cmd)
 	} else {
 		tmpl(os.Stdout, helpTemplate, cmd)
 	}
@@ -165,7 +165,7 @@ func capitalize(s string) string {
 	return string(unicode.ToTitle(r)) + s[n:]
 }
 
-func PrintUsage(w io.Writer, cmd *base.Command) {
+func printUsage(w io.Writer, cmd *base.Command) {
 	bw := bufio.NewWriter(w)
 	tmpl(bw, usageTemplate, cmd)
 	bw.Flush()

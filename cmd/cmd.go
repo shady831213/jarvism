@@ -1,3 +1,19 @@
+/*
+jarvism cmd interface:
+Valid cmd:
+	show_tests
+	show_builds
+	show_groups
+	show_plugins
+
+	run_parse
+	run_build
+	run_test
+	run_group
+
+	init
+Run 'jarvsim help <command>' for details.
+*/
 package cmd
 
 import (
@@ -11,6 +27,7 @@ import (
 	"strings"
 )
 
+//cmd interface entry, main() call this function
 func Run() error {
 	flag.Usage = base.Usage
 	flag.Parse()
@@ -23,7 +40,7 @@ func Run() error {
 
 	cmdName := args[0]
 	if args[0] == "help" {
-		Help(args[1:])
+		help(args[1:])
 		return nil
 	}
 
@@ -37,12 +54,12 @@ BigCmdLoop:
 				bigCmd = cmd
 				args = args[1:]
 				if len(args) == 0 {
-					PrintUsage(os.Stderr, bigCmd)
+					printUsage(os.Stderr, bigCmd)
 					base.SetExitStatus(2)
 					base.Exit()
 				}
 				if args[0] == "help" {
-					Help(append(strings.Split(cmdName, " "), args[1:]...))
+					help(append(strings.Split(cmdName, " "), args[1:]...))
 					return nil
 				}
 				cmdName += " " + args[0]
@@ -77,6 +94,6 @@ func init() {
 }
 
 func mainUsage() {
-	PrintUsage(os.Stderr, base.Jarvism)
+	printUsage(os.Stderr, base.Jarvism)
 	os.Exit(2)
 }
