@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/shady831213/jarvism/core/cmdline"
+	"github.com/shady831213/jarvism/cmd"
 	"github.com/shady831213/jarvism/core/utils"
 	"os"
 )
 
 func main() {
-	if err := cmdline.Run(); err != nil {
-		fmt.Println(utils.Red(err.Error()))
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, utils.Red(err.Error()))
 		os.Exit(2)
 	}
 }

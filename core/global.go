@@ -64,7 +64,7 @@ func getCfgFile(p string) (string, error) {
 	if s, err := os.Stat(path.Join(p, "jarvism_cfg.yaml")); err == nil && !s.IsDir() {
 		return path.Join(p, "jarvism_cfg.yaml"), os.Setenv("JVS_PRJ_HOME", p)
 	}
-	return "", nil
+	return "", errors.New("no \"jarvism_cfg\" dir or \"jarvism_cfg.yaml\" found in " + p + "!")
 }
 
 func GetCfgFile() (string, error) {
@@ -82,7 +82,7 @@ func GetCfgFile() (string, error) {
 	}
 	p, err := filepath.Abs(os.ExpandEnv(os.Getenv("JVS_PRJ_HOME")))
 	if err != nil {
-		return "", err
+		return "", errors.New("no \"jarvism_cfg\" dir or \"jarvism_cfg.yaml\" found in  $JVS_PRJ_HOME(" + os.ExpandEnv("JVS_PRJ_HOME") + ")!" + err.Error())
 	}
 	return getCfgFile(p)
 }

@@ -1,8 +1,8 @@
 package showPlugins_test
 
 import (
+	"github.com/shady831213/jarvism/cmd"
 	"github.com/shady831213/jarvism/core"
-	"github.com/shady831213/jarvism/core/cmdline"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,14 +10,14 @@ import (
 )
 
 func TestShowPlugins(t *testing.T) {
-	os.Args = []string{"", "-show_plugins", "all"}
-	if err := cmdline.Run(); err != nil {
+	os.Args = []string{"", "show_plugins"}
+	if err := cmd.Run(); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 }
 
 func init() {
-	abs, _ := filepath.Abs(path.Join(core.CorePath(), "cmdline", "cmdline_tests", "testFiles"))
+	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "testFiles"))
 	os.Setenv("JVS_PRJ_HOME", abs)
 }
