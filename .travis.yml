@@ -12,4 +12,4 @@ script:
 #install
   - go install
 #go fmt
-  - gofm -s .
+  - gofmt -s .
