@@ -7,5 +7,5 @@ go:
 script:
 #test
   - go test ./...
-#lint
+#install
   - go install
