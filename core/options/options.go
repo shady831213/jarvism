@@ -1,3 +1,6 @@
+/*
+core global option
+*/
 package options
 
 import (
@@ -6,6 +9,9 @@ import (
 	"fmt"
 )
 
+/*
+parse args to options
+*/
 func ArgToOption(s string) (string, error) {
 	if len(s) < 2 || s[0] != '-' {
 		return "", errors.New(fmt.Sprintf("bad flag syntax: %s", s))
