@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/shady831213/jarvism/cmd/base"
+	_ "github.com/shady831213/jarvism/cmd/init"
 	_ "github.com/shady831213/jarvism/cmd/run"
 	_ "github.com/shady831213/jarvism/cmd/show"
 	"os"
