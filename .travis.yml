@@ -11,3 +11,5 @@ script:
   - go test ./...
 #install
   - go install
+#go fmt
+  - gofm -s .
