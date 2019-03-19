@@ -1,3 +1,8 @@
+env:
+  runner:
+    type:
+      "runParseTestRunner"
+
 common_compile_option: &common_compile >-
   -sverilog
   -ntb_opts uvm-1.2

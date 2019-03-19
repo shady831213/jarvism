@@ -1,4 +1,4 @@
-package runtest_test
+package runParse_test
 
 import (
 	"github.com/shady831213/jarvism/cmd"
@@ -9,8 +9,8 @@ import (
 	"testing"
 )
 
-func TestRunTest(t *testing.T) {
-	os.Args = []string{"", "run_test", "build1", "test1", "-repeat", "10"}
+func TestRunParse(t *testing.T) {
+	os.Args = []string{"", "run_parse"}
 	if err := cmd.Run(); err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -18,6 +18,6 @@ func TestRunTest(t *testing.T) {
 }
 
 func init() {
-	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "runtest_test", "testFiles"))
+	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "runParse_test", "testFiles"))
 	os.Setenv("JVS_PRJ_HOME", abs)
 }

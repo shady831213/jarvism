@@ -18,6 +18,6 @@ func TestRunGroup(t *testing.T) {
 }
 
 func init() {
-	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "testFiles"))
+	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "rungroup_test", "testFiles"))
 	os.Setenv("JVS_PRJ_HOME", abs)
 }

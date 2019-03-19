@@ -18,6 +18,6 @@ func TestBuildOnly(t *testing.T) {
 }
 
 func init() {
-	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "testFiles"))
+	abs, _ := filepath.Abs(path.Join(core.PkgPath(), "cmd", "cmd_tests", "buildOnly_test", "testFiles"))
 	os.Setenv("JVS_PRJ_HOME", abs)
 }
