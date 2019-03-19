@@ -8,6 +8,6 @@ install: go get -u github.com/shady831213/jarvism
 
 script:
 #test
-  - go test ./...
+  - go test ./... -parallel 1
 #install
   - go install
