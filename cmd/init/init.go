@@ -36,12 +36,13 @@ func init() {
 func runInit(cmd *base.Command, args []string) error {
 	if prjDir == "" {
 		prjDir = os.Getenv("PWD")
+	} else {
+		prjDir = os.ExpandEnv(prjDir)
+		if err := os.Mkdir(prjDir, os.ModePerm); err != nil {
+			return errors.New(utils.Red(err.Error()))
+		}
 	}
-	prjDir = os.ExpandEnv(prjDir)
 	//make dirs
-	if err := os.Mkdir(prjDir, os.ModePerm); err != nil {
-		return errors.New(utils.Red(err.Error()))
-	}
 	if err := os.Mkdir(path.Join(prjDir, "jarvism_cfg"), os.ModePerm); err != nil {
 		return errors.New(utils.Red(err.Error()))
 	}
