@@ -2,6 +2,11 @@
 Just A Really Very Impressive Simulation Manager
 
 # install
+instatll go
+
+[go](https://github.com/golang/go)
+
+install jarvism
 ```
 go get -u github.com/shady831213/jarvism
 
