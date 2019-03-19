@@ -57,14 +57,11 @@ func runInit(cmd *base.Command, args []string) error {
 	}
 	workDir = os.ExpandEnv(workDir)
 	//files
-	setupContent := fmt.Sprintf("#!/bin/bash\nexport JVS_PRJ_HOME=%s\nexprt JVS_WORK_DIR=%s\n", prjDir, workDir)
+	setupContent := fmt.Sprintf("#!/bin/bash\nexport JVS_PRJ_HOME=%s\nexport JVS_WORK_DIR=%s\n", prjDir, workDir)
 	if err := utils.WriteNewFile(path.Join(prjDir, "jarvism_cfg", "jarvism_setup.sh"), setupContent); err != nil {
 		return errors.New(utils.Red(err.Error()))
 	}
-	yamlContent :=
-		`builds:
-			build1:
-`
+	yamlContent := "builds:\n\tbuild1:\n"
 	if err := utils.WriteNewFile(path.Join(prjDir, "jarvism_cfg", "jarvism_cfg.yaml"), yamlContent); err != nil {
 		return errors.New(utils.Red(err.Error()))
 	}
