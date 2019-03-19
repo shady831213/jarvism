@@ -108,6 +108,7 @@ func (e *JVSRuntimeResult) addMsgs(msgs ...string) {
 		}
 	}
 }
+
 //create runtime result
 func NewJVSRuntimeResult(status JVSRuntimeStatus, msgs ...string) *JVSRuntimeResult {
 	switch status {

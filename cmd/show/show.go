@@ -94,7 +94,7 @@ func runShowPlugins(cmd *base.Command, args []string) error {
 	if argsLen > 5 {
 		argsLen = 5
 	}
-	for i := 0; i < argsLen; i ++ {
+	for i := 0; i < argsLen; i++ {
 		if args[i] != plugin.JVSReporterPlugin &&
 			args[i] != plugin.JVSTestDiscovererPlugin &&
 			args[i] != plugin.JVSSimulatorPlugin &&

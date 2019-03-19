@@ -66,7 +66,7 @@ func catSignal(sc chan os.Signal) {
 }
 
 func runRunParse(cmd *base.Command, args []string) error {
-	return base.Parse();
+	return base.Parse()
 }
 
 func runRunTest(cmd *base.Command, args []string) error {

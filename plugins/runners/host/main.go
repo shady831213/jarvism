@@ -1,4 +1,3 @@
-
 /*
 host runner implementation
 
@@ -23,7 +22,6 @@ builds will be compile into dir $JVS_WORK_DIR/builds/$build_name__$hash
 tests will be run in dir $JVS_WORK_DIR/tests/$parentGroupDirTree/$build_name__$hash__$test_name__$seed. Corresponding build will be linked into test dir.
 
 */
-
 
 package main
 

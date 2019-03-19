@@ -5,6 +5,7 @@ go:
   - "1.12.x"
 
 script:
+  - go get -u
 #test
   - go test ./...
 #install

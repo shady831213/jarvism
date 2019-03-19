@@ -1,6 +1,7 @@
 package loader
 
 import "github.com/shady831213/jarvism/core/plugin"
+
 //test discoverer interface
 //
 //detect valid tests with corresponding build
