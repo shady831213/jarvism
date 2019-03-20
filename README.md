@@ -44,6 +44,31 @@ usage: jarvism init [-prj_dir DIR][-work_dir DIR]
 ```
 Enjoy!
 
+# Config
+jarvism allows you use a single yaml file ($JVS_PRJ_HOME/jarvism_cfg.yaml) or a banch of yaml files ($JVS_PRJ_HOME/jarvism_cfg/*.yaml) to config project. Refer to https://github.com/shady831213/jarvism/tree/master/core/runtime/testFiles/jarvism_cfg
+
+## env
+env config simulator and runner, which are all both parsable plugin, they defiend by "type" and "attr".
+"type" is required. "attr" is optional, depends on plugin implementation (about plugin, see below).
+If env is not defined, simulator and runner will be default, "vcs" and "host" respectively.
+If runner or simulator not defined in env, default will beb used.
+e.g
+```yaml
+env: # runner is default
+  simulator:
+    type: "vcs" 
+```
+
+
+```yaml
+env: # simulator is default
+  runner:
+    type: "host"
+    attr: #attributes used by "host" runner
+```
+
+If the default simulator or runner can not meet your requirement, you can implement your own plugin, and use them in your config file.(about plugin, see below).
+
 # Example
 
 TBD
