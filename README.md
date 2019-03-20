@@ -141,7 +141,7 @@ As about example, "build1" and "build2" are build name. There are some attribute
 + compile_checker: A parsable plugin. If it is not defined, default compile_checker "compileChecker" will be used.
 		   You can add error, warning, unknown and exclued error, warning, unknown pattern through "attr".
 		   If default compile_checker can not meet your requirement, you can write your own checker plugin.
-+ sim_checker: Same as compile_checker, except it is use for simulation, and some pattern has been pre defined.
++ test_checker: Same as compile_checker, except it is use for simulation, and some pattern has been pre defined.
 
 + *_action: There are 4 hooks provided. You can add some cmd sequences before or after compile and simulation.
 
@@ -268,6 +268,50 @@ on_action and with_value_action could be defined together:
 ```
 It means this option could be a bool option or string option. If it is applied without value, on_action will take effect, otherwise, with_value_action will take effect.
 
+
+# Plugins
+
+There are 5 plugin types in jarvism:
+
+## runtime plugin : reporter
+Reporters can and only can be appliy through cmdline like this: "-report junit -reporter report1 ... -reporter reportn".
+Repoter interface refer to https://github.com/shady831213/jarvism/blob/master/core/runtime/reporter.go
+A buildin reporter "junit" can generate junit xml report for CI tools such as Jenkins.
+If you want to develop your own reporter, refer to https://github.com/shady831213/jarvism/tree/master/plugins/reporters/junit
+
+## parsable plugins
+Parsable plugins can be config in config file like this:
+```yaml
+ plugin:
+   type: "plugin name" 
+   attr:
+      attr1:"attr1"
+      attr2:
+      	- attr2_1
+	- attr2_2
+      attr3:
+      	attr3_1: "attr3_1"
+	attr3_2: "attr3_2"
+```
+How to parse "attr" depends on plugin implementation.
+
+There are 4 types pasable plugins:
++ simulator : configed in "env"
++ runner : configed in "env"
++ checker : compile_checker and test_checker are configed in each build
++ test_discoverer : configed in each build
+
+Each type of pasable plugins has a default implementaion:
+"vcs" simulator: https://github.com/shady831213/jarvism/tree/master/plugins/simulators/vcs
+"host" runner: https://github.com/shady831213/jarvism/tree/master/plugins/runners/host
+"compileChecker" and "testChecker" checker: https://github.com/shady831213/jarvism/tree/master/plugins/checkers
+"uvm_test" test_discoverer:https://github.com/shady831213/jarvism/tree/master/plugins/testDiscoverers/uvm_test
+
+How to use these plugins please refer to above description in builds and env.
+
+## develop your own plugins
+TBD
+
 # Example
 
 TBD
@@ -278,9 +322,7 @@ cd $GOPATH/src/github.com/shady831213/jarvism/plugins/runner/host
 go test -v
 ```
 
-# Plugins
 
-TBD
 
 # godoc
 [doc](https://godoc.org/github.com/shady831213/jarvism)
