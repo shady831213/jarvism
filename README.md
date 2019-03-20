@@ -373,10 +373,10 @@ There are 4 types pasable plugins:
 + test_discoverer : configed in each build
 
 Each type of pasable plugins has a default implementaion:
-"vcs" simulator: https://github.com/shady831213/jarvism/tree/master/plugins/simulators/vcs
-"host" runner: https://github.com/shady831213/jarvism/tree/master/plugins/runners/host
-"compileChecker" and "testChecker" checker: https://github.com/shady831213/jarvism/tree/master/plugins/checkers
-"uvm_test" test_discoverer:https://github.com/shady831213/jarvism/tree/master/plugins/testDiscoverers/uvm_test
++ "vcs" simulator: https://github.com/shady831213/jarvism/tree/master/plugins/simulators/vcs
++ "host" runner: https://github.com/shady831213/jarvism/tree/master/plugins/runners/host
++ "compileChecker" and "testChecker" checker: https://github.com/shady831213/jarvism/tree/master/plugins/checkers
++ "uvm_test" test_discoverer:https://github.com/shady831213/jarvism/tree/master/plugins/testDiscoverers/uvm_test
 
 How to use these plugins please refer to above description in builds and env.
 
