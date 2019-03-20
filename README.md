@@ -361,7 +361,6 @@ Parsable plugins can be config in config file like this:
        attr3_1: "attr3_1"
        attr3_2: "attr3_2"
        attr3_3: "attr3_3"
-	
 ```
 How to parse "attr" depends on plugin implementation.
 
