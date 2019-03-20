@@ -115,16 +115,83 @@ builds:
 As about example, "build1" and "build2" are build name. There are some attributes in a build:
 
 + compile_option: A list define compile options will pass to simulator compile flow
+
 + sim_option: A list define simulation options will pass to simulator runtime 
-+ compile_checker: A parsable plugin. If it is not defined, default compile_checker "compileChecker" will be use.
+
++ compile_checker: A parsable plugin. If it is not defined, default compile_checker "compileChecker" will be used.
 		   You can add error, warning, unknown and exclued error, warning, unknown pattern through "attr".
 		   If default compile_checker can not meet your requirement, you can write your own checker plugin.
 + sim_checker: Same as compile_checker, except it is use for simulation, and some pattern has been pre defined.
+
 + *_action: There are 4 hooks provided. You can add some cmd sequences before or after compile and simulation.
 
++ test_discoverer: A parsable plugin. If it is not defined, default test_discoverer "uvm_test" will be used.
+		   You can define top testcases dir through attr, defualt is $JVS_PRJ_HOME/testcases.
+		   If your testcases are compliance with following convention, they will be discovered automatically.
+		   And you don't need add them to file list.Besides, the testcase dir name will pass to simulator through
+		   +UVM_TESTNAME.
+		   
+		   - all testcases in testcases dir
+		   
+		   - testcase dir name is same as .sv file, e.g
+		   
+```
+		   	. testcases/
+			--------test1/ \\valid
+			----------------test1.sv	
+			--------test2/ \\invalid
+			----------------test3.sv	
+			--------test3/ \\invalid
+			----------------test3.c	
+			--------test4/ \\invalid
 
+```
+		   
+		   - uvm_test name is same as .sv file and testcase dir name
+		   
+		   If default test_discoverer can not meet your requirement, you can write your own test_discoverer plugin.
+		   
+## groups
+"groups" defined one or multiple group, which used to organize testcases.
+e.g
+```yaml
+groups:
+  group1:
+    build: build1
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test1:
+          args:
+            - -repeat 10
+      - test2:
+          args:
+            - -seed 1
 
+  group2:
+    build: build2
+    args:
+      - -vh
+      - -repeat 1
+    tests:
+      - test3:
+          args:
+            - -repeat 10
+    groups:
+      - group1
 
+  group3:
+    build: build2
+    args:
+      - -vh
+      - -repeat 20
+    tests:
+      - test1:
+    groups:
+      - group2
+      - group1
+```
 
 # Example
 
