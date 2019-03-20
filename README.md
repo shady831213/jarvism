@@ -204,6 +204,50 @@ As about example, "group1", "group2" and "group3" are group name. There are some
 
 If some testcases in the same group tree use the same build with the same compile_option and pre/post_compile_action, jarvism can detected and try to let them share the same compile database.
 
+## options
+"options" allows user to add user-defined option, which can be used in config file and cmdline.
+e.g
+```yaml
+options:
+  vh:
+    usage: 
+    	"uvm verbosity high"
+    on_action:
+      sim_option:
+        - +UVM_VERBOSITY=UVM_FULL
+
+  test_phase:
+    with_value_action:
+      compile_option:
+        - echo "compile_option $test_phase"
+      sim_option:
+        - echo "sim_option $test_phase"
+```
+As about example, "vh" and "test_phase" user-defined option, it can be used in config file or cmdline like this: "-vh", "-test_phase jarvism". There are some attributes in a option:
+
++ usage: Help message. 
+
++ on_action: If on_cation is defined, this option can be a bool option. It means when this option applied without value, it will add defined sim_option or/and compile_option to testcase or/and build.
+
++ with_value_action: If with_value_cation is defined, this option can be a string option. It means when this option applied with value, it will add defined sim_option or/and compile_option to testcase or/and build, and will use value to replace $option_name. For example, if test_phase is defined as above, and you aplly "-test_phase jarvism", this option will return
+{compile_option: echo "compile_option jarvism", sim_option: echo "sim_option jarvism"}.
+
+on_action and with_value_action could be defined together:
+```yaml
+  wave:
+    usage:
+      dump waveform, vaule is format[FSDB, VPD], use macro[DUMP_FSDB, DUMP_VPD] in your testbench, default is VPD
+    on_action:
+      compile_option:
+        - -lca -debug_access+pp
+        - +define+DUMP_VPD
+    with_value_action:
+      compile_option:
+        - -lca -debug_access+pp
+        - +define+DUMP$wave
+```
+It means this option could be a bool option or string option. If it is applied without value, on_action will take effect, otherwise, with_value_action will take effect.
+
 # Example
 
 TBD
