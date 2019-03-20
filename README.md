@@ -64,6 +64,11 @@ Enjoy!
 
 If you need more flexible or complicated configuration, see below.
 
+# Example
+
+[jarvisuk](https://github.com/shady831213/jarvisuk)
+
+
 # usage
 ```
 Just A Really Very Impressive Simulation Manager.
@@ -374,13 +379,3 @@ How to use these plugins please refer to above description in builds and env.
 
 ## develop your own plugins
 TBD
-
-# Example
-
-TBD
-
-But if you have vcs, you can run tests in plugins/runner/host
-```
-cd $GOPATH/src/github.com/shady831213/jarvism/plugins/runner/host
-go test -v
-```
