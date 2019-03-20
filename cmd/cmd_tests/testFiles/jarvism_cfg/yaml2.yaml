@@ -22,7 +22,6 @@ builds:
       - echo "post_compile_build1"
     sim_option:
       - *common_sim
-
 groups:
   group1:
     build: build1

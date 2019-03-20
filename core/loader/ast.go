@@ -1103,10 +1103,10 @@ func (t *AstGroup) Link() *errors.JVSAstError {
 	//dfs link groups
 	for name := range t.Groups {
 		group := jvsAstRoot.GetGroup(name)
+		if group == nil {
+			return errors.JVSAstLinkError("group "+t.Name+"("+t.file+")", " sub group "+name+"of group "+t.Name+" is undef!")
+		}
 		if !group.linked {
-			if group == nil {
-				return errors.JVSAstLinkError("group "+t.Name+"("+t.file+")", "sub group "+name+"of group "+t.Name+" is undef!")
-			}
 			if err := group.Link(); err != nil {
 				return err
 			}

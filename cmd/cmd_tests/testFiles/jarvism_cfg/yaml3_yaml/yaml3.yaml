@@ -6,15 +6,22 @@ options:
       sim_option:
         - echo "sim_option $test_phase"
 
+
+builds:
+  build3:
+    pre_compile_action:
+      - echo "pre_compile_build1"
+    compile_option:
+      - -debug_access+pp
+    post_compile_action:
+      - echo "post_compile_build1"
+
 groups:
   group2:
-    build: build2
+    build: build3
     args:
-      - -vh
       - -repeat 1
     tests:
       - test3:
           args:
             - -repeat 10
-    groups:
-      - group1

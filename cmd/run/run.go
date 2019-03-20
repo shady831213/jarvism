@@ -19,22 +19,38 @@ var CmdRunParse = &base.Command{
 }
 
 var CmdRunTest = &base.Command{
-	UsageLine:   "jarvism run_test [build_name][test_name][args]",
-	Short:       "run single test, build name must assigned",
+	UsageLine: "jarvism run_test [build_name][test_name][args]",
+	Short:     "run single test, build name must assigned",
+	Long: `
+Use "jarvsim show_args" for more information about available arguments.
+Use "jarvsim show_builds" for more information about valid builds.
+Use "jarvsim show_tests build_name" for more information about valid tests list for a build.
+`,
 	Flag:        *options.GetJvsOptions(),
 	CustomFlags: true,
 }
 
 var CmdRunBuild = &base.Command{
-	UsageLine:   "jarvism run_build [build_name][args]",
-	Short:       "run single build",
+	UsageLine: "jarvism run_build [build_name][args]",
+	Short:     "run single build",
+	Long: `
+Use "jarvsim show_args" for more information about available arguments.
+Use "jarvsim show_builds" for more information about valid builds.
+Use "jarvsim show_tests build_name" for more information about valid tests list for a build.
+`,
 	Flag:        *options.GetJvsOptions(),
 	CustomFlags: true,
 }
 
 var CmdRunGroup = &base.Command{
-	UsageLine:   "jarvism run_group [group_name][args]",
-	Short:       "run group",
+	UsageLine: "jarvism run_group [group_name][args]",
+	Short:     "run group",
+	Long: `
+Use "jarvsim show_args" for more information about available arguments.
+Use "jarvsim show_builds" for more information about valid builds.
+Use "jarvsim show_tests build_name" for more information about valid tests list for a build.
+Use "jarvsim show_groups" for more information about valid groups.
+`,
 	Flag:        *options.GetJvsOptions(),
 	CustomFlags: true,
 }

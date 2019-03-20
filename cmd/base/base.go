@@ -7,6 +7,7 @@ import (
 	"github.com/shady831213/jarvism/core/loader"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"sync"
 )
@@ -40,8 +41,13 @@ type Command struct {
 }
 
 var Jarvism = &Command{
-	UsageLine: "jarvism",
-	Long:      `Just A Really Very Impressive Simulation Manager.`,
+	UsageLine: "jarvism [-config_top config_top]",
+	Long: `
+Just A Really Very Impressive Simulation Manager.
+
+-config_top assign a config top inside $JVS_PRJ_HOME/jarvism_cfg, default is $JVS_PRJ_HOME/jarvism_cfg or $JVS_PRJ_HOME/jarvism_cfg.yaml. 
+If only jarsivm_cfg.yaml in $JVS_PRJ_HOME,or config_top is not existed in $JVS_PRJ_HOME/jarvism_cfg, this argument will be ignored.
+`,
 	// Commands initialized in package main
 }
 
@@ -129,10 +135,23 @@ func (c *Command) AddCommand(subCommands ...*Command) {
 // but here for reference by other packages.
 var Usage func()
 
+// yaml config top, a dir or a file
+//
+// config top must be inside jarvism_cfg
+var configTop string
+
+func init() {
+	flag.StringVar(&configTop, "config_top", "", "")
+}
+
 func Parse() error {
 	cfg, err := core.GetCfgFile()
 	if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(path.Join(cfg, configTop)); err == nil {
+		cfg = path.Join(cfg, configTop)
 	}
 	if err := loader.Load(cfg); err != nil {
 		return err
