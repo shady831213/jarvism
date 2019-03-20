@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"github.com/shady831213/jarvism/cmd/base"
 	"github.com/shady831213/jarvism/core/loader"
+	"github.com/shady831213/jarvism/core/options"
 	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 )
+
+var CmdShowArgs = &base.Command{
+	UsageLine: "jarvism show_args",
+	Short:     "list all available arguments",
+}
 
 var CmdShowTests = &base.Command{
 	UsageLine: "jarvism show_tests [build_name]",
@@ -30,11 +36,21 @@ var CmdShowPlugins = &base.Command{
 }
 
 func init() {
+	CmdShowArgs.Run = runShowArgs
 	CmdShowTests.Run = runShowTests
 	CmdShowBuilds.Run = runShowBuilds
 	CmdShowGroups.Run = runShowGroups
 	CmdShowPlugins.Run = runShowPlugins
-	base.Jarvism.AddCommand(CmdShowTests, CmdShowGroups, CmdShowBuilds, CmdShowPlugins)
+	base.Jarvism.AddCommand(CmdShowArgs, CmdShowTests, CmdShowGroups, CmdShowBuilds, CmdShowPlugins)
+}
+
+func runShowArgs(cmd *base.Command, args []string) error {
+	if err := base.Parse(); err != nil {
+		return err
+	}
+	fmt.Println("all args:")
+	options.GetJvsOptions().PrintDefaults()
+	return nil
 }
 
 func runShowTests(cmd *base.Command, args []string) error {

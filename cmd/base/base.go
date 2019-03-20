@@ -68,7 +68,6 @@ func (c *Command) Name() string {
 
 func (c *Command) Usage() {
 	fmt.Fprintf(os.Stderr, "usage: %s\n", c.UsageLine)
-	c.Flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "Run 'jarvsim help %s ' for details.\n", c.LongName())
 	os.Exit(2)
 }

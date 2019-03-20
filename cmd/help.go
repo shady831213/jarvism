@@ -52,7 +52,6 @@ Args:
 	} else {
 		tmpl(os.Stdout, helpTemplate, cmd)
 	}
-	cmd.Flag.PrintDefaults()
 	return
 }
 
