@@ -48,10 +48,10 @@ Enjoy!
 jarvism allows you use a single yaml file ($JVS_PRJ_HOME/jarvism_cfg.yaml) or a banch of yaml files ($JVS_PRJ_HOME/jarvism_cfg/*.yaml) to config project. Refer to https://github.com/shady831213/jarvism/tree/master/core/runtime/testFiles/jarvism_cfg
 
 ## env
-env config simulator and runner, which are all both parsable plugin, they defiend by "type" and "attr".
+"env" config simulator and runner, which are all both parsable plugin, they defiend by "type" and "attr".
 "type" is required. "attr" is optional, depends on plugin implementation (about plugin, see below).
-If env is not defined, simulator and runner will be default, "vcs" and "host" respectively.
-If runner or simulator not defined in env, default will beb used.
+If "env" is not defined, simulator and runner will be default, "vcs" and "host" respectively.
+If runner or simulator not defined in "env", default will beb used.
 e.g
 ```yaml
 env: # runner is default
@@ -68,6 +68,63 @@ env: # simulator is default
 ```
 
 If the default simulator or runner can not meet your requirement, you can implement your own plugin, and use them in your config file.(about plugin, see below).
+
+
+## builds
+"builds" is a required tag.  "builds" defined one or multiple build, which used to config a specific compile flow.
+e.g
+```yaml
+common_compile_option: &common_compile >-
+  -sverilog
+  -ntb_opts uvm-1.2
+
+common_sim_option: &common_sim >-
+  +UVM_VERBOSITY=UVM_LOW
+  +UVM_CONFIG_DB_TRACE
+
+builds:
+  build1:
+    compile_checker:
+      type:
+        compileChecker
+      attr:
+        fail:
+          - .*Error.*
+    compile_option:
+      - *common_compile
+      - -timescale=1ns/10ps
+    pre_sim_action:
+      - echo "pre_sim_build1"
+    sim_option:
+      - *common_sim
+    post_sim_action:
+      - echo "post_sim_build1"
+
+  build2:
+    pre_compile_action:
+      - echo "pre_compile_build2"
+    compile_option:
+      - -debug_access+pp
+      - *common_compile
+    post_compile_action:
+      - echo "post_compile_build2"
+    sim_option:
+      - *common_sim
+```
+
+As about example, "build1" and "build2" are build name. There are some attributes in a build:
+
++ compile_option: A list define compile options will pass to simulator compile flow
++ sim_option: A list define simulation options will pass to simulator runtime 
++ compile_checker: A parsable plugin. If it is not defined, default compile_checker "compileChecker" will be use.
+		   You can add error, warning, unknown and exclued error, warning, unknown pattern through "attr".
+		   If default compile_checker can not meet your requirement, you can write your own checker plugin.
++ sim_checker: Same as compile_checker, except it is use for simulation, and some pattern has been pre defined.
++ *_action: There are 4 hooks provided. You can add some cmd sequences before or after compile and simulation.
+
+
+
+
 
 # Example
 
