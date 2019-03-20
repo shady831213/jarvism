@@ -159,8 +159,7 @@ groups:
   group1:
     build: build1
     args:
-      - -vh
-      - -repeat 1
+      - -vh, -repeat 1
     tests:
       - test1:
           args:
@@ -192,6 +191,18 @@ groups:
       - group2
       - group1
 ```
+
+As about example, "group1", "group2" and "group3" are group name. There are some attributes in a group:
+
++ build: Assign a defined build name to this group. This build will be used for all tests and subgroups in this group, if they don't define their own build.
+
++ args: A list define pre-defined and user-defined(about user-defined options, see below) arguments. These arguments will be used for all tests and subgroups in this group, if they don't override them. For expample, in test3 of group2, -repeat value will be 10. Multiple args in one line is allowed, but they must be seperated by ",".
+
++ tests: A list define testcases in the group. Each test can config it's own build and args. Build and args defined more nested have higher priority.
+
++ groups: A list of defined sub groups.
+
+If some testcases in the same group tree use the same build with the same compile_option and pre/post_compile_action, jarvism can detected and try to let them share the same compile database.
 
 # Example
 
