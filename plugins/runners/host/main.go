@@ -136,6 +136,9 @@ func (r *hostRunner) PrepareTest(testCase *loader.AstTestCase, cmdRunner loader.
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
 	//link build dir
+	if err := os.RemoveAll(path.Join(testDir, buildName)); err != nil {
+		return errors.JVSRuntimeResultFail(err.Error())
+	}
 	if err := os.Symlink(buildDir, path.Join(testDir, buildName)); err != nil {
 		return errors.JVSRuntimeResultFail(err.Error())
 	}
