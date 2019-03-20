@@ -27,8 +27,6 @@ go test -v ./...
 ```
 $ jarvism init -prj_dir jvs_prj
 $ cd jvs_prj
-$ ls 
-algorithms  go	jarivsm  jvs_prj  src  testcases  work
 $ jarvism help init
 usage: jarvism init [-prj_dir DIR][-work_dir DIR]
 
