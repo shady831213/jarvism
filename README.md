@@ -42,7 +42,27 @@ usage: jarvism init [-prj_dir DIR][-work_dir DIR]
   -work_dir string
     	assign work dir, default is $prj_dir/work
 ```
+Write your bench and case.
+Then modify jarvism_cfg.yaml to config your project like this:
+```yaml
+builds:
+  build1:
+    compile_option:
+      - -sverilog
+      - -ntb_opts uvm-1.1
+      - -timescale=1ns/10ps
+      - $JVS_PRJ_HOME/test.sv -top test
+    sim_option:
+      - +UVM_VERBOSITY=UVM_LOW
+      - +UVM_CONFIG_DB_TRACE
+```
+run test:
+```
+jarvism run_test build1 test1
+```
 Enjoy!
+
+If you need more flexible or complicated configuration, see below.
 
 # Config
 jarvism allows you use a single yaml file ($JVS_PRJ_HOME/jarvism_cfg.yaml) or a banch of yaml files ($JVS_PRJ_HOME/jarvism_cfg/*.yaml) to config project. Refer to https://github.com/shady831213/jarvism/tree/master/core/runtime/testFiles/jarvism_cfg
