@@ -218,13 +218,13 @@ As about example, "build1" and "build2" are build name. There are some attribute
 
 + test_discoverer: A parsable plugin. If it is not defined, default test_discoverer "uvm_test" will be used.
 		   You can define top testcases dir through attr, defualt is $JVS_PRJ_HOME/testcases.
-		   If your testcases are compliance with following convention, they will be discovered automatically.
+		   If your testcases are compliance with following conventions, they will be discovered automatically.
 		   And you don't need add them to file list.Besides, the testcase dir name will pass to simulator through
-		   +UVM_TESTNAME.
+		   +UVM_TESTNAME. If default test_discoverer can not meet your requirement, you can write your own 			   test_discoverer plugin.
 		   
 		   - all testcases in testcases dir
+		   - uvm_test name,  same as .sv file and testcase dir name must be same e.g
 		   
-		   - testcase dir name is same as .sv file, e.g
 		   
 ```
 		   	. testcases/
@@ -237,11 +237,7 @@ As about example, "build1" and "build2" are build name. There are some attribute
 			--------test4/ \\invalid
 
 ```
-		   
-		   - uvm_test name is same as .sv file and testcase dir name
-		   
-		   If default test_discoverer can not meet your requirement, you can write your own test_discoverer plugin.
-		   
+
 ## groups
 "groups" defined one or multiple group, which used to organize testcases.
 e.g
@@ -356,13 +352,16 @@ Parsable plugins can be config in config file like this:
  plugin:
    type: "plugin name" 
    attr:
-      attr1:"attr1"
+      attr1: "attr1"
       attr2:
-      	- attr2_1
-	- attr2_2
+       - "attr2_1"
+       - "attr2_2"
+       - "attr2_3"
       attr3:
-      	attr3_1: "attr3_1"
-	attr3_2: "attr3_2"
+       attr3_1: "attr3_1"
+       attr3_2: "attr3_2"
+       attr3_3: "attr3_3"
+	
 ```
 How to parse "attr" depends on plugin implementation.
 
