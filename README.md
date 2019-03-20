@@ -123,12 +123,8 @@ all args:
     	simulation args pass to simulator (default false)
   -sim_only
     	bypass compile and only run simulation, default is false.
-  -test_phase
-    	user-defined flag (default false)
   -unique
     	if set jobId(timestamp) will be included in hash, then builds and testcases will have unique name and be in unique dir.default is false.
-  -vh
-    	user-defined flag (default false)
   -wave
     	dump waveform, vaule is format[FSDB, VPD], use macro[DUMP_FSDB, DUMP_VPD] in your testbench, default is VPD (default false)
 
