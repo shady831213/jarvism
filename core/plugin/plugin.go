@@ -135,24 +135,40 @@ func getRealPath(path string) string {
 }
 
 func LoadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstError {
+	needCompile := false
+	//check lib
+	libPath := path.Join(core.GetWorkDir(), ".jarvism_plugins", string(pluginType)+"s", pluginName+".so")
+	libState, err := os.Stat(libPath)
+	libExist := err == nil
+	needCompile = !libExist
+	//exe file
+	if exeState := getExeStat(); exeState != nil && libExist {
+		needCompile = needCompile || libState.ModTime().Before(exeState.ModTime())
+	}
+
 	//check plugin path, check customized first, then buildin
 	pluginPath := path.Join(core.GetPluginsHome(), string(pluginType)+"s", pluginName)
 	pluginState, err := os.Stat(pluginPath)
 	if err == nil {
-		symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
-		pluginLocks[pluginType].Lock()
-		defer func() {
-			os.RemoveAll(symPluginPath)
-			pluginLocks[pluginType].Unlock()
-		}()
+		if libExist {
+			needCompile = needCompile || libState.ModTime().Before(pluginState.ModTime())
+		}
+		if needCompile {
+			symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
+			pluginLocks[pluginType].Lock()
+			defer func() {
+				os.RemoveAll(symPluginPath)
+				pluginLocks[pluginType].Unlock()
+			}()
 
-		if stat, err := os.Stat(symPluginPath); err == nil && !stat.IsDir() {
-			os.RemoveAll(symPluginPath)
+			if stat, err := os.Stat(symPluginPath); err == nil && !stat.IsDir() {
+				os.RemoveAll(symPluginPath)
+			}
+			if err := os.Symlink(pluginPath, symPluginPath); err != nil {
+				return jvsErrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
+			}
+			pluginPath = symPluginPath
 		}
-		if err := os.Symlink(pluginPath, symPluginPath); err != nil {
-			return jvsErrors.JVSPluginLoadError(pluginName, err.Error(), pluginPath)
-		}
-		pluginPath = symPluginPath
 	} else {
 		_pluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
 		_pluginState, _err := os.Stat(_pluginPath)
@@ -161,17 +177,11 @@ func LoadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstEr
 		}
 		pluginPath = _pluginPath
 		pluginState = _pluginState
+		if libExist {
+			needCompile = needCompile || libState.ModTime().Before(pluginState.ModTime())
+		}
 	}
 
-	needCompile := false
-	//check lib
-	libPath := path.Join(core.GetWorkDir(), ".jarvism_plugins", string(pluginType)+"s", pluginName+".so")
-	libState, err := os.Stat(libPath)
-	needCompile = err != nil || libState.ModTime().Before(pluginState.ModTime())
-	//exe file
-	if exeState := getExeStat(); exeState != nil {
-		needCompile = needCompile || libState.ModTime().Before(exeState.ModTime())
-	}
 	//compile
 	if needCompile {
 		if err := compile(pluginType, pluginPath, libPath); err != nil {
