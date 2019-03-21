@@ -42,7 +42,7 @@ quitecompilingwith-q,andcloselintwith+lint=none
 On:
 ----------------
 compile_option:
-+lint=none-q
+-q+lint=none
 ----------------
 sim_option:
 
@@ -127,7 +127,7 @@ dumpwaveform,vauleisformat[FSDB,VPD],usemacro[DUMP_FSDB,DUMP_VPD]inyourtestbench
 On:
 ----------------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 ----------------
 sim_option:
 
@@ -136,7 +136,7 @@ sim_option:
 WithValue:
 ----------------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 ----------------
 sim_option:
 
@@ -321,7 +321,7 @@ user-definedflag
 On:
 -----------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 -----------
 sim_option:
 
@@ -330,7 +330,7 @@ sim_option:
 WithValue:
 -----------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 -----------
 sim_option:
 
@@ -359,7 +359,7 @@ pre_compile_action:
 
 --------------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMP_VPD
 --------------
 post_compile_action:
 
@@ -736,7 +736,7 @@ user-definedflag
 On:
 -----------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 -----------
 sim_option:
 
@@ -745,7 +745,7 @@ sim_option:
 WithValue:
 -----------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 -----------
 sim_option:
 
@@ -774,7 +774,7 @@ pre_compile_action:
 
 --------------
 compile_option:
-+define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMPfsdb
 --------------
 post_compile_action:
 
@@ -829,7 +829,7 @@ echo"pre_sim_build1"
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 echo"post_sim_build1"
@@ -1002,7 +1002,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1029,7 +1029,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1056,7 +1056,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1083,7 +1083,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1110,7 +1110,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1137,7 +1137,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1164,7 +1164,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1191,7 +1191,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1218,7 +1218,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1245,7 +1245,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -1348,7 +1348,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 ---------
 sim_option:
 
@@ -1357,7 +1357,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 ---------
 sim_option:
 
@@ -1386,7 +1386,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMP_VPD
 ------------
 post_compile_action:
 
@@ -1763,7 +1763,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 ---------
 sim_option:
 
@@ -1772,7 +1772,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 ---------
 sim_option:
 
@@ -1801,7 +1801,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMPfsdb
 ------------
 post_compile_action:
 
@@ -1856,7 +1856,7 @@ echo"pre_sim_build1"
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 echo"post_sim_build1"
@@ -2031,7 +2031,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2058,7 +2058,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2085,7 +2085,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2112,7 +2112,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2139,7 +2139,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2166,7 +2166,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2193,7 +2193,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2220,7 +2220,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2247,7 +2247,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2274,7 +2274,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2301,7 +2301,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2328,7 +2328,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2355,7 +2355,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2382,7 +2382,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2409,7 +2409,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2436,7 +2436,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2463,7 +2463,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2490,7 +2490,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2517,7 +2517,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2544,7 +2544,7 @@ pre_sim_action:
 
 --------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 --------------
 post_sim_action:
 
@@ -2647,7 +2647,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 ---------
 sim_option:
 
@@ -2656,7 +2656,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 ---------
 sim_option:
 
@@ -2685,7 +2685,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMP_VPD
 ------------
 post_compile_action:
 
@@ -3062,7 +3062,7 @@ user-definedflag
 On:
 ---------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 ---------
 sim_option:
 
@@ -3071,7 +3071,7 @@ sim_option:
 WithValue:
 ---------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 ---------
 sim_option:
 
@@ -3100,7 +3100,7 @@ pre_compile_action:
 
 ------------
 compile_option:
-+define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMPfsdb
 ------------
 post_compile_action:
 
@@ -3155,7 +3155,7 @@ echo"pre_sim_build1"
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 echo"post_sim_build1"
@@ -3328,7 +3328,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3355,7 +3355,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3382,7 +3382,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3409,7 +3409,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3436,7 +3436,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3463,7 +3463,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3490,7 +3490,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3517,7 +3517,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3544,7 +3544,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3571,7 +3571,7 @@ pre_sim_action:
 
 ------------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ------------
 post_sim_action:
 
@@ -3674,7 +3674,7 @@ user-definedflag
 On:
 -------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 -------
 sim_option:
 
@@ -3683,7 +3683,7 @@ sim_option:
 WithValue:
 -------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 -------
 sim_option:
 
@@ -3712,7 +3712,7 @@ pre_compile_action:
 
 ----------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMP_VPD
 ----------
 post_compile_action:
 
@@ -4089,7 +4089,7 @@ user-definedflag
 On:
 -------
 compile_option:
-+define+DUMP_VPD-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP_VPD
 -------
 sim_option:
 
@@ -4098,7 +4098,7 @@ sim_option:
 WithValue:
 -------
 compile_option:
-+define+DUMP$wave-lca-debug_access+pp
+-lca-debug_access+pp+define+DUMP$wave
 -------
 sim_option:
 
@@ -4127,7 +4127,7 @@ pre_compile_action:
 
 ----------
 compile_option:
-+define+DUMPfsdb-lca-debug_access+pp-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps
+-sverilog-ntb_optsuvm-1.2-timescale=1ns/10ps-lca-debug_access+pp+define+DUMPfsdb
 ----------
 post_compile_action:
 
@@ -4182,7 +4182,7 @@ echo"pre_sim_build1"
 
 ----------
 sim_option:
-+UVM_VERBOSITY=UVM_FULL+UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+ntb_random_seed=seed
++UVM_VERBOSITY=UVM_LOW+UVM_CONFIG_DB_TRACE+UVM_VERBOSITY=UVM_FULL+ntb_random_seed=seed
 ----------
 post_sim_action:
 echo"post_sim_build1"

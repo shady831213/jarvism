@@ -2,12 +2,10 @@ package loader
 
 import (
 	"fmt"
-	"github.com/fatih/set"
 	"github.com/shady831213/jarvism/core/errors"
 	"github.com/shady831213/jarvism/core/plugin"
 	"github.com/shady831213/jarvism/core/utils"
 	"math"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -106,14 +104,17 @@ func astLoadPlugin(pluginType plugin.JVSPluginType, pluginName string) *errors.J
 }
 
 type astItem struct {
-	content *set.SetNonTS
+	m       map[string]interface{}
+	content []string
 }
 
 func newAstItem(content interface{}) *astItem {
 	inst := new(astItem)
-	inst.content = set.New(set.NonThreadSafe).(*set.SetNonTS)
+	inst.m = make(map[string]interface{})
+	inst.content = make([]string, 0)
 	if value, ok := content.(string); ok {
-		inst.content.Add(value)
+		inst.m[value] = nil
+		inst.content = append(inst.content, value)
 		return inst
 	}
 	if value, ok := content.([]interface{}); ok {
@@ -123,7 +124,8 @@ func newAstItem(content interface{}) *astItem {
 				panic(fmt.Sprintf("content must be string or []interface{}, but it is %T !", content))
 				return nil
 			}
-			inst.content.Add(s)
+			inst.m[s] = nil
+			inst.content = append(inst.content, s)
 		}
 
 		return inst
@@ -136,23 +138,26 @@ func (item *astItem) cat(i *astItem) {
 	if i == nil {
 		return
 	}
-	item.content.Merge(i.content)
+	for _, v := range i.content {
+		if _, ok := item.m[v]; !ok {
+			item.m[v] = nil
+			item.content = append(item.content, v)
+		}
+	}
 }
 
 func (item *astItem) replace(old, new string, cnt int) *astItem {
 	inst := newAstItem("")
-	item.content.Each(func(i interface{}) bool {
-		s := strings.Replace(i.(string), old, new, cnt)
-		inst.content.Add(s)
-		return true
-	})
+	for i := range item.content {
+		newString := strings.Replace(item.content[i], old, new, cnt)
+		inst.m[newString] = nil
+		inst.content = append(inst.content, newString)
+	}
 	return inst
 }
 
 func (item *astItem) getString() string {
-	l := set.StringSlice(item.content)
-	sort.Strings(l)
-	return strings.Join(l, " ")
+	return strings.Join(item.content, " ")
 }
 
 type astItems struct {
