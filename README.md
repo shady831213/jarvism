@@ -378,4 +378,6 @@ Each type of pasable plugins has a default implementaion:
 How to use these plugins please refer to above description in builds and env.
 
 ## develop your own plugins
-TBD
+Although jarvism has provided a flexible simulation flow, sometimes maybe you need more extensiblity and fixiblity. For example, you need other simulator support or you want to run your simulation jobs on remoted clusters or you want to organize your testcases in another way. For that purpose, you can develop your own plugins to build your own simulation flow.
+
+Please refer to [jarvism_plugins_example](https://github.com/shady831213/jarvism_plugins_example) for more infomations.
