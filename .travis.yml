@@ -6,8 +6,6 @@ go:
 
 install: go get -u github.com/shady831213/jarvism
 
-before_script:
-  - gem install travis
 
 script:
 #test
@@ -16,8 +14,3 @@ script:
   - go install
 #go fmt
   - gofmt -s -l .
-
-after_success:
-  - curl -LO https://raw.github.com/stephanmg/travis-dependent-builds/master/trigger.sh
-  - chmod +x trigger.sh
-  - ./trigger.sh $USER github.com/shady831213/jarvism_plugins_example master $TRAVIS_ACCESS_TOKEN
