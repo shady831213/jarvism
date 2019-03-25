@@ -26,7 +26,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type JVSPluginType string
@@ -47,18 +46,8 @@ type pluginCreator func() Plugin
 
 var loadedPlugins map[JVSPluginType]map[string]pluginCreator
 var pluginFileCache map[JVSPluginType]map[string]interface{}
-var pluginLocks map[JVSPluginType]*sync.Mutex
 
 var gotool string
-
-func init() {
-	pluginLocks = make(map[JVSPluginType]*sync.Mutex)
-	pluginLocks[JVSRunnerPlugin] = &sync.Mutex{}
-	pluginLocks[JVSTestDiscovererPlugin] = &sync.Mutex{}
-	pluginLocks[JVSSimulatorPlugin] = &sync.Mutex{}
-	pluginLocks[JVSCheckerPlugin] = &sync.Mutex{}
-	pluginLocks[JVSReporterPlugin] = &sync.Mutex{}
-}
 
 func initLoadedPlugins(pluginType JVSPluginType) {
 	if loadedPlugins == nil {
@@ -154,11 +143,9 @@ func LoadPlugin(pluginType JVSPluginType, pluginName string) *jvsErrors.JVSAstEr
 			needCompile = needCompile || libState.ModTime().Before(pluginState.ModTime())
 		}
 		if needCompile {
-			symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName)
-			pluginLocks[pluginType].Lock()
+			symPluginPath := path.Join(core.BuildInPluginsHome(), string(pluginType)+"s", pluginName+"__"+strconv.Itoa(os.Getpid()))
 			defer func() {
 				os.RemoveAll(symPluginPath)
-				pluginLocks[pluginType].Unlock()
 			}()
 
 			if stat, err := os.Stat(symPluginPath); err == nil && !stat.IsDir() {
