@@ -20,4 +20,4 @@ script:
 after_success:
   - curl -LO https://raw.github.com/stephanmg/travis-dependent-builds/master/trigger.sh
   - chmod +x trigger.sh
-  - ./trigger.sh stephanmg github.com/shady831213/jarvism_plugins_example master $TRAVIS_ACCESS_TOKEN
+  - ./trigger.sh shady831213@126.com github.com/shady831213/jarvism_plugins_example master $TRAVIS_ACCESS_TOKEN
