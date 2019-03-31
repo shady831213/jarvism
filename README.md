@@ -1,4 +1,7 @@
-# jarvism[![Build Status](https://travis-ci.org/shady831213/jarvism.svg?branch=master)](https://travis-ci.org/shady831213/jarvism)
+# jarvism
+[![Build Status](https://travis-ci.org/shady831213/jarvism.svg?branch=master)](https://travis-ci.org/shady831213/jarvism)<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg"></a>
+
+
 Just A Really Very Impressive Simulation Manager
 
 # install
